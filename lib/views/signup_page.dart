@@ -187,7 +187,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
               const SizedBox(height: 32),
 
-              // Zaten bir hesabın var mı? Giriş yap
               Align(
                 alignment: Alignment.center,
                 child: TextButton(

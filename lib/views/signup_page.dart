@@ -3,9 +3,6 @@ import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
 import '../utils/app_colors.dart';
 
-const Color kPrimaryColor = Color(0xFFFF5722);
-const Color kBackgroundColor = Color(0xFFF5F5F5);
-
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
 
@@ -67,7 +64,7 @@ class _SignUpPageState extends State<SignUpPage> {
     // Geçerliyse kayıt mantığı buraya eklenecek
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Kayıt bilgileri geçerli. Devam ediliyor...'),
+        content: Text('Kayıt bilgileri geçerli.'),
         backgroundColor: AppColors.primaryColor,
       ),
     );
@@ -76,10 +73,9 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        // Geri butonu
-        backgroundColor: kBackgroundColor,
+        backgroundColor: AppColors.kBackgroundColor,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
@@ -124,7 +120,6 @@ class _SignUpPageState extends State<SignUpPage> {
 
               // Eğer STK seçili ise sadece STK ADI, E-posta ve Şifre göster
               if (_isSelected[1]) ...[
-                // benzersiz Key'ler ekledim
                 const CustomInputField(
                     key: ValueKey('stk_name'), hintText: 'STK Adı'),
                 const SizedBox(height: 16),

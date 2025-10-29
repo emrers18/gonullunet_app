@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2020470675",
+    "project_id": "gonullunet-863c5",
+    "storage_bucket": "gonullunet-863c5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2020470675:android:66d29556c167f4a1588266",
+        "android_client_info": {
+          "package_name": "com.example.gonullunet_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADKysj5TkdOzmu4DIekG6Ps8gANZnVopU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

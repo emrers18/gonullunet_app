@@ -9,7 +9,7 @@ class Home extends StatelessWidget {
   const Home({super.key});
   @override
   Widget build(BuildContext context) {
-    return const HomePage();
+    return HomePage();
   }
 }
 
@@ -17,7 +17,7 @@ class Events extends StatelessWidget {
   const Events({super.key});
   @override
   Widget build(BuildContext context) {
-    return const EventsPage();
+    return EventsPage();
   }
 }
 
@@ -25,7 +25,7 @@ class Ngos extends StatelessWidget {
   const Ngos({super.key});
   @override
   Widget build(BuildContext context) {
-    return const NgosPage();
+    return NgosPage();
   }
 }
 
@@ -60,29 +60,9 @@ class _MainPageState extends State<MainPage> {
     });
   }
 
-  final List<String> _pageTitles = [
-    'Anasayfa',
-    'Etkinlikler',
-    'STK\'lar',
-    'Profil'
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_pageTitles[
-            _selectedIndex]), // Başlığı seçili sayfaya göre değiştir
-        backgroundColor: const Color(0xFFF5F5F5),
-        elevation: 0,
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black87,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Inter',
-        ),
-      ),
       body: IndexedStack(
         index: _selectedIndex,
         children: _widgetOptions,

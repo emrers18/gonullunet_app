@@ -9,4 +9,5 @@ class AppColors {
   static const Color secondaryText = Color(0xFF757575);
   static const Color dividerColor = Color(0xFFBDBDBD);
   static const Color textColor = Color(0xFFFFFFFF);
+  static const Color kBackgroundColor = Color(0xFFF5F5F5);
 }

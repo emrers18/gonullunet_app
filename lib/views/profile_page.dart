@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gonullunet_app/models/user_model.dart';
-import 'package:gonullunet_app/services/auth.dart'; // Auth servisimizi import ediyoruz
-// import 'package:gonullunet_app/utils/app_colors.dart'; // Varsa renk paletinizi ekleyin
+import 'package:gonullunet_app/services/auth.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -32,24 +31,6 @@ class _ProfilePageState extends State<ProfilePage> {
           .snapshots()
           .map((snapshot) => UserModel.fromFirestore(snapshot));
     }
-  }
-
-  // Kullanıcının baş harflerini almak için yardımcı bir fonksiyon
-  String _getInitials(String name, [String surname = '']) {
-    if (name.isEmpty) return '?';
-
-    // Eğer STK ise (soyad boş gelirse)
-    if (surname.isEmpty) {
-      var parts = name.split(' ');
-      if (parts.length > 1) {
-        return parts[0][0].toUpperCase() + parts[1][0].toUpperCase();
-      } else {
-        return name[0].toUpperCase();
-      }
-    }
-
-    // Gönüllü ise
-    return name[0].toUpperCase() + surname[0].toUpperCase();
   }
 
   // Çıkış yapmadan önce onay isteyen bir dialog göster

@@ -1,33 +1,15 @@
 import 'package:flutter/material.dart';
 
-// --- Renk Tanımlamaları ---
+import '../models/post_model.dart';
+import '../utils/app_colors.dart';
+import '../widgets/posts/post_card.dart';
+
 const Color kBackgroundColor = Color(0xFFF9F9F9);
-const Color kPrimaryColor = Color(0xFFFF5722); // Ana turuncu renk
+const Color kPrimaryColor = Color(0xFFFF5722);
 const Color kCardBackgroundColor = Color(0xFFFFFFFF);
 const Color kIconColor = Colors.black54;
-const Color kTimeColor = Colors.grey; // Hata düzeltildi (ColorsKodu -> Colors)
+const Color kTimeColor = Colors.grey;
 
-// --- Sosyal Akış Gönderi Modeli ---
-/// Her bir gönderinin verilerini tutmak için basit bir sınıf.
-class Post {
-  final String imageUrl;
-  final String title;
-  final String description;
-  final String timeAgo;
-  final int likeCount;
-  final int commentCount;
-
-  Post({
-    required this.imageUrl,
-    required this.title,
-    required this.description,
-    required this.timeAgo,
-    required this.likeCount,
-    required this.commentCount,
-  });
-}
-
-// --- Ana Anasayfa Widget'ı (Stateful'a dönüştürüldü) ---
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -36,8 +18,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  // Veritabanından gelecek olan TÜM gönderilerin listesi.
-  // Örnek 10 adet gönderi.
   final List<Post> _allPosts = [
     Post(
       imageUrl: 'https://placehold.co/600x400/81C784/FFFFFF?text=Bahçe+Projesi',
@@ -136,16 +116,12 @@ class _HomePageState extends State<HomePage> {
     ),
   ];
 
-  // Başlangıçta gösterilecek gönderi sayısı
   int _visiblePostCount = 2;
-  // Her "Daha Fazla Yükle" tıklandığında kaç tane ekleneceği
   final int _loadMoreIncrement = 3;
 
-  /// Daha fazla gönderi yüklemek için state'i güncelleyen fonksiyon
   void _loadMorePosts() {
     setState(() {
       _visiblePostCount += _loadMoreIncrement;
-      // Toplam gönderi sayısını aşmamak için kontrol
       if (_visiblePostCount > _allPosts.length) {
         _visiblePostCount = _allPosts.length;
       }
@@ -155,32 +131,23 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: kBackgroundColor, // Arka plan rengini buraya taşıdık
-      // Ana gövdeyi SingleChildScrollView ile sardık
+      color: AppColors.kBackgroundColor,
       child: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
-              // Gönderi listesi
               ListView.separated(
-                // Bu ayarlar SingleChildScrollView içinde ListView kullanmak için ZORUNLUDUR
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                // ---
-                itemCount: _visiblePostCount, // Sadece görünür olanları yükle
+                itemCount: _visiblePostCount,
                 itemBuilder: (context, index) {
-                  // Her bir gönderi için özel kart widget'ını oluştur
                   return PostCard(post: _allPosts[index]);
                 },
-                // Kartlar arasına boşluk ekle
                 separatorBuilder: (context, index) =>
                     const SizedBox(height: 16),
               ),
-              const SizedBox(height: 20), // Liste ile buton arasına boşluk
-
-              // "Daha Fazla Yükle" Butonu
-              // Sadece gösterilecek daha fazla gönderi varsa bu butonu göster
+              const SizedBox(height: 20),
               if (_visiblePostCount < _allPosts.length)
                 TextButton(
                   onPressed: _loadMorePosts,
@@ -201,143 +168,9 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-              const SizedBox(height: 20), // Sayfa sonuna ekstra boşluk
+              const SizedBox(height: 20),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// --- Tek Bir Gönderi Kartı Widget'ı ---
-// (Bu widget'ta değişiklik yapılmadı)
-class PostCard extends StatelessWidget {
-  final Post post;
-
-  const PostCard({super.key, required this.post});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: kCardBackgroundColor,
-      elevation: 0, // Hafif gölge veya sıfır
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
-        // Kenarlık eklemek isterseniz:
-        // side: BorderSide(color: Colors.grey[200]!, width: 1),
-      ),
-      margin: const EdgeInsets.all(0),
-      clipBehavior: Clip.antiAlias, // Resmin kenarlıklarını yuvarlat
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Gönderi Resmi
-          Image.network(
-            post.imageUrl,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: 200, // Resim yüksekliği
-            // Yükleme ve hata widget'ları eklenebilir
-          ),
-
-          // Metin İçeriği Alanı
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Başlık
-                Text(
-                  post.title,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Açıklama
-                Text(
-                  post.description,
-                  style: TextStyle(
-                    color: Colors.grey[700],
-                    fontSize: 15,
-                    height: 1.4, // Satır yüksekliği
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Zaman
-                Text(
-                  post.timeAgo,
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Buton Alanı (Beğen, Yorum Yap)
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Row(
-              children: [
-                _buildActionButton(
-                  icon: Icons.favorite_border_outlined,
-                  text: post.likeCount.toString(),
-                  onPressed: () {
-                    // Beğenme mantığı
-                  },
-                ),
-                const SizedBox(width: 20),
-                _buildActionButton(
-                  icon: Icons.chat_bubble_outline,
-                  text: post.commentCount.toString(),
-                  onPressed: () {
-                    // Yorum yapma mantığı
-                  },
-                ),
-                // Paylaşma ikonu isteğiniz üzerine kaldırıldı.
-              ],
-            ),
-          ),
-          const SizedBox(height: 8), // Kartın altında ekstra boşluk
-        ],
-      ),
-    );
-  }
-
-  /// Beğen/Yorum Yap butonu için yardımcı widget
-  Widget _buildActionButton({
-    required IconData icon,
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(8),
-      child: Padding(
-        padding: const EdgeInsets.all(4.0),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 20,
-              color: kIconColor,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: const TextStyle(
-                color: kIconColor,
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
-              ),
-            ),
-          ],
         ),
       ),
     );

@@ -20,11 +20,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     super.initState();
-    // O an giriş yapmış olan kullanıcının UID'sini al
     _uid = _auth.currentUser?.uid;
 
     if (_uid != null) {
-      // Bu UID'ye ait kullanıcının Firestore'daki verisini anlık dinle
       _userStream = _firestore
           .collection('users')
           .doc(_uid!)
@@ -33,11 +31,10 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // Çıkış yapmadan önce onay isteyen bir dialog göster
   Future<void> _showSignOutDialog() async {
     return showDialog<void>(
       context: context,
-      barrierDismissible: false, // Dışarı tıklayınca kapanmasın
+      barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Çıkış Yap'),
@@ -52,24 +49,19 @@ class _ProfilePageState extends State<ProfilePage> {
             TextButton(
               child: const Text('İptal'),
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Dialog'u kapat
+                Navigator.of(dialogContext).pop();
               },
             ),
             TextButton(
               child: const Text(
                 'Çıkış Yap',
-                style: TextStyle(color: Colors.red), // Dikkat çekici
+                style: TextStyle(color: Colors.red),
               ),
               onPressed: () async {
-                // Önce Auth servisinden çıkış yap
                 await _auth.signOut();
-
-                // Dialog'u kapat
                 if (dialogContext.mounted) {
                   Navigator.of(dialogContext).pop();
                 }
-
-                // (AuthGate bizi otomatik olarak LoginPage'e yönlendirecek)
               },
             ),
           ],
@@ -80,8 +72,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Renkleri tanımlayalım (veya AppColors'tan çekelim)
-    const Color primaryColor = Color(0xFFFF5722); // Ana turuncu renk
+    const Color primaryColor = Color(0xFFFF5722);
     const Color backgroundColor = Color(0xFFF9F9F9);
 
     return Scaffold(
@@ -99,27 +90,21 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ),
-      // Kullanıcı verisini dinleyen StreamBuilder
       body: StreamBuilder<UserModel>(
         stream: _userStream,
         builder: (context, snapshot) {
-          // 1. Veri bekleniyor
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
                 child: CircularProgressIndicator(color: primaryColor));
           }
 
-          // 2. Hata oluştu
           if (snapshot.hasError) {
             return Center(child: Text('Bir hata oluştu: ${snapshot.error}'));
           }
 
-          // 3. Veri yok veya kullanıcı dökümanı bulunamadı
           if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text('Kullanıcı verisi bulunamadı.'));
           }
-
-          // 4. Veri başarıyla alındı!
           final UserModel user = snapshot.data!;
 
           return SingleChildScrollView(
@@ -128,7 +113,6 @@ class _ProfilePageState extends State<ProfilePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- Profil Başlığı ---
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -177,11 +161,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 32),
                   const Divider(),
-
-                  // --- Profil Seçenekleri ---
                   _buildProfileOption(
                     icon: Icons.edit_outlined,
                     title: 'Profili Düzenle',
@@ -192,39 +173,30 @@ class _ProfilePageState extends State<ProfilePage> {
                     title: 'Bildirimler',
                     onTap: () {},
                   ),
-
-                  // STK'lara özel seçenek
                   if (user.isNgo)
                     _buildProfileOption(
                       icon: Icons.event_available_outlined,
                       title: 'Yayınladığım Etkinlikler',
                       onTap: () {},
                     ),
-
-                  // Gönüllülere özel seçenek
                   if (user.isVolunteer)
                     _buildProfileOption(
                       icon: Icons.check_circle_outline,
                       title: 'Katıldığım Etkinlikler',
                       onTap: () {},
                     ),
-
                   _buildProfileOption(
                     icon: Icons.settings_outlined,
                     title: 'Ayarlar',
                     onTap: () {},
                   ),
-
                   const Divider(),
                   const SizedBox(height: 16),
-
-                  // --- Çıkış Yap Butonu ---
                   _buildProfileOption(
                     icon: Icons.logout,
                     title: 'Çıkış Yap',
-                    color: Colors.red, // Kırmızı renk
+                    color: Colors.red,
                     onTap: () {
-                      // Çıkış yapmadan önce onayla
                       _showSignOutDialog();
                     },
                   ),

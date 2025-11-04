@@ -4,6 +4,7 @@ import '../services/auth.dart';
 import '../widgets/custom_input_field.dart';
 import '../utils/app_colors.dart';
 import 'signUp_page.dart';
+import 'package:gonullunet_app/utils/validators/validators.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,8 +16,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  final RegExp _emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
 
   final Auth _auth = Auth();
   bool _isLoading = false;
@@ -48,7 +47,7 @@ class _LoginPageState extends State<LoginPage> {
       return;
     }
 
-    if (!_emailReg.hasMatch(email)) {
+    if (!AppValidators.emailReg.hasMatch(email)) {
       _showError(
           'Geçersiz e-posta adresi. Lütfen doğru formatta girin (ör: ornek@domain.com).');
       return;

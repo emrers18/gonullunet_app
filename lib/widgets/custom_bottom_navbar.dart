@@ -2,12 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
 
-/// [currentIndex] parametresi o an seçili olan sayfanın index'ini alır.
-/// [onTap] parametresi ise bir öğeye tıklandığında hangi fonksiyonun
-/// çalışacağını belirler (genellikle sayfa değiştiren bir `setState`).
 class CustomBottomNavBar extends StatelessWidget {
-  final int currentIndex;
-  final Function(int) onTap;
+  final int currentIndex; //seçili olan sayfa
+  final Function(int) onTap; //sayfa değişim fonksiyonu
 
   const CustomBottomNavBar({
     super.key,

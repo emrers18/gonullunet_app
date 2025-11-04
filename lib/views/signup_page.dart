@@ -3,6 +3,7 @@ import 'package:gonullunet_app/widgets/custom_input_field.dart';
 import 'package:gonullunet_app/services/auth.dart'; // Auth servisi
 import 'package:firebase_auth/firebase_auth.dart'; // Hata yakalamak için
 import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore için
+import 'package:gonullunet_app/utils/validators/validators.dart';
 
 import '../utils/app_colors.dart';
 
@@ -17,7 +18,6 @@ class _SignUpPageState extends State<SignUpPage> {
   // Toggle button'ların durumunu tutmak için 0: Gönüllü, 1: STK
   final List<bool> _isSelected = [true, false];
 
-  // Ayrı controller'lar
   final TextEditingController _volNameController = TextEditingController();
   final TextEditingController _volSurnameController = TextEditingController();
   final TextEditingController _volEmailController = TextEditingController();
@@ -27,15 +27,10 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _stkEmailController = TextEditingController();
   final TextEditingController _stkPasswordController = TextEditingController();
 
-  final RegExp _emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-  final RegExp _passwordReg =
-      RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$');
-
-  // Firebase servislerini tanımla
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  bool _isLoading = false; // Yüklenme durumu
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -55,44 +50,40 @@ class _SignUpPageState extends State<SignUpPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.accentColor, // Veya Colors.red
+        backgroundColor: AppColors.accentColor,
       ),
     );
   }
 
-  // KAYIT FONKSİYONU (Firebase Entegreli)
+  // Kayıt ola basılınca => Firebase ile kayıt
   void _onSignUpPressed() async {
     String name, surname, email, password, userType;
 
-    // Hangi tip seçiliyse ona göre controller'lardan al
     if (_isSelected[1]) {
-      // STK SEÇİLİ
       name = _stkNameController.text.trim();
       email = _stkEmailController.text.trim();
       password = _stkPasswordController.text;
-      surname = ''; // STK için soyad yok
-      userType = 'ngo'; // Kullanıcı tipini 'ngo' olarak belirle
+      surname = '';
+      userType = 'ngo';
 
       if (name.isEmpty) return _showError('STK adı boş bırakılamaz.');
     } else {
-      // GÖNÜLLÜ SEÇİLİ
       name = _volNameController.text.trim();
       surname = _volSurnameController.text.trim();
       email = _volEmailController.text.trim();
       password = _volPasswordController.text;
-      userType = 'volunteer'; // Kullanıcı tipini 'volunteer' olarak belirle
+      userType = 'volunteer';
 
       if (name.isEmpty) return _showError('Ad boş bırakılamaz.');
       if (surname.isEmpty) return _showError('Soyad boş bırakılamaz.');
     }
 
-    // Ortak kontroller
     if (email.isEmpty) return _showError('E-posta boş bırakılamaz.');
-    if (!_emailReg.hasMatch(email)) {
+    if (!AppValidators.emailReg.hasMatch(email)) {
       return _showError('Geçersiz e-posta adresi.');
     }
     if (password.isEmpty) return _showError('Şifre boş bırakılamaz.');
-    if (!_passwordReg.hasMatch(password)) {
+    if (!AppValidators.passwordReg.hasMatch(password)) {
       return _showError(
           'Şifre zayıf. En az 8 karakter, büyük/küçük harf, rakam ve özel karakter içermelidir.');
     }
@@ -101,16 +92,16 @@ class _SignUpPageState extends State<SignUpPage> {
       _isLoading = true;
     });
 
+    //firebase auth ile kayıt işlemi
     try {
-      // 1. ADIM: Kullanıcıyı Firebase Auth'a kaydet
-      // (auth.dart dosyasını 'Future<UserCredential>' döndürecek şekilde düzelttiğimizi varsayıyorum)
+      //kullanıcı oluşturma
       UserCredential userCredential =
           await _auth.createUser(email: email, password: password);
 
-      // 2. ADIM: Başarılı olursa, dönen UID'yi al
+      //kullanıcı uid'sini alma
       String uid = userCredential.user!.uid;
 
-      // 3. ADIM: Firestore'a 'users' koleksiyonu altına kaydet
+      //firestorea kaydetme
       Map<String, dynamic> userData = {
         'uid': uid,
         'email': email,
@@ -135,7 +126,7 @@ class _SignUpPageState extends State<SignUpPage> {
             backgroundColor: AppColors.primaryColor,
           ),
         );
-        Navigator.of(context).pop(); // Geri dön (Login sayfasına)
+        Navigator.of(context).pop();
       }
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
@@ -178,12 +169,10 @@ class _SignUpPageState extends State<SignUpPage> {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment:
+                CrossAxisAlignment.stretch, // Genişlik boyunca gerilme
             children: [
               const SizedBox(height: 20),
-
-              // *** DÜZELTİLEN KISIM ***
-              // Toggle Butonun UI Kodu (Yorum satırı değil, kodun kendisi)
               Container(
                 padding: const EdgeInsets.all(2.0),
                 decoration: BoxDecoration(
@@ -201,11 +190,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   ],
                 ),
               ),
-              // *** DÜZELTME BİTTİ ***
-
               const SizedBox(height: 24),
-
-              // Eğer STK seçili ise sadece STK ADI, E-posta ve Şifre göster
               if (_isSelected[1]) ...[
                 CustomInputField(
                   key: const ValueKey('stk_name'),
@@ -227,7 +212,6 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: _stkPasswordController,
                 ),
               ] else ...[
-                // Gönüllü seçili ise
                 CustomInputField(
                   key: const ValueKey('vol_name'),
                   hintText: 'Ad',
@@ -254,9 +238,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   controller: _volPasswordController,
                 ),
               ],
-
               const SizedBox(height: 32),
-
               ElevatedButton(
                 onPressed: _isLoading ? null : _onSignUpPressed,
                 style: ElevatedButton.styleFrom(
@@ -277,9 +259,7 @@ class _SignUpPageState extends State<SignUpPage> {
                         ),
                       ),
               ),
-
               const SizedBox(height: 32),
-
               Align(
                 alignment: Alignment.center,
                 child: TextButton(
@@ -314,16 +294,12 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // Bu iki metot (onToggleChanged ve buildToggleChild) toggle'ın çalışması için şart.
-  // Bunları silmediğinden emin ol.
-
+//toggle değişince diğer kullanıcı tipinin controllerları temizlenir
   void _onToggleChanged(int index) {
     setState(() {
       for (int i = 0; i < _isSelected.length; i++) {
         _isSelected[i] = i == index;
       }
-
-      //toggle değiştiğinde diğer kullanıcı tipinin controllerları temizlenir
       if (index == 0) {
         _stkNameController.clear();
         _stkEmailController.clear();
@@ -343,9 +319,7 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected
-              ? Colors.white
-              : Colors.transparent, // Seçili ise beyaz
+          color: isSelected ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(10.0),
           boxShadow: isSelected
               ? [

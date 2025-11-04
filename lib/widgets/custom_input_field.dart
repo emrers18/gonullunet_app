@@ -31,7 +31,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
 
   void _toggleObscure() {
     setState(() {
-      _obscureText = !_obscureText;
+      _obscureText = !_obscureText; //şifreyi gizleme gösterme
     });
   }
 

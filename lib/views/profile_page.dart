@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:gonullunet_app/models/user_model.dart';
 import 'package:gonullunet_app/services/auth.dart'; // Auth servisimizi import ediyoruz
 // import 'package:gonullunet_app/utils/app_colors.dart'; // Varsa renk paletinizi ekleyin
 
@@ -14,7 +15,7 @@ class _ProfilePageState extends State<ProfilePage> {
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Stream<DocumentSnapshot<Map<String, dynamic>>>? _userStream;
+  Stream<UserModel>? _userStream;
   String? _uid;
 
   @override
@@ -25,7 +26,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
     if (_uid != null) {
       // Bu UID'ye ait kullanıcının Firestore'daki verisini anlık dinle
-      _userStream = _firestore.collection('users').doc(_uid!).snapshots();
+      _userStream = _firestore
+          .collection('users')
+          .doc(_uid!)
+          .snapshots()
+          .map((snapshot) => UserModel.fromFirestore(snapshot));
     }
   }
 
@@ -114,7 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ),
       // Kullanıcı verisini dinleyen StreamBuilder
-      body: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      body: StreamBuilder<UserModel>(
         stream: _userStream,
         builder: (context, snapshot) {
           // 1. Veri bekleniyor
@@ -129,26 +134,12 @@ class _ProfilePageState extends State<ProfilePage> {
           }
 
           // 3. Veri yok veya kullanıcı dökümanı bulunamadı
-          if (!snapshot.hasData || !snapshot.data!.exists) {
+          if (!snapshot.hasData || snapshot.data == null) {
             return const Center(child: Text('Kullanıcı verisi bulunamadı.'));
           }
 
           // 4. Veri başarıyla alındı!
-          final userData = snapshot.data!.data()!;
-          final userType = userData['userType'] ?? 'volunteer';
-          final email = userData['email'] ?? 'E-posta yok';
-
-          String displayName, initials;
-
-          if (userType == 'ngo') {
-            displayName = userData['stkName'] ?? 'STK Adı Yok';
-            initials = _getInitials(displayName);
-          } else {
-            displayName =
-                '${userData['name'] ?? ''} ${userData['surname'] ?? ''}';
-            initials =
-                _getInitials(userData['name'] ?? '', userData['surname'] ?? '');
-          }
+          final UserModel user = snapshot.data!;
 
           return SingleChildScrollView(
             child: Padding(
@@ -164,7 +155,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         radius: 50,
                         backgroundColor: primaryColor.withOpacity(0.1),
                         child: Text(
-                          initials,
+                          user.initials,
                           style: const TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,
@@ -174,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        displayName,
+                        user.displayName,
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 22,
@@ -184,7 +175,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        email,
+                        user.email,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[600],
@@ -193,7 +184,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       const SizedBox(height: 12),
                       Chip(
                         label: Text(
-                          userType == 'ngo' ? 'STK Hesabı' : 'Gönüllü',
+                          user.isNgo ? 'STK Kullanıcısı' : 'Gönüllü Kullanıcı',
                           style: const TextStyle(
                             color: Colors.black87,
                             fontWeight: FontWeight.w500,
@@ -213,44 +204,34 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.edit_outlined,
                     title: 'Profili Düzenle',
-                    onTap: () {
-                      // TODO: Profil düzenleme sayfasına git
-                    },
+                    onTap: () {},
                   ),
                   _buildProfileOption(
                     icon: Icons.notifications_none_outlined,
                     title: 'Bildirimler',
-                    onTap: () {
-                      // TODO: Bildirimler sayfasına git
-                    },
+                    onTap: () {},
                   ),
 
                   // STK'lara özel seçenek
-                  if (userType == 'ngo')
+                  if (user.isNgo)
                     _buildProfileOption(
                       icon: Icons.event_available_outlined,
                       title: 'Yayınladığım Etkinlikler',
-                      onTap: () {
-                        // TODO: STK'nın kendi etkinliklerini gördüğü sayfaya git
-                      },
+                      onTap: () {},
                     ),
 
                   // Gönüllülere özel seçenek
-                  if (userType == 'volunteer')
+                  if (user.isVolunteer)
                     _buildProfileOption(
                       icon: Icons.check_circle_outline,
                       title: 'Katıldığım Etkinlikler',
-                      onTap: () {
-                        // TODO: Gönüllünün katıldığı etkinlikleri gördüğü sayfaya git
-                      },
+                      onTap: () {},
                     ),
 
                   _buildProfileOption(
                     icon: Icons.settings_outlined,
                     title: 'Ayarlar',
-                    onTap: () {
-                      // TODO: Ayarlar sayfasına git
-                    },
+                    onTap: () {},
                   ),
 
                   const Divider(),
@@ -275,12 +256,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Seçenekler için yardımcı bir widget
   Widget _buildProfileOption({
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.black87, // Varsayılan renk
+    Color color = Colors.black87,
   }) {
     return ListTile(
       leading: Icon(icon, color: color),

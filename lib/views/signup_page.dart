@@ -88,8 +88,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
     // Ortak kontroller
     if (email.isEmpty) return _showError('E-posta boş bırakılamaz.');
-    if (!_emailReg.hasMatch(email))
+    if (!_emailReg.hasMatch(email)) {
       return _showError('Geçersiz e-posta adresi.');
+    }
     if (password.isEmpty) return _showError('Şifre boş bırakılamaz.');
     if (!_passwordReg.hasMatch(password)) {
       return _showError(

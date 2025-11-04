@@ -9,7 +9,7 @@ class Home extends StatelessWidget {
   const Home({super.key});
   @override
   Widget build(BuildContext context) {
-    return HomePage();
+    return const HomePage();
   }
 }
 
@@ -17,7 +17,7 @@ class Events extends StatelessWidget {
   const Events({super.key});
   @override
   Widget build(BuildContext context) {
-    return EventsPage();
+    return const EventsPage();
   }
 }
 

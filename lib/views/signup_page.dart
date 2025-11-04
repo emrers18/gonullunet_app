@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/widgets/custom_input_field.dart';
+import 'package:gonullunet_app/services/auth.dart'; // Auth servisi
+import 'package:firebase_auth/firebase_auth.dart'; // Hata yakalamak için
+import 'package:cloud_firestore/cloud_firestore.dart'; // Firestore için
 
 import '../utils/app_colors.dart';
 
@@ -11,63 +14,143 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  // Toggle button'ların durumunu tutmak için  0: Gönüllü, 1: STK
+  // Toggle button'ların durumunu tutmak için 0: Gönüllü, 1: STK
   final List<bool> _isSelected = [true, false];
 
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // Ayrı controller'lar
+  final TextEditingController _volNameController = TextEditingController();
+  final TextEditingController _volSurnameController = TextEditingController();
+  final TextEditingController _volEmailController = TextEditingController();
+  final TextEditingController _volPasswordController = TextEditingController();
+
+  final TextEditingController _stkNameController = TextEditingController();
+  final TextEditingController _stkEmailController = TextEditingController();
+  final TextEditingController _stkPasswordController = TextEditingController();
 
   final RegExp _emailReg = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
   final RegExp _passwordReg =
       RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$');
 
+  // Firebase servislerini tanımla
+  final Auth _auth = Auth();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  bool _isLoading = false; // Yüklenme durumu
+
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _volNameController.dispose();
+    _volSurnameController.dispose();
+    _volEmailController.dispose();
+    _volPasswordController.dispose();
+    _stkNameController.dispose();
+    _stkEmailController.dispose();
+    _stkPasswordController.dispose();
     super.dispose();
   }
 
   void _showError(String message) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.accentColor,
+        backgroundColor: AppColors.accentColor, // Veya Colors.red
       ),
     );
   }
 
-  void _onSignUpPressed() {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
+  // KAYIT FONKSİYONU (Firebase Entegreli)
+  void _onSignUpPressed() async {
+    String name, surname, email, password, userType;
 
-    if (email.isEmpty) {
-      _showError('E-posta boş bırakılamaz.');
-      return;
-    }
-    if (!_emailReg.hasMatch(email)) {
-      _showError('Geçersiz e-posta adresi.');
-      return;
+    // Hangi tip seçiliyse ona göre controller'lardan al
+    if (_isSelected[1]) {
+      // STK SEÇİLİ
+      name = _stkNameController.text.trim();
+      email = _stkEmailController.text.trim();
+      password = _stkPasswordController.text;
+      surname = ''; // STK için soyad yok
+      userType = 'ngo'; // Kullanıcı tipini 'ngo' olarak belirle
+
+      if (name.isEmpty) return _showError('STK adı boş bırakılamaz.');
+    } else {
+      // GÖNÜLLÜ SEÇİLİ
+      name = _volNameController.text.trim();
+      surname = _volSurnameController.text.trim();
+      email = _volEmailController.text.trim();
+      password = _volPasswordController.text;
+      userType = 'volunteer'; // Kullanıcı tipini 'volunteer' olarak belirle
+
+      if (name.isEmpty) return _showError('Ad boş bırakılamaz.');
+      if (surname.isEmpty) return _showError('Soyad boş bırakılamaz.');
     }
 
-    if (password.isEmpty) {
-      _showError('Şifre boş bırakılamaz.');
-      return;
-    }
+    // Ortak kontroller
+    if (email.isEmpty) return _showError('E-posta boş bırakılamaz.');
+    if (!_emailReg.hasMatch(email))
+      return _showError('Geçersiz e-posta adresi.');
+    if (password.isEmpty) return _showError('Şifre boş bırakılamaz.');
     if (!_passwordReg.hasMatch(password)) {
-      _showError(
+      return _showError(
           'Şifre zayıf. En az 8 karakter, büyük/küçük harf, rakam ve özel karakter içermelidir.');
-      return;
     }
 
-    // Geçerliyse kayıt mantığı buraya eklenecek
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Kayıt bilgileri geçerli.'),
-        backgroundColor: AppColors.primaryColor,
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // 1. ADIM: Kullanıcıyı Firebase Auth'a kaydet
+      // (auth.dart dosyasını 'Future<UserCredential>' döndürecek şekilde düzelttiğimizi varsayıyorum)
+      UserCredential userCredential =
+          await _auth.createUser(email: email, password: password);
+
+      // 2. ADIM: Başarılı olursa, dönen UID'yi al
+      String uid = userCredential.user!.uid;
+
+      // 3. ADIM: Firestore'a 'users' koleksiyonu altına kaydet
+      Map<String, dynamic> userData = {
+        'uid': uid,
+        'email': email,
+        'userType': userType,
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
+      if (userType == 'ngo') {
+        userData['stkName'] = name;
+      } else {
+        userData['name'] = name;
+        userData['surname'] = surname;
+      }
+
+      await _firestore.collection('users').doc(uid).set(userData);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content:
+                Text('Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.'),
+            backgroundColor: AppColors.primaryColor,
+          ),
+        );
+        Navigator.of(context).pop(); // Geri dön (Login sayfasına)
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-already-in-use') {
+        _showError('Bu e-posta adresi zaten kullanılıyor.');
+      } else {
+        _showError('Kayıt hatası: ${e.message}');
+      }
+    } catch (e) {
+      _showError('Bilinmeyen bir hata oluştu: $e');
+    }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -98,6 +181,8 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               const SizedBox(height: 20),
 
+              // *** DÜZELTİLEN KISIM ***
+              // Toggle Butonun UI Kodu (Yorum satırı değil, kodun kendisi)
               Container(
                 padding: const EdgeInsets.all(2.0),
                 decoration: BoxDecoration(
@@ -115,18 +200,22 @@ class _SignUpPageState extends State<SignUpPage> {
                   ],
                 ),
               ),
+              // *** DÜZELTME BİTTİ ***
 
               const SizedBox(height: 24),
 
               // Eğer STK seçili ise sadece STK ADI, E-posta ve Şifre göster
               if (_isSelected[1]) ...[
-                const CustomInputField(
-                    key: ValueKey('stk_name'), hintText: 'STK Adı'),
+                CustomInputField(
+                  key: const ValueKey('stk_name'),
+                  hintText: 'STK Adı',
+                  controller: _stkNameController,
+                ),
                 const SizedBox(height: 16),
                 CustomInputField(
                   key: const ValueKey('stk_email'),
                   hintText: 'E-posta',
-                  controller: _emailController,
+                  controller: _stkEmailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
@@ -134,20 +223,26 @@ class _SignUpPageState extends State<SignUpPage> {
                   key: const ValueKey('stk_password'),
                   hintText: 'Şifre',
                   isPassword: true,
-                  controller: _passwordController,
+                  controller: _stkPasswordController,
                 ),
               ] else ...[
-                // Gönüllü seçili ise farklı Key'lerle alanlar
-                const CustomInputField(
-                    key: ValueKey('vol_name'), hintText: 'Ad'),
+                // Gönüllü seçili ise
+                CustomInputField(
+                  key: const ValueKey('vol_name'),
+                  hintText: 'Ad',
+                  controller: _volNameController,
+                ),
                 const SizedBox(height: 16),
-                const CustomInputField(
-                    key: ValueKey('vol_surname'), hintText: 'Soyad'),
+                CustomInputField(
+                  key: const ValueKey('vol_surname'),
+                  hintText: 'Soyad',
+                  controller: _volSurnameController,
+                ),
                 const SizedBox(height: 16),
                 CustomInputField(
                   key: const ValueKey('vol_email'),
                   hintText: 'E-posta',
-                  controller: _emailController,
+                  controller: _volEmailController,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 const SizedBox(height: 16),
@@ -155,14 +250,14 @@ class _SignUpPageState extends State<SignUpPage> {
                   key: const ValueKey('vol_password'),
                   hintText: 'Şifre',
                   isPassword: true,
-                  controller: _passwordController,
+                  controller: _volPasswordController,
                 ),
               ],
 
               const SizedBox(height: 32),
 
               ElevatedButton(
-                onPressed: _onSignUpPressed,
+                onPressed: _isLoading ? null : _onSignUpPressed,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.accentColor,
                   foregroundColor: AppColors.textColor,
@@ -171,13 +266,15 @@ class _SignUpPageState extends State<SignUpPage> {
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                 ),
-                child: const Text(
-                  'Kayıt Ol',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: _isLoading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        'Kayıt Ol',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
               ),
 
               const SizedBox(height: 32),
@@ -186,7 +283,6 @@ class _SignUpPageState extends State<SignUpPage> {
                 alignment: Alignment.center,
                 child: TextButton(
                   onPressed: () {
-                    // Giriş yap sayfasına geri dön
                     Navigator.of(context).pop();
                   },
                   child: RichText(
@@ -217,16 +313,32 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  // ToggleButonlar için özel child widget
+  // Bu iki metot (onToggleChanged ve buildToggleChild) toggle'ın çalışması için şart.
+  // Bunları silmediğinden emin ol.
+
+  void _onToggleChanged(int index) {
+    setState(() {
+      for (int i = 0; i < _isSelected.length; i++) {
+        _isSelected[i] = i == index;
+      }
+
+      //toggle değiştiğinde diğer kullanıcı tipinin controllerları temizlenir
+      if (index == 0) {
+        _stkNameController.clear();
+        _stkEmailController.clear();
+        _stkPasswordController.clear();
+      } else {
+        _volNameController.clear();
+        _volSurnameController.clear();
+        _volEmailController.clear();
+        _volPasswordController.clear();
+      }
+    });
+  }
+
   Widget _buildToggleChild(String text, bool isSelected, int index) {
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          for (int i = 0; i < _isSelected.length; i++) {
-            _isSelected[i] = i == index;
-          }
-        });
-      },
+      onTap: () => _onToggleChanged(index),
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(

@@ -13,24 +13,21 @@ class NgoCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Sol Taraf: Metinler ve Buton
         Expanded(
-          flex: 2, // Metin alanı resimden daha geniş (2/3 oranında)
+          flex: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // STK Adı
               Text(
                 ngo.name,
                 style: const TextStyle(
                   color: Colors.black87,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  height: 1.3, // Satır yüksekliği
+                  height: 1.3,
                 ),
               ),
               const SizedBox(height: 6),
-              // Konum
               Text(
                 ngo.location,
                 style: TextStyle(
@@ -40,7 +37,6 @@ class NgoCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              // Açıklama
               Text(
                 ngo.description,
                 style: TextStyle(
@@ -48,14 +44,13 @@ class NgoCard extends StatelessWidget {
                   fontSize: 14,
                   height: 1.4,
                 ),
-                maxLines: 3, // Açıklamayı 3 satır ile sınırla
-                overflow: TextOverflow.ellipsis, // Sığmazsa ... koy
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: 12),
-              // Takip Et Butonu
               TextButton(
                 onPressed: () {
-                  // STK'yı takip etme mantığı
+                  // Detay sayfasına yönlendirme işlemi burada yapılabilir
                 },
                 style: TextButton.styleFrom(
                   backgroundColor: kFollowButtonColor,
@@ -67,26 +62,23 @@ class NgoCard extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Takip Et',
+                  'Detay',
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(width: 16), // Araya boşluk
-
-        // Sağ Taraf: Resim (Logo)
+        const SizedBox(width: 16),
         Expanded(
-          flex: 1, // Resim alanı (1/3 oranında)
+          flex: 1,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12.0),
             child: AspectRatio(
-              aspectRatio: 1 / 1, // Logo için 1:1 (kare) oran daha iyi
+              aspectRatio: 1 / 1,
               child: Image.network(
                 ngo.imageUrl,
-                fit: BoxFit.cover, // Resim alanı doldursun
-                // Yüklenirken gösterilecek
+                fit: BoxFit.cover,
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Container(
@@ -99,7 +91,6 @@ class NgoCard extends StatelessWidget {
                     ),
                   );
                 },
-                // Hata durumunda gösterilecek
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: Colors.grey[200],

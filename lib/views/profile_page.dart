@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gonullunet_app/models/user_model.dart';
 import 'package:gonullunet_app/services/auth.dart';
 
+import 'edit_ngo_profile_page.dart';
+
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
@@ -166,7 +168,24 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileOption(
                     icon: Icons.edit_outlined,
                     title: 'Profili Düzenle',
-                    onTap: () {},
+                    onTap: () {
+                      // Kullanıcının rolünü kontrol et
+                      if (user.isNgo) {
+                        // STK ise STK düzenleme sayfasına git
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EditNgoProfilePage(),
+                          ),
+                        );
+                      } else if (user.isVolunteer) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Gönüllü profili düzenleme yakında!'),
+                          ),
+                        );
+                      }
+                    },
                   ),
                   _buildProfileOption(
                     icon: Icons.notifications_none_outlined,

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../models/ngo_model.dart';
@@ -11,65 +12,60 @@ const Color kPrimaryColor = Color(0xFFFF5722);
 class NgosPage extends StatelessWidget {
   NgosPage({super.key});
 
-  final List<Ngo> ngos = [
-    Ngo(
-      name: 'Eğitim Gönüllüleri Vakfı (TEGV)',
-      location: 'İstanbul, Türkiye',
-      description: 'İlköğretim çağı çocuklarımızın daha güzel bir gelecek...',
-      imageUrl: 'https://placehold.co/150x150/E57373/FFFFFF?text=TEGV',
-    ),
-    Ngo(
-      name: 'TEMA Vakfı',
-      location: 'Türkiye Geneli',
-      description:
-          'Türkiye\'nin doğal varlıklarını ve çevresel değerlerini koruma...',
-      imageUrl: 'https://placehold.co/150x150/81C784/FFFFFF?text=TEMA',
-    ),
-    Ngo(
-      name: 'LÖSEV',
-      location: 'Ankara, Türkiye',
-      description: 'Lösemili ve kan hastası çocukların sağlık ve eğitim...',
-      imageUrl: 'https://placehold.co/150x150/64B5F6/FFFFFF?text=LÖSEV',
-    ),
-    Ngo(
-      name: 'Darüşşafaka Cemiyeti',
-      location: 'İstanbul, Türkiye',
-      description: 'Eğitimde fırsat eşitliği misyonuyla 1863 yılından beri...',
-      imageUrl: 'https://placehold.co/150x150/FFB74D/FFFFFF?text=Darüşşafaka',
-    ),
-  ];
-
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
-      appBar: AppBar(
         backgroundColor: kBackgroundColor,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'STK\'lar',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'Inter',
+        appBar: AppBar(
+          backgroundColor: kBackgroundColor,
+          elevation: 0,
+          centerTitle: true,
+          title: const Text(
+            'Kurumlar',
+            style: TextStyle(
+              color: Colors.black87,
+              fontWeight: FontWeight.bold,
+              fontFamily: 'Inter',
+            ),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.filter_list, color: Colors.black54),
+              onPressed: () {},
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.black54),
-            onPressed: () {},
-          ),
-        ],
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: ngos.length,
-        itemBuilder: (context, index) {
-          return NgoCard(ngo: ngos[index]);
-        },
-        separatorBuilder: (context, index) => const SizedBox(height: 24),
-      ),
-    );
+        body: StreamBuilder<QuerySnapshot>(
+            stream: _firestore
+                .collection('users')
+                .where('userType', isEqualTo: 'ngo')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                    child: CircularProgressIndicator(color: kPrimaryColor));
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Hata: ${snapshot.error}'));
+              }
+
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return const Center(
+                    child: Text('Gösterilecek kurum (STK) bulunamadı.'));
+              }
+              final ngoDocs = snapshot.data!.docs;
+
+              return ListView.separated(
+                  padding: const EdgeInsets.all(16.0),
+                  itemBuilder: (context, index) {
+                    final ngo = Ngo.fromFirestore(ngoDocs[index]);
+                    return NgoCard(ngo: ngo);
+                  },
+                  separatorBuilder: (context, index) => const SizedBox(
+                        height: 24,
+                      ),
+                  itemCount: ngoDocs.length);
+            }));
   }
 }

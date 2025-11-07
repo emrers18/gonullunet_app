@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:gonullunet_app/utils/app_colors.dart';
 import '../../models/post_model.dart';
 import '../../views/home_page.dart';
 
@@ -11,7 +11,7 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: kCardBackgroundColor,
+      color: AppColors.kCardBackgroundColor,
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
@@ -100,13 +100,13 @@ class PostCard extends StatelessWidget {
             Icon(
               icon,
               size: 20,
-              color: kIconColor,
+              color: AppColors.kIconColor,
             ),
             const SizedBox(width: 6),
             Text(
               text,
               style: const TextStyle(
-                color: kIconColor,
+                color: AppColors.kIconColor,
                 fontWeight: FontWeight.w500,
                 fontSize: 14,
               ),

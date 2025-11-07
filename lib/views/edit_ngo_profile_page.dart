@@ -12,36 +12,30 @@ class EditNgoProfilePage extends StatefulWidget {
 }
 
 class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
-  // Firebase Servisleri
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Controller'lar
   late TextEditingController _stkNameController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
   late TextEditingController _imageUrlController;
 
-  // Yüklenme Durumları
-  bool _isLoadingPage = true; // Sayfa ilk açılırken veriyi çekmek için
-  bool _isSaving = false; // Kayıt butonuna basıldığında
+  bool _isLoadingPage = true;
+  bool _isSaving = false;
 
   @override
   void initState() {
     super.initState();
-    // Controller'ları başlat
     _stkNameController = TextEditingController();
     _descriptionController = TextEditingController();
     _locationController = TextEditingController();
     _imageUrlController = TextEditingController();
 
-    // Mevcut verileri Firestore'dan yükle
     _loadCurrentNgoData();
   }
 
   @override
   void dispose() {
-    // Controller'ları temizle
     _stkNameController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
@@ -49,7 +43,7 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     super.dispose();
   }
 
-  // Sayfa açıldığında STK'nın mevcut verilerini yükler
+//firebaseden mevcut verileri yükler
   Future<void> _loadCurrentNgoData() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -63,14 +57,12 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     }
 
     try {
-      // Kullanıcının belgesini Firestore'dan bir kerelik al
       final docSnapshot =
           await _firestore.collection('users').doc(user.uid).get();
 
       if (docSnapshot.exists && docSnapshot.data() != null) {
         final data = docSnapshot.data()!;
 
-        // Controller'lara mevcut verileri doldur
         if (mounted) {
           setState(() {
             _stkNameController.text = data['stkName'] ?? '';
@@ -91,19 +83,17 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     }
   }
 
-  // Hata göstermek için
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: AppColors.accentColor, // veya Colors.red
+        backgroundColor: Colors.red,
       ),
     );
   }
 
-  // Kaydetme fonksiyonu (senin sağladığın fonksiyonun geliştirilmiş hali)
   Future<void> _saveNgoProfile() async {
     final user = _auth.currentUser;
     if (user == null) {
@@ -111,7 +101,6 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
       return;
     }
 
-    // Basit validasyon
     if (_stkNameController.text.trim().isEmpty) {
       _showError("STK Adı boş bırakılamaz.");
       return;
@@ -123,24 +112,22 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
       });
     }
 
+    //firebasede kullanıcın verisini günceller
     try {
-      // Firestore'da kullanıcının belgesini GÜNCELLE
       await _firestore.collection('users').doc(user.uid).update({
         'stkName': _stkNameController.text.trim(),
         'description': _descriptionController.text.trim(),
         'location': _locationController.text.trim(),
         'imageUrl': _imageUrlController.text.trim(),
-        // 'profileCompleted': true // (İsteğe bağlı)
       });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profil başarıyla güncellendi!'),
-            backgroundColor: Colors.green, // Başarı rengi
+            backgroundColor: Colors.green,
           ),
         );
-        // Başarılı olunca bir önceki sayfaya (Profilim) geri dön
         Navigator.pop(context);
       }
     } catch (e) {
@@ -159,7 +146,7 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        title: const Text('STK Profilini Düzenle'),
+        title: const Text('Kurum Profilini Düzenle'),
         centerTitle: true,
         backgroundColor: AppColors.kBackgroundColor,
         elevation: 0,
@@ -195,40 +182,30 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // STK Adı
                     CustomInputField(
                       controller: _stkNameController,
                       hintText: 'STK Adı',
                       keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
-
-                    // Açıklama
                     CustomInputField(
                       controller: _descriptionController,
                       hintText: 'Açıklama (Kurumunuzun amacı, misyonu vb.)',
                       keyboardType: TextInputType.multiline,
                     ),
                     const SizedBox(height: 16),
-
-                    // Konum
                     CustomInputField(
                       controller: _locationController,
                       hintText: 'Konum (Örn: İstanbul, Türkiye)',
                       keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
-
-                    // Resim URL'si
                     CustomInputField(
                       controller: _imageUrlController,
                       hintText: 'Profil Resmi URL\'si',
                       keyboardType: TextInputType.url,
                     ),
                     const SizedBox(height: 32),
-
-                    // Kaydet Butonu
                     ElevatedButton(
                       onPressed: _isSaving ? null : _saveNgoProfile,
                       style: ElevatedButton.styleFrom(

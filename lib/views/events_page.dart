@@ -6,12 +6,6 @@ import 'package:gonullunet_app/models/event_model.dart';
 
 import '../widgets/events/event_card.dart';
 
-const Color kBackgroundColor = Color(0xFFF9F9F9);
-const Color kDateColor = Color(0xFF9A6D5F);
-const Color kJoinButtonColor = Color(0xFFF5EBE0);
-const Color kJoinButtonTextColor = Color(0xFF6D4C41);
-const Color kPrimaryColor = Color(0xFFFF5722);
-
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
 
@@ -99,8 +93,6 @@ class _EventsPageState extends State<EventsPage> {
               return FloatingActionButton(
                 onPressed: () {
                   // Navigator.push(context, MaterialPageRoute(builder: (context) => AddEventPage()));
-                  // ignore: avoid_print
-                  print('STK etkinlik ekleme butonuna bastı.');
                 },
                 backgroundColor: kPrimaryColor,
                 child: const Icon(Icons.add, color: Colors.white),

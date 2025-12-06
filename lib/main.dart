@@ -1,31 +1,61 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'firebase_options.dart';
+
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/views/login_page.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:gonullunet_app/views/main_page.dart';
-import 'firebase_options.dart';
+
+import 'logic/post_cubit.dart';
+import 'repo/post_repository.dart';
+import 'views/onboarding_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+
+  final prefs = await SharedPreferences.getInstance();
+  final bool showOnboarding = prefs.getBool('showOnboarding') ?? true;
+
+  runApp(MyApp(showOnboarding: showOnboarding));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool showOnboarding;
+  const MyApp({super.key, required this.showOnboarding});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider(create: (context) => PostRepository()),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => PostCubit(
+              context.read<PostRepository>(),
+            )..loadPosts(),
+          ),
+        ],
+        child: MaterialApp(
+          title: 'GönüllüNet',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme:
+                ColorScheme.fromSeed(seedColor: const Color(0xFF03A9F4)),
+            useMaterial3: true,
+          ),
+
+          // Eğer showOnboarding true ise Tanıtımı göster, değilse AuthGate (Giriş Kontrolü)
+          home: showOnboarding ? const OnboardingPage() : const AuthGate(),
+        ),
       ),
-      home: const AuthGate(),
     );
   }
 }
@@ -38,7 +68,6 @@ class AuthGate extends StatelessWidget {
     return StreamBuilder<User?>(
         stream: Auth().authStateChanges,
         builder: (context, snapshot) {
-          //veri gelmiyorsa bekleme kısmı
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(
@@ -46,11 +75,9 @@ class AuthGate extends StatelessWidget {
               ),
             );
           }
-          //veri geldi ve kullanıcı giriş yapmış ise
           if (snapshot.hasData && snapshot.data != null) {
             return const MainPage();
           }
-          // veri gelmiş ama kullanıcı giriş yapmamış ise
           return const LoginPage();
         });
   }

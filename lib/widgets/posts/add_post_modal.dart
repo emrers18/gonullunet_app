@@ -1,9 +1,8 @@
-// lib/widgets/posts/add_post_modal.dart
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gonullunet_app/services/auth.dart'; // Auth servisi
-import 'package:gonullunet_app/utils/app_colors.dart'; // Renklerin
-import 'package:gonullunet_app/widgets/custom_input_field.dart'; // Özel input alanımız
+import 'package:gonullunet_app/services/auth.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
 class AddPostModal extends StatefulWidget {
   const AddPostModal({super.key});
@@ -13,12 +12,10 @@ class AddPostModal extends StatefulWidget {
 }
 
 class _AddPostModalState extends State<AddPostModal> {
-  // Controller'lar
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _imageUrlController = TextEditingController();
 
-  // Servisler
   final Auth _auth = Auth();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
@@ -74,14 +71,13 @@ class _AddPostModalState extends State<AddPostModal> {
       await _firestore.collection('posts').add({
         'title': title,
         'description': description,
-        'imageUrl': imageUrl, // (Boşsa, model 'placeholder'a çevirecek)
-        'publisherId': user.uid, // Gönderiyi yayınlayan STK'nın UID'si
-        'createdAt': Timestamp.now(), // Sıralama için şimdiki zaman
+        'imageUrl': imageUrl,
+        'publisherId': user.uid,
+        'createdAt': Timestamp.now(),
         'likeCount': 0,
         'commentCount': 0,
       });
 
-      // Başarılıysa modal'ı kapat
       if (mounted) {
         Navigator.pop(context);
       }
@@ -115,10 +111,9 @@ class _AddPostModalState extends State<AddPostModal> {
             ),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min, // İçerik kadar yer kapla
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // "Çekme Çubuğu" (İsteğe bağlı)
               Center(
                 child: Container(
                   width: 40,

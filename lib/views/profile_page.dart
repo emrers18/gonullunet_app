@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:gonullunet_app/models/user_model.dart';
 import 'package:gonullunet_app/services/auth.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 
 import 'edit_ngo_profile_page.dart';
 
@@ -74,7 +75,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryColor = Color(0xFFFF5722);
     const Color backgroundColor = Color(0xFFF9F9F9);
 
     return Scaffold(
@@ -86,7 +86,7 @@ class _ProfilePageState extends State<ProfilePage> {
         title: const Text(
           'Profilim',
           style: TextStyle(
-            color: Colors.black87,
+            color: AppColors.primaryText,
             fontWeight: FontWeight.bold,
             fontFamily: 'Inter',
           ),
@@ -97,7 +97,8 @@ class _ProfilePageState extends State<ProfilePage> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator(color: primaryColor));
+                child:
+                    CircularProgressIndicator(color: AppColors.primaryColor));
           }
 
           if (snapshot.hasError) {
@@ -120,15 +121,21 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       CircleAvatar(
                         radius: 50,
-                        backgroundColor: primaryColor.withOpacity(0.1),
-                        child: Text(
-                          user.initials,
-                          style: const TextStyle(
-                            fontSize: 40,
-                            fontWeight: FontWeight.bold,
-                            color: primaryColor,
-                          ),
-                        ),
+                        backgroundColor: AppColors.lightPrimaryColor,
+                        backgroundImage:
+                            (user.imageUrl != null && user.imageUrl!.isNotEmpty)
+                                ? NetworkImage(user.imageUrl!)
+                                : null,
+                        child: (user.imageUrl == null || user.imageUrl!.isEmpty)
+                            ? Text(
+                                user.initials,
+                                style: const TextStyle(
+                                  fontSize: 40,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.darkPrimaryColor,
+                                ),
+                              )
+                            : null,
                       ),
                       const SizedBox(height: 16),
                       Text(
@@ -137,15 +144,15 @@ class _ProfilePageState extends State<ProfilePage> {
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: AppColors.primaryText,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
                         user.email,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
-                          color: Colors.grey[600],
+                          color: AppColors.secondaryText,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -153,11 +160,12 @@ class _ProfilePageState extends State<ProfilePage> {
                         label: Text(
                           user.isNgo ? 'STK Kullanıcısı' : 'Gönüllü Kullanıcı',
                           style: const TextStyle(
-                            color: Colors.black87,
+                            color: AppColors.primaryText,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        backgroundColor: Colors.grey[200],
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.black12),
                         padding: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 4),
                       ),
@@ -169,9 +177,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     icon: Icons.edit_outlined,
                     title: 'Profili Düzenle',
                     onTap: () {
-                      // Kullanıcının rolünü kontrol et
                       if (user.isNgo) {
-                        // STK ise STK düzenleme sayfasına git
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -232,21 +238,25 @@ class _ProfilePageState extends State<ProfilePage> {
     required IconData icon,
     required String title,
     required VoidCallback onTap,
-    Color color = Colors.black87,
+    Color? color,
   }) {
+    // Eğer özel bir renk verilmediyse (Çıkış butonu hariç), Ana Rengi (Mavi) kullan
+    final iconColor = color ?? AppColors.kPrimaryColor;
+    final textColor = color ?? AppColors.primaryText;
+
     return ListTile(
-      leading: Icon(icon, color: color),
+      leading: Icon(icon, color: iconColor),
       title: Text(
         title,
         style: TextStyle(
-          color: color,
+          color: textColor,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
       ),
       trailing: Icon(
         Icons.arrow_forward_ios,
-        color: color.withOpacity(0.7),
+        color: AppColors.secondaryText.withOpacity(0.7),
         size: 16,
       ),
       onTap: onTap,

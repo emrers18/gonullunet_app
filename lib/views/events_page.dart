@@ -91,9 +91,8 @@ class _EventsPageState extends State<EventsPage> {
 
             if (userType == 'ngo') {
               return FloatingActionButton(
-                onPressed: () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => AddEventPage()));
-                },
+                onPressed: () {},
+                heroTag: 'add_event_fab',
                 backgroundColor: kPrimaryColor,
                 child: const Icon(Icons.add, color: Colors.white),
               );

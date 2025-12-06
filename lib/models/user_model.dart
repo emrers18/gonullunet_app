@@ -7,9 +7,10 @@ class UserModel {
   final Timestamp createdAt;
 
   final String? name;
-  final String? surname; //gönüllünün dolduracağı alanlar
+  final String? surname;
 
-  final String? stkName; //kurumun dolduracağı alan
+  final String? stkName;
+  final String? imageUrl;
 
   UserModel({
     required this.uid,
@@ -19,9 +20,9 @@ class UserModel {
     this.name,
     this.surname,
     this.stkName,
+    this.imageUrl,
   });
 
-  //Firestore veri okuma
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     Map<String, dynamic> data = doc.data()!;
 
@@ -33,10 +34,10 @@ class UserModel {
       name: data['name'],
       surname: data['surname'],
       stkName: data['stkName'],
+      imageUrl: data['imageUrl'],
     );
   }
 
-  //Firestore veri yazma
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -46,13 +47,13 @@ class UserModel {
       'name': name,
       'surname': surname,
       'stkName': stkName,
+      'imageUrl': imageUrl,
     };
   }
 
   bool get isNgo => userType == 'ngo';
   bool get isVolunteer => userType == 'volunteer';
 
-  //profil sayfasında gösterilecek isim
   String get displayName {
     if (isNgo) {
       return stkName ?? 'STK Adı';
@@ -61,7 +62,6 @@ class UserModel {
     }
   }
 
-  //profi sayfasındaki baş harfler
   String get initials {
     if (isNgo && stkName != null && stkName!.isNotEmpty) {
       var parts = stkName!.split(' ');

@@ -27,17 +27,17 @@ class Post {
     return timeago.format(createdAt.toDate(), locale: 'tr');
   }
 
-  //firestoredan gelen veri Post modeline dönüştürür
+  // Firestore'dan gelen veri Post modeline dönüştürülür
   factory Post.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    const String placeholder =
-        'https://placehold.co/600x400/9E9E9E/FFFFFF?text=Görsel+Yok';
     final dynamic imageUrlData = data['imageUrl'];
-    String finalImageUrl = placeholder;
+    String finalImageUrl = '';
+
     if (imageUrlData != null &&
         imageUrlData is String &&
-        imageUrlData.isNotEmpty) {
+        imageUrlData.isNotEmpty &&
+        imageUrlData.startsWith('http')) {
       finalImageUrl = imageUrlData;
     }
 

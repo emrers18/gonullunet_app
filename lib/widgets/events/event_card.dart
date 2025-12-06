@@ -18,14 +18,13 @@ class EventCard extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Sol Taraf: Metinler ve Buton
         Expanded(
           flex: 2,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                event.date.toUpperCase(), // '12 May' veya '12.05.2025'
+                event.date.toUpperCase(),
                 style: const TextStyle(
                   color: kDateColor,
                   fontWeight: FontWeight.bold,
@@ -74,8 +73,6 @@ class EventCard extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 16),
-
-        // Sağ Taraf: Resim
         Expanded(
           flex: 1,
           child: ClipRRect(
@@ -85,7 +82,6 @@ class EventCard extends StatelessWidget {
               child: Image.network(
                 event.imageUrl,
                 fit: BoxFit.cover,
-                // Yüklenme ve Hata builder'ların çok güzel, aynen kalmalı
                 loadingBuilder: (context, child, loadingProgress) {
                   if (loadingProgress == null) return child;
                   return Container(

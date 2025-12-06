@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/widgets/custom_input_field.dart';
 import 'package:gonullunet_app/services/auth.dart'; // Auth servisi

@@ -49,9 +49,7 @@ class NgoCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () {
-                  // Detay sayfasına yönlendirme işlemi burada yapılabilir
-                },
+                onPressed: () {},
                 style: TextButton.styleFrom(
                   backgroundColor: kFollowButtonColor,
                   foregroundColor: kFollowButtonTextColor,

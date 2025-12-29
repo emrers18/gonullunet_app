@@ -1,7 +1,8 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/post_model.dart';
-import 'package:gonullunet_app/repo/post_repository.dart';
+import '../repo/post_repository.dart';
 import 'post_state.dart';
 
 class PostCubit extends Cubit<PostState> {
@@ -19,6 +20,7 @@ class PostCubit extends Cubit<PostState> {
     if (currentState is PostLoaded) {
       oldPosts = currentState.posts;
       lastDoc = currentState.lastDocument;
+
       if (!currentState.hasMore) return;
     }
 
@@ -26,15 +28,13 @@ class PostCubit extends Cubit<PostState> {
 
     try {
       final newPosts = await _repository.fetchPosts(lastDocument: lastDoc);
-
-      // Pagination için son dökümanı bul
       final newLastDoc =
           await _repository.getLastDocumentFromQuery(lastDocument: lastDoc);
 
       final totalPosts = [...oldPosts, ...newPosts];
 
-      // Eğer gelen veri limiti doldurmadıysa (örn: 10 istedik 3 geldi), sonuna geldik demektir.
-      final hasMoreData = newPosts.isNotEmpty && newPosts.length >= 10;
+      final hasMoreData =
+          newPosts.isNotEmpty && newPosts.length >= PostRepository.limit;
 
       emit(PostLoaded(
           posts: totalPosts, hasMore: hasMoreData, lastDocument: newLastDoc));
@@ -43,19 +43,21 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  // post ekleme
-  Future<void> addPost(
-      String title, String desc, String url, String uid) async {
+  Future<void> addPostWithImage(
+      String title, String desc, File? imageFile, String uid) async {
     try {
-      await _repository.addPost(title, desc, url, uid);
-      emit(PostInitial());
-      loadPosts();
+      String imageUrl = '';
+      if (imageFile != null) {
+        imageUrl = await _repository.uploadImage(imageFile);
+      }
+
+      await _repository.addPost(title, desc, imageUrl, uid);
+      await refresh();
     } catch (e) {
       emit(PostError("Post eklenemedi: $e"));
     }
   }
 
-  // liste yenileme
   Future<void> refresh() async {
     emit(PostInitial());
     await loadPosts();

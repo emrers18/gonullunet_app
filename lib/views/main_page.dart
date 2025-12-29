@@ -25,7 +25,7 @@ class Ngos extends StatelessWidget {
   const Ngos({super.key});
   @override
   Widget build(BuildContext context) {
-    return NgosPage();
+    return const NgosPage();
   }
 }
 

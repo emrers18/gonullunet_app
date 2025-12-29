@@ -21,8 +21,7 @@ class CustomBottomNavBar extends StatelessWidget {
       showSelectedLabels: true,
       showUnselectedLabels: true,
       selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-      type: BottomNavigationBarType
-          .fixed, // Tip: fixed, 4 öğe de sığar ve yerinde sabit kalır
+      type: BottomNavigationBarType.fixed,
       currentIndex: currentIndex,
       onTap: onTap,
       items: const [

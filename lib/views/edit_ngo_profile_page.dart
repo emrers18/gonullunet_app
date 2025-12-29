@@ -1,27 +1,42 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:gonullunet_app/services/auth.dart';
-import 'package:gonullunet_app/widgets/custom_input_field.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
-class EditNgoProfilePage extends StatefulWidget {
+import '../logic/profile_cubit.dart';
+import '../logic/profile_state.dart';
+import '../repo/user_repository.dart';
+
+class EditNgoProfilePage extends StatelessWidget {
   const EditNgoProfilePage({super.key});
 
   @override
-  State<EditNgoProfilePage> createState() => _EditNgoProfilePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) =>
+          EditProfileCubit(UserRepository())..loadProfileData(),
+      child: const EditNgoProfileView(),
+    );
+  }
 }
 
-class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
-  final Auth _auth = Auth();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+class EditNgoProfileView extends StatefulWidget {
+  const EditNgoProfileView({super.key});
 
+  @override
+  State<EditNgoProfileView> createState() => _EditNgoProfileViewState();
+}
+
+class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   late TextEditingController _stkNameController;
   late TextEditingController _descriptionController;
   late TextEditingController _locationController;
-  late TextEditingController _imageUrlController;
 
-  bool _isLoadingPage = true;
-  bool _isSaving = false;
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+  String? _currentImageUrl;
 
   @override
   void initState() {
@@ -29,9 +44,6 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     _stkNameController = TextEditingController();
     _descriptionController = TextEditingController();
     _locationController = TextEditingController();
-    _imageUrlController = TextEditingController();
-
-    _loadCurrentNgoData();
   }
 
   @override
@@ -39,106 +51,42 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
     _stkNameController.dispose();
     _descriptionController.dispose();
     _locationController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
-//firebaseden mevcut verileri yükler
-  Future<void> _loadCurrentNgoData() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      if (mounted) {
-        setState(() {
-          _isLoadingPage = false;
-        });
-        _showError("Kullanıcı bulunamadı. Lütfen tekrar giriş yapın.");
-      }
-      return;
-    }
-
+  Future<void> _pickImage() async {
     try {
-      final docSnapshot =
-          await _firestore.collection('users').doc(user.uid).get();
-
-      if (docSnapshot.exists && docSnapshot.data() != null) {
-        final data = docSnapshot.data()!;
-
-        if (mounted) {
-          setState(() {
-            _stkNameController.text = data['stkName'] ?? '';
-            _descriptionController.text = data['description'] ?? '';
-            _locationController.text = data['location'] ?? '';
-            _imageUrlController.text = data['imageUrl'] ?? '';
-          });
-        }
+      final XFile? pickedFile = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 50,
+      );
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path);
+        });
       }
     } catch (e) {
-      _showError("Veriler yüklenirken bir hata oluştu: $e");
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingPage = false;
-        });
-      }
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Resim seçilemedi: $e")),
+      );
     }
   }
 
-  void _showError(String message) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
-  }
-
-  Future<void> _saveNgoProfile() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      _showError("Kullanıcı oturumu bulunamadı.");
-      return;
-    }
-
+  void _onSavePressed(BuildContext context) {
     if (_stkNameController.text.trim().isEmpty) {
-      _showError("STK Adı boş bırakılamaz.");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("STK Adı boş olamaz.")),
+      );
       return;
     }
 
-    if (mounted) {
-      setState(() {
-        _isSaving = true;
-      });
-    }
-
-    //firebasede kullanıcın verisini günceller
-    try {
-      await _firestore.collection('users').doc(user.uid).update({
-        'stkName': _stkNameController.text.trim(),
-        'description': _descriptionController.text.trim(),
-        'location': _locationController.text.trim(),
-        'imageUrl': _imageUrlController.text.trim(),
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profil başarıyla güncellendi!'),
-            backgroundColor: Colors.green,
-          ),
+    context.read<EditProfileCubit>().updateProfile(
+          stkName: _stkNameController.text.trim(),
+          description: _descriptionController.text.trim(),
+          location: _locationController.text.trim(),
+          imageFile: _selectedImage,
         );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      _showError("Profil güncellenemedi: $e");
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    }
   }
 
   @override
@@ -155,37 +103,127 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
-      body: _isLoadingPage
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
-            )
-          : SingleChildScrollView(
+      body: BlocListener<EditProfileCubit, EditProfileState>(
+        listener: (context, state) {
+          if (state is EditProfileSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Profil başarıyla güncellendi!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pop(context);
+          } else if (state is EditProfileError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text(state.message), backgroundColor: Colors.red),
+            );
+          }
+        },
+        child: BlocBuilder<EditProfileCubit, EditProfileState>(
+          builder: (context, state) {
+            if (state is EditProfileLoading) {
+              return const Center(
+                  child:
+                      CircularProgressIndicator(color: AppColors.primaryColor));
+            }
+
+            if (state is EditProfileLoaded) {
+              if (_stkNameController.text.isEmpty) {
+                _stkNameController.text = state.stkName;
+              }
+              if (_descriptionController.text.isEmpty) {
+                _descriptionController.text = state.description;
+              }
+              if (_locationController.text.isEmpty) {
+                _locationController.text = state.location;
+              }
+              _currentImageUrl ??= state.imageUrl;
+            }
+
+            if (state is EditProfileUpdating) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(color: AppColors.primaryColor),
+                    SizedBox(height: 16),
+                    Text("Profil güncelleniyor..."),
+                  ],
+                ),
+              );
+            }
+
+            return SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Kurum Bilgileri',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                    Center(
+                      child: Stack(
+                        children: [
+                          GestureDetector(
+                            onTap: _pickImage,
+                            child: CircleAvatar(
+                              radius: 60,
+                              backgroundColor: Colors.grey[200],
+                              backgroundImage: _selectedImage != null
+                                  ? FileImage(_selectedImage!) as ImageProvider
+                                  : (_currentImageUrl != null &&
+                                          _currentImageUrl!.isNotEmpty)
+                                      ? NetworkImage(_currentImageUrl!)
+                                      : null,
+                              child: (_selectedImage == null &&
+                                      (_currentImageUrl == null ||
+                                          _currentImageUrl!.isEmpty))
+                                  ? const Icon(Icons.add_a_photo,
+                                      size: 40, color: Colors.grey)
+                                  : null,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.edit,
+                                    color: Colors.white, size: 20),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
-                      'Bu bilgiler "Kurumlar" sayfasında diğer kullanıcılara gösterilecektir.',
+                      'Fotoğrafı Değiştir',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Kurum Bilgileri',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Bu bilgiler "Kurumlar" sayfasında diğer kullanıcılara gösterilecektir.',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
                     CustomInputField(
                       controller: _stkNameController,
                       hintText: 'STK Adı',
-                      keyboardType: TextInputType.text,
                     ),
                     const SizedBox(height: 16),
                     CustomInputField(
@@ -197,46 +235,31 @@ class _EditNgoProfilePageState extends State<EditNgoProfilePage> {
                     CustomInputField(
                       controller: _locationController,
                       hintText: 'Konum (Örn: İstanbul, Türkiye)',
-                      keyboardType: TextInputType.text,
-                    ),
-                    const SizedBox(height: 16),
-                    CustomInputField(
-                      controller: _imageUrlController,
-                      hintText: 'Profil Resmi URL\'si',
-                      keyboardType: TextInputType.url,
                     ),
                     const SizedBox(height: 32),
                     ElevatedButton(
-                      onPressed: _isSaving ? null : _saveNgoProfile,
+                      onPressed: () => _onSavePressed(context),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.accentColor,
-                        foregroundColor: AppColors.textColor,
+                        foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                       ),
-                      child: _isSaving
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 3,
-                              ),
-                            )
-                          : const Text(
-                              'Kaydet',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                      child: const Text(
+                        'Kaydet',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
                     ),
                   ],
                 ),
               ),
-            ),
+            );
+          },
+        ),
+      ),
     );
   }
 }

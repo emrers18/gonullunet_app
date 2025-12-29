@@ -4,7 +4,6 @@ import '../services/auth.dart';
 import '../widgets/custom_input_field.dart';
 import '../utils/app_colors.dart';
 import 'signUp_page.dart';
-import 'main_page.dart';
 import 'package:gonullunet_app/utils/validators/validators.dart';
 
 class LoginPage extends StatefulWidget {
@@ -49,8 +48,7 @@ class _LoginPageState extends State<LoginPage> {
     }
 
     if (!AppValidators.emailReg.hasMatch(email)) {
-      _showError(
-          'Geçersiz e-posta adresi. Lütfen doğru formatta girin (ör: ornek@domain.com).');
+      _showError('Geçersiz e-posta adresi. Lütfen doğru formatta girin.');
       return;
     }
     if (password.isEmpty) {
@@ -64,12 +62,6 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _auth.signIn(email: email, password: password);
-
-      if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainPage()),
-      );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
         _showError('Bu e-posta ile kayıtlı bir kullanıcı bulunamadı.');
@@ -109,9 +101,9 @@ class _LoginPageState extends State<LoginPage> {
                 child: Container(
                   height: 350,
                   width: 350,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    color: AppColors.lightPrimaryColor.withOpacity(0.3),
+                    color: AppColors.lightPrimaryColor,
                   ),
                   padding: const EdgeInsets.all(25),
                   child: Image.asset(

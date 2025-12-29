@@ -27,7 +27,6 @@ class Post {
     return timeago.format(createdAt.toDate(), locale: 'tr');
   }
 
-  // Firestore'dan gelen veri Post modeline dönüştürülür
   factory Post.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 

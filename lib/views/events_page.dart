@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:gonullunet_app/services/auth.dart';
-import 'package:gonullunet_app/models/event_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../widgets/events/event_card.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/events/event_card.dart';
+import 'package:gonullunet_app/widgets/events/add_event_modal.dart';
+
+import '../logic/event_cubit.dart';
+import '../logic/event_state.dart';
+import 'events_map_page.dart';
 
 class EventsPage extends StatefulWidget {
   const EventsPage({super.key});
@@ -14,89 +17,131 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> {
-  final Auth _auth = Auth();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Stream<DocumentSnapshot<Map<String, dynamic>>>? _userStream;
-  Stream<QuerySnapshot>? _eventsStream;
-
   @override
   void initState() {
     super.initState();
-    User? currentUser = _auth.currentUser;
-    if (currentUser != null) {
-      _userStream =
-          _firestore.collection('users').doc(currentUser.uid).snapshots();
-    }
-    _eventsStream = _firestore.collection('events').snapshots();
+    context.read<EventCubit>().loadEvents();
+  }
+
+  void _showAddEventModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => const AddEventModal(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        backgroundColor: kBackgroundColor,
+        backgroundColor: AppColors.kBackgroundColor,
         elevation: 0,
         centerTitle: true,
         title: const Text(
           'Etkinlikler',
           style: TextStyle(
-            color: Colors.black87,
+            color: AppColors.primaryText,
             fontWeight: FontWeight.bold,
             fontFamily: 'Inter',
           ),
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.map_outlined, color: Colors.black54),
+            tooltip: "Haritada Göster",
+            onPressed: () {
+              final state = context.read<EventCubit>().state;
+
+              if (state is EventLoaded) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => EventsMapPage(events: state.events),
+                  ),
+                );
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content:
+                          Text("Etkinlikler yükleniyor, lütfen bekleyin.")),
+                );
+              }
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.filter_list, color: Colors.black54),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Filtreleme yakında!")),
+              );
+            },
           ),
         ],
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: _eventsStream,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Hata: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+      body: BlocBuilder<EventCubit, EventState>(
+        builder: (context, state) {
+          if (state is EventLoading) {
             return const Center(
-                child: Text('Gösterilecek etkinlik bulunamadı.'));
+                child:
+                    CircularProgressIndicator(color: AppColors.primaryColor));
           }
 
-          final eventDocs = snapshot.data!.docs;
+          if (state is EventError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Text(
+                  state.message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            );
+          }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16.0),
-            itemCount: eventDocs.length,
-            itemBuilder: (context, index) {
-              final event = Event.fromFirestore(eventDocs[index]);
-              return EventCard(event: event);
-            },
-            separatorBuilder: (context, index) => const SizedBox(height: 24),
-          );
-        },
-      ),
-      floatingActionButton:
-          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-        stream: _userStream,
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.exists) {
-            final userData = snapshot.data!.data();
-            final String userType = userData?['userType'] ?? 'volunteer';
-
-            if (userType == 'ngo') {
-              return FloatingActionButton(
-                onPressed: () {},
-                heroTag: 'add_event_fab',
-                backgroundColor: kPrimaryColor,
-                child: const Icon(Icons.add, color: Colors.white),
+          if (state is EventLoaded) {
+            if (state.events.isEmpty) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Henüz hiç etkinlik yok.',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                    ),
+                  ],
+                ),
               );
             }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: state.events.length,
+              itemBuilder: (context, index) {
+                final event = state.events[index];
+                return EventCard(event: event);
+              },
+              separatorBuilder: (context, index) => const SizedBox(height: 24),
+            );
+          }
+
+          return const SizedBox.shrink();
+        },
+      ),
+      floatingActionButton: BlocBuilder<EventCubit, EventState>(
+        builder: (context, state) {
+          if (state is EventLoaded && state.isNgo) {
+            return FloatingActionButton(
+              onPressed: _showAddEventModal,
+              heroTag: 'add_event_fab',
+              backgroundColor: AppColors.primaryColor,
+              child: const Icon(Icons.add, color: Colors.white),
+            );
           }
           return const SizedBox.shrink();
         },

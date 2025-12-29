@@ -1,13 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/posts/post_card.dart';
 import 'package:gonullunet_app/widgets/posts/add_post_modal.dart';
 
 import '../logic/post_cubit.dart';
 import '../logic/post_state.dart';
+import '../logic/user_cubit.dart';
+import '../logic/user_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -18,7 +19,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final ScrollController _scrollController = ScrollController();
-  final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void initState() {
@@ -57,13 +57,13 @@ class _HomePageState extends State<HomePage> {
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(75.0),
         child: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black26,
                 blurRadius: 10,
-                offset: const Offset(0, 4),
+                offset: Offset(0, 4),
               ),
             ],
           ),
@@ -180,31 +180,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildUserHeader() {
-    if (_currentUserId == null) return const SizedBox.shrink();
-
-    return StreamBuilder<DocumentSnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('users')
-          .doc(_currentUserId)
-          .snapshots(),
-      builder: (context, snapshot) {
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (context, state) {
         String displayName = 'Gönüllü';
         String? imageUrl;
 
-        if (snapshot.hasData &&
-            snapshot.data != null &&
-            snapshot.data!.exists) {
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-
-          final userType = data['userType'];
-          if (userType == 'ngo') {
-            displayName = data['stkName'] ?? 'STK';
-          } else {
-            displayName =
-                "${data['name'] ?? ''} ${data['surname'] ?? ''}".trim();
-            if (displayName.isEmpty) displayName = 'Gönüllü';
-          }
-          imageUrl = data['imageUrl'];
+        if (state is UserLoaded) {
+          displayName = state.user.displayName;
+          imageUrl = state.user.imageUrl;
         }
 
         return Row(
@@ -212,9 +195,7 @@ class _HomePageState extends State<HomePage> {
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                    color: AppColors.darkPrimaryColor.withOpacity(0.2),
-                    width: 2),
+                border: Border.all(color: AppColors.darkPrimaryColor, width: 2),
               ),
               child: CircleAvatar(
                 radius: 24,

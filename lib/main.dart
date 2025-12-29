@@ -2,14 +2,20 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:gonullunet_app/logic/profile_cubit.dart';
+import 'package:gonullunet_app/repo/user_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
 
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/views/login_page.dart';
 import 'package:gonullunet_app/views/main_page.dart';
 
+import 'logic/event_cubit.dart';
 import 'logic/post_cubit.dart';
+import 'logic/user_cubit.dart';
+import 'repo/event_repository.dart';
 import 'repo/post_repository.dart';
 import 'views/onboarding_page.dart';
 
@@ -18,6 +24,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await initializeDateFormatting('tr_TR', null);
 
   final prefs = await SharedPreferences.getInstance();
   final bool showOnboarding = prefs.getBool('showOnboarding') ?? true;
@@ -34,6 +42,8 @@ class MyApp extends StatelessWidget {
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider(create: (context) => PostRepository()),
+        RepositoryProvider(create: (context) => EventRepository()),
+        RepositoryProvider(create: (context) => UserRepository()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -41,6 +51,18 @@ class MyApp extends StatelessWidget {
             create: (context) => PostCubit(
               context.read<PostRepository>(),
             )..loadPosts(),
+          ),
+          BlocProvider(
+            create: (context) => EventCubit(context.read<EventRepository>()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                EditProfileCubit(context.read<UserRepository>()),
+          ),
+          BlocProvider(
+            create: (context) => UserCubit(
+              UserRepository(),
+            )..loadUser(),
           ),
         ],
         child: MaterialApp(
@@ -51,8 +73,6 @@ class MyApp extends StatelessWidget {
                 ColorScheme.fromSeed(seedColor: const Color(0xFF03A9F4)),
             useMaterial3: true,
           ),
-
-          // Eğer showOnboarding true ise Tanıtımı göster, değilse AuthGate (Giriş Kontrolü)
           home: showOnboarding ? const OnboardingPage() : const AuthGate(),
         ),
       ),

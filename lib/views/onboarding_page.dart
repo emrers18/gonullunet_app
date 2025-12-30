@@ -34,19 +34,19 @@ class _OnboardingViewState extends State<OnboardingView> {
       "title": "GönüllüNet'e Hoş Geldin",
       "desc":
           "Çevrendeki iyilik hareketlerini keşfet, topluluğa katıl ve fark yaratmaya hemen başla.",
-      "image": "assets/images/logo.png",
+      "image": "lib/assets/images/logo.png",
     },
     {
       "title": "Etkinlikleri Keşfet",
       "desc":
           "Sana en yakın gönüllülük etkinliklerini harita üzerinde bul ve ilgi alanına göre filtrele.",
-      "image": "assets/images/onboarding_2.png",
+      "image": "lib/assets/images/onboarding_2.png",
     },
     {
       "title": "Birlikte Güçlüyüz",
       "desc":
           "STK'lar ve gönüllülerle bir araya gelerek büyük değişimlerin bir parçası ol.",
-      "image": "assets/images/onboarding_3.png",
+      "image": "lib/assets/images/onboarding_3.png",
     },
   ];
 

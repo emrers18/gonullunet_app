@@ -72,6 +72,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                       widget.ngo.imageUrl,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
+                        // ignore: deprecated_member_use
                         color: AppColors.primaryColor.withOpacity(0.3),
                         child: const Icon(Icons.business, size: 60),
                       ),

@@ -47,6 +47,10 @@ dependencies:
   geocoding: ^4.0.0
   geolocator: ^10.1.0
   google_maps_flutter: ^2.6.0
+  firebase_messaging: ^16.1.0
+  flutter_local_notifications: ^19.5.0
+  flutter_launcher_icons: ^0.14.4
+  google_fonts: ^6.3.3
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +63,13 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
+flutter_launcher_icons:
+  android: "ic_launcher" # Android için ikon ismi
+  ios: true # iOS için de oluştur
+  image_path: "lib/assets/images/logo.png" # İkon dosyanızın yolu
+  min_sdk_android: 21 # Android min SDK sürümü
+  adaptive_icon_background: "#FFFFFF"
+  image_path_android: "lib/assets/images/logo.png"
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

@@ -10,6 +10,7 @@ class Event {
   final String imageUrl;
   final String organizerId;
   final List<String> participants;
+  final String category;
 
   Event({
     required this.id,
@@ -21,6 +22,7 @@ class Event {
     required this.imageUrl,
     required this.organizerId,
     required this.participants,
+    required this.category,
   });
 
   factory Event.fromFirestore(DocumentSnapshot doc) {
@@ -36,6 +38,7 @@ class Event {
       imageUrl: data['imageUrl'] ?? '',
       organizerId: data['organizerId'] ?? '',
       participants: List<String>.from(data['participants'] ?? []),
+      category: data['category'] ?? 'Genel',
     );
   }
 }

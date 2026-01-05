@@ -10,8 +10,11 @@ class AppColors {
   static const Color dividerColor = Color(0xFFBDBDBD);
   static const Color textColor = Color(0xFFFFFFFF);
   static const Color kBackgroundColor = Color(0xFFF5F5F5);
-  static const Color kPrimaryColor = Color(0xFFFF5722);
+  static const Color kPrimaryColor = Color(0xFFFF6B35);
   static const Color kCardBackgroundColor = Color(0xFFFFFFFF);
   static const Color kIconColor = Colors.black54;
   static const Color kTimeColor = Colors.grey;
+  static const Color kTealColor = Color(0xFF1A659E);
+  static const Color kTextColor = Color(0xFF1F2937);
+  static const Color textSub = Color(0xFF8D6A5E);
 }

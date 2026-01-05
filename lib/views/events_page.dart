@@ -7,6 +7,7 @@ import 'package:gonullunet_app/widgets/events/add_event_modal.dart';
 
 import '../logic/event_cubit.dart';
 import '../logic/event_state.dart';
+import '../widgets/events/event_filter_modal.dart';
 import 'events_map_page.dart';
 
 class EventsPage extends StatefulWidget {
@@ -32,6 +33,19 @@ class _EventsPageState extends State<EventsPage> {
     );
   }
 
+  void _showFilterModal() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (ctx) {
+        return BlocProvider.value(
+          value: context.read<EventCubit>(),
+          child: const EventFilterModal(),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,18 +64,30 @@ class _EventsPageState extends State<EventsPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.map_outlined, color: Colors.black54),
+            icon: const Icon(Icons.map, color: Colors.black54),
             tooltip: "Haritada Göster",
             onPressed: () {
               final state = context.read<EventCubit>().state;
 
               if (state is EventLoaded) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => EventsMapPage(events: state.events),
-                  ),
-                );
+                final activeEvents = state.events
+                    .where((e) => e.date.isAfter(DateTime.now()))
+                    .toList();
+
+                if (activeEvents.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EventsMapPage(events: activeEvents),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("Haritada gösterilecek güncel etkinlik yok.")),
+                  );
+                }
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -72,12 +98,9 @@ class _EventsPageState extends State<EventsPage> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.black54),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Filtreleme yakında!")),
-              );
-            },
+            icon: const Icon(Icons.filter_list_sharp, color: Colors.black54),
+            onPressed: _showFilterModal,
+            tooltip: "Etkinlikleri Filtrele",
           ),
         ],
       ),
@@ -111,8 +134,16 @@ class _EventsPageState extends State<EventsPage> {
                     Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
                     const SizedBox(height: 16),
                     Text(
-                      'Henüz hiç etkinlik yok.',
+                      'Henüz hiç etkinlik yok veya filtreye uygun sonuç bulunamadı.',
+                      textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        context.read<EventCubit>().clearFilters();
+                      },
+                      child: const Text("Filtreleri Temizle",
+                          style: TextStyle(color: AppColors.primaryColor)),
                     ),
                   ],
                 ),

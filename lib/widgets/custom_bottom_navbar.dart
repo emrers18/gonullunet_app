@@ -31,14 +31,14 @@ class CustomBottomNavBar extends StatelessWidget {
           label: 'Anasayfa',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.calendar_today_outlined),
-          activeIcon: Icon(Icons.calendar_today),
-          label: 'Etkinlikler',
+          icon: Icon(Icons.explore_outlined),
+          activeIcon: Icon(Icons.explore),
+          label: 'Keşfet',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.corporate_fare_outlined),
           activeIcon: Icon(Icons.corporate_fare),
-          label: 'STK\'lar',
+          label: 'Kurumlar',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person_outline),

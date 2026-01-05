@@ -1,9 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+
+import '../../views/event_detail_page.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -12,129 +12,265 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final bool isJoined = user != null && event.participants.contains(user.uid);
-    final String dateString =
-        DateFormat('dd MMM', 'tr_TR').format(event.date).toUpperCase();
+    final String dayString = DateFormat('dd MMMM', 'tr_TR').format(event.date);
+    final String timeString = DateFormat('HH:mm', 'tr_TR').format(event.date);
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 4),
-      padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 20, left: 4, right: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
           BoxShadow(
-            color: Colors.black26,
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            flex: 2,
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(24)),
+                child: AspectRatio(
+                  aspectRatio: 4 / 3,
+                  child: event.imageUrl.isNotEmpty
+                      ? Image.network(
+                          event.imageUrl,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes !=
+                                        null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                color: AppColors.primaryColor,
+                              ),
+                            );
+                          },
+                          errorBuilder: (c, e, s) => Container(
+                            color: Colors.grey[200],
+                            child: const Icon(Icons.image_not_supported,
+                                color: Colors.grey),
+                          ),
+                        )
+                      : Container(color: Colors.grey[200]),
+                ),
+              ),
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius:
+                        const BorderRadius.vertical(top: Radius.circular(24)),
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        Colors.transparent
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 16,
+                left: 16,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.95),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.calendar_today_rounded,
+                          size: 16, color: AppColors.kPrimaryColor),
+                      const SizedBox(width: 6),
+                      Text(
+                        '$dayString • $timeString',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.15),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.grey[200],
+                    child: const Icon(Icons.business_rounded,
+                        size: 20, color: AppColors.kPrimaryColor),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  dateString,
-                  style: const TextStyle(
-                    color: AppColors.primaryColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
                   event.title,
                   style: const TextStyle(
-                    color: AppColors.primaryText,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    color: AppColors.primaryText,
                     height: 1.2,
                   ),
-                  maxLines: 2,
+                  maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(Icons.location_on_outlined,
-                        size: 14, color: AppColors.secondaryText),
+                        size: 16, color: Colors.grey),
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
                         event.location,
-                        style: const TextStyle(
-                          color: AppColors.secondaryText,
-                          fontSize: 13,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey[600],
+                          height: 1.5,
                         ),
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 36,
-                  child: ElevatedButton(
-                    onPressed: () => _handleJoin(context, user, isJoined),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isJoined
-                          ? Colors.grey.shade200
-                          : AppColors.lightPrimaryColor,
-                      foregroundColor:
-                          isJoined ? Colors.grey : AppColors.primaryColor,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
+                const SizedBox(height: 20),
+                Divider(color: Colors.grey[100], height: 1),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildParticipantsStack(event.participants),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EventDetailPage(event: event),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.kPrimaryColor,
+                        foregroundColor: Colors.white,
+                        shadowColor: AppColors.kPrimaryColor.withOpacity(0.4),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                      child: const Text(
+                        "İncele",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    child: Text(
-                      isJoined ? 'Katıldın' : 'Katıl',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          if (event.imageUrl.isNotEmpty)
-            Expanded(
-              flex: 1,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12.0),
-                  child: Image.network(
-                    event.imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Colors.grey[100],
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[200],
-                        child: const Icon(Icons.image_not_supported_outlined,
-                            color: Colors.grey),
-                      );
-                    },
+        ],
+      ),
+    );
+  }
+
+  Widget _buildParticipantsStack(List<dynamic> participants) {
+    if (participants.isEmpty) {
+      return Text(
+        "İlk katılan sen ol!",
+        style: TextStyle(color: Colors.grey[500], fontSize: 12),
+      );
+    }
+    const int maxAvatars = 3;
+    final int displayCount =
+        participants.length > maxAvatars ? maxAvatars : participants.length;
+    final int remainingCount = participants.length - maxAvatars;
+
+    return SizedBox(
+      height: 32,
+      width: 32.0 + (displayCount - 1) * 20 + (remainingCount > 0 ? 25 : 0),
+      child: Stack(
+        children: [
+          for (int i = 0; i < displayCount; i++)
+            Positioned(
+              left: i * 20.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const CircleAvatar(
+                  radius: 14,
+                  backgroundColor: Colors.grey,
+                  child: Icon(Icons.person, size: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          if (remainingCount > 0)
+            Positioned(
+              left: displayCount * 20.0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: 14,
+                  backgroundColor: Colors.grey[100],
+                  child: Text(
+                    '+$remainingCount',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                    ),
                   ),
                 ),
               ),
@@ -142,35 +278,5 @@ class EventCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Future<void> _handleJoin(
-      BuildContext context, User? user, bool isJoined) async {
-    if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Katılmak için giriş yapmalısınız.')),
-      );
-      return;
-    }
-
-    try {
-      final docRef =
-          FirebaseFirestore.instance.collection('events').doc(event.id);
-
-      if (isJoined) {
-        await docRef.update({
-          'participants': FieldValue.arrayRemove([user.uid])
-        });
-      } else {
-        await docRef.update({
-          'participants': FieldValue.arrayUnion([user.uid])
-        });
-      }
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İşlem başarısız: $e')),
-      );
-    }
   }
 }

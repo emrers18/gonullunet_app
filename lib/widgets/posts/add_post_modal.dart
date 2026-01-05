@@ -77,29 +77,23 @@ class _AddPostModalState extends State<AddPostModal> {
       return;
     }
 
-    // 2. Yükleniyor durumunu başlat
     setState(() {
       _isSaving = true;
     });
 
-    // 3. Cubit'i çağır ve işlemi başlat
-    // Not: Hata yönetimi Cubit içinde yapılıyor, burası sadece tetikliyor.
     await context.read<PostCubit>().addPostWithImage(
           title,
           description,
-          _selectedImage, // Dosya olarak gönderiyoruz (Varsa)
+          _selectedImage, 
           user.uid,
         );
 
-    // 4. İşlem bitince (Hata olsa da olmasa da Cubit işlemi sonlandırır)
     if (mounted) {
       setState(() {
         _isSaving = false;
       });
-      // Modalı kapat
       Navigator.pop(context);
 
-      // Kullanıcıya bilgi ver
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("İşlem tamamlandı."),

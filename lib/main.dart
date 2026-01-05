@@ -17,6 +17,7 @@ import 'logic/post_cubit.dart';
 import 'logic/user_cubit.dart';
 import 'repo/event_repository.dart';
 import 'repo/post_repository.dart';
+import 'views/auth_gate.dart';
 import 'views/onboarding_page.dart';
 
 void main() async {
@@ -77,28 +78,5 @@ class MyApp extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class AuthGate extends StatelessWidget {
-  const AuthGate({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<User?>(
-        stream: Auth().authStateChanges,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-          if (snapshot.hasData && snapshot.data != null) {
-            return const MainPage();
-          }
-          return const LoginPage();
-        });
   }
 }

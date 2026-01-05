@@ -18,6 +18,16 @@
         <meta-data
               android:name="com.google.android.geo.API_KEY"
               android:value="AIzaSyC08dw3sku9DAhK2WOzEZk-V1TtBPwUVuI"/>
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+        
+        <!-- İsterseniz bildirim ikonunun rengini de belirleyebilirsiniz (Örn: Turuncu) -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/accent_color" />
+            
         
         <activity
             android:name=".MainActivity"

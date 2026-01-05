@@ -7,8 +7,11 @@ class EventRepository {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Stream<List<Event>> getEventsStream() {
+    final now = DateTime.now();
+
     return _firestore
         .collection('events')
+        .where('date', isGreaterThanOrEqualTo: Timestamp.fromDate(now))
         .orderBy('date', descending: false)
         .snapshots()
         .map((snapshot) {
@@ -29,6 +32,40 @@ class EventRepository {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<void> toggleJoinEvent(String eventId, String userId) async {
+    final eventRef = _firestore.collection('events').doc(eventId);
+    final doc = await eventRef.get();
+
+    if (doc.exists) {
+      List<String> participants =
+          List<String>.from(doc.data()?['participants'] ?? []);
+
+      if (participants.contains(userId)) {
+        // Zaten katılmışsa çıkar
+        participants.remove(userId);
+      } else {
+        // Katılmamışsa ekle
+        participants.add(userId);
+      }
+
+      await eventRef.update({'participants': participants});
+    }
+  }
+
+  Future<String> getOrganizerName(String organizerId) async {
+    try {
+      final doc = await _firestore.collection('users').doc(organizerId).get();
+      if (doc.exists) {
+        final data = doc.data() as Map<String, dynamic>;
+        // Öncelik stkName, yoksa name, yoksa varsayılan metin
+        return data['stkName'] ?? data['name'] ?? 'İsimsiz Organizasyon';
+      }
+      return 'Bilinmeyen Kurum';
+    } catch (e) {
+      return 'Hata: Kurum Bulunamadı';
     }
   }
 }

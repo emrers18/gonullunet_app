@@ -1,9 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/validators/validators.dart';
-import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
 import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
@@ -28,7 +29,9 @@ class SignUpView extends StatefulWidget {
 }
 
 class _SignUpViewState extends State<SignUpView> {
-  final List<bool> _isSelected = [true, false];
+  // 0: Gönüllü, 1: STK
+  int _selectedIndex = 0;
+  bool _isPasswordVisible = false;
 
   final TextEditingController _volNameController = TextEditingController();
   final TextEditingController _volSurnameController = TextEditingController();
@@ -38,6 +41,12 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _stkNameController = TextEditingController();
   final TextEditingController _stkEmailController = TextEditingController();
   final TextEditingController _stkPasswordController = TextEditingController();
+
+  static const Color kPrimaryColor = Color(0xFFFF6B35); // Orange
+  static const Color kSecondaryColor = Color(0xFF004E89); // Dark Blue
+  static const Color kBackgroundColor =
+      Color(0xFFF7F9FC); // Light Gray Background
+  static const Color kTextColor = Color(0xFF1F2937);
 
   @override
   void dispose() {
@@ -56,8 +65,10 @@ class _SignUpViewState extends State<SignUpView> {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
+        content: Text(message, style: GoogleFonts.inter()),
+        backgroundColor: Colors.redAccent,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -66,7 +77,7 @@ class _SignUpViewState extends State<SignUpView> {
     String name = '', surname = '', email = '', password = '', userType = '';
     String? stkName;
 
-    if (_isSelected[1]) {
+    if (_selectedIndex == 1) {
       // STK
       stkName = _stkNameController.text.trim();
       email = _stkEmailController.text.trim();
@@ -109,31 +120,18 @@ class _SignUpViewState extends State<SignUpView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.kBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColors.kBackgroundColor,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const Text('GönüllüNet'),
-        centerTitle: true,
-        titleTextStyle: const TextStyle(
-          color: Colors.black87,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          fontFamily: 'Inter',
-        ),
-      ),
+      backgroundColor: kBackgroundColor,
       body: BlocListener<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
+              SnackBar(
                 content: Text(
-                    'Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.'),
+                  'Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.',
+                  style: GoogleFonts.inter(),
+                ),
                 backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
               ),
             );
             Navigator.of(context).pop();
@@ -141,138 +139,322 @@ class _SignUpViewState extends State<SignUpView> {
             _showError(state.message);
           }
         },
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey.shade100),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: kTextColor),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Logo Alanı (Gradient ve Dönme Efekti)
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 80,
+                      height: 80,
+                      decoration: BoxDecoration(
+                        color: kPrimaryColor.withOpacity(0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: ClipOval(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(
+                              sigmaX: 10.0,
+                              sigmaY:
+                                  10.0), 
+                          child: Container(),
+                        ),
+                      ),
+                    ),
+                    Transform.rotate(
+                      angle: -0.05, 
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [kPrimaryColor, Colors.orangeAccent],
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: kPrimaryColor.withOpacity(0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(Icons.volunteer_activism,
+                            color: Colors.white, size: 32),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                Text(
+                  "GönüllüNet",
+                  style: GoogleFonts.inter(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkPrimaryColor,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                Text(
+                  _selectedIndex == 0
+                      ? "Gönüllü Ol, Etkinliklere Katıl"
+                      : "Kurum Portalı",
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade500,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+
+                const SizedBox(height: 32),
+
+                // --- 2. TOGGLE (Gönüllü / STK Seçimi) ---
                 Container(
-                  padding: const EdgeInsets.all(2.0),
+                  padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEFEFEF),
-                    borderRadius: BorderRadius.circular(12.0),
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade100),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.02),
+                        blurRadius: 10,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
                   ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: _buildToggleChild('Gönüllü', _isSelected[0], 0),
+                        child: _buildToggleButton(
+                          text: "Gönüllü",
+                          icon: Icons.person_outline,
+                          isSelected: _selectedIndex == 0,
+                          activeColor: AppColors.darkPrimaryColor,
+                          onTap: () => setState(() => _selectedIndex = 0),
+                        ),
                       ),
                       Expanded(
-                        child: _buildToggleChild('STK', _isSelected[1], 1),
+                        child: _buildToggleButton(
+                          text: "STK",
+                          icon: Icons.business_outlined, // corporate_fare
+                          isSelected: _selectedIndex == 1,
+                          activeColor: AppColors.darkPrimaryColor,
+                          onTap: () => setState(() => _selectedIndex = 1),
+                        ),
                       ),
                     ],
                   ),
                 ),
+
                 const SizedBox(height: 24),
-                if (_isSelected[1]) ...[
-                  CustomInputField(
-                    key: const ValueKey('stk_name'),
-                    hintText: 'STK Adı',
-                    controller: _stkNameController,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomInputField(
-                    key: const ValueKey('stk_email'),
-                    hintText: 'E-posta',
-                    controller: _stkEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomInputField(
-                    key: const ValueKey('stk_password'),
-                    hintText: 'Şifre',
-                    isPassword: true,
-                    controller: _stkPasswordController,
-                  ),
-                ] else ...[
-                  CustomInputField(
-                    key: const ValueKey('vol_name'),
-                    hintText: 'Ad',
-                    controller: _volNameController,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomInputField(
-                    key: const ValueKey('vol_surname'),
-                    hintText: 'Soyad',
-                    controller: _volSurnameController,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomInputField(
-                    key: const ValueKey('vol_email'),
-                    hintText: 'E-posta',
-                    controller: _volEmailController,
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  const SizedBox(height: 16),
-                  CustomInputField(
-                    key: const ValueKey('vol_password'),
-                    hintText: 'Şifre',
-                    isPassword: true,
-                    controller: _volPasswordController,
-                  ),
-                ],
-                const SizedBox(height: 32),
-                BlocBuilder<SignUpCubit, SignUpState>(
-                  builder: (context, state) {
-                    return ElevatedButton(
-                      onPressed: (state is SignUpLoading)
-                          ? null
-                          : () => _onSignUpPressed(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.accentColor,
-                        foregroundColor: AppColors.textColor,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.0),
+
+                // --- 3. FORM ALANI ---
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Hesap Oluştur",
+                        style: GoogleFonts.inter(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: kTextColor,
                         ),
                       ),
-                      child: (state is SignUpLoading)
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 3),
-                            )
-                          : const Text(
-                              'Kayıt Ol',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
+                      const SizedBox(height: 4),
+                      Text(
+                        _selectedIndex == 0
+                            ? "Gönüllü olmak için bilgilerinizi giriniz."
+                            : "Gönüllülerle buluşmak için katılın.",
+                        style: GoogleFonts.inter(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                if (_selectedIndex == 0) ...[
+                  // Gönüllü Formu
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildModernInput(
+                          controller: _volNameController,
+                          hint: "Ad",
+                          icon: Icons.badge_outlined,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildModernInput(
+                          controller: _volSurnameController,
+                          hint: "Soyad",
+                          icon: Icons.badge_outlined,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModernInput(
+                    controller: _volEmailController,
+                    hint: "E-posta Adresi",
+                    icon: Icons.mail_outline,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModernInput(
+                    controller: _volPasswordController,
+                    hint: "Şifre",
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                  ),
+                ] else ...[
+                  // STK Formu
+                  _buildModernInput(
+                    controller: _stkNameController,
+                    hint: "STK Adı",
+                    icon: Icons.business,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModernInput(
+                    controller: _stkEmailController,
+                    hint: "E-posta",
+                    icon: Icons.mail_outline,
+                    keyboardType: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildModernInput(
+                    controller: _stkPasswordController,
+                    hint: "Şifre",
+                    icon: Icons.lock_outline,
+                    isPassword: true,
+                  ),
+                ],
+
+                const SizedBox(height: 32),
+
+                // --- 4. KAYIT OL BUTONU ---
+                BlocBuilder<SignUpCubit, SignUpState>(
+                  builder: (context, state) {
+                    return SizedBox(
+                      width: double.infinity,
+                      height: 56,
+                      child: ElevatedButton(
+                        onPressed: (state is SignUpLoading)
+                            ? null
+                            : () => _onSignUpPressed(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: kPrimaryColor,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shadowColor: kPrimaryColor.withOpacity(0.5),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ).copyWith(
+                          elevation: WidgetStateProperty.all(8),
+                          shadowColor: WidgetStateProperty.all(
+                              kPrimaryColor.withOpacity(0.4)),
+                        ),
+                        child: (state is SignUpLoading)
+                            ? const SizedBox(
+                                height: 24,
+                                width: 24,
+                                child: CircularProgressIndicator(
+                                    color: Colors.white, strokeWidth: 3),
+                              )
+                            : Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'Kayıt Ol',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(Icons.arrow_forward_rounded,
+                                      size: 20),
+                                ],
                               ),
-                            ),
+                      ),
                     );
                   },
                 ),
-                const SizedBox(height: 32),
-                Align(
-                  alignment: Alignment.center,
-                  child: TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          color: Colors.grey[700],
-                          fontSize: 14,
-                          fontFamily: 'Inter',
-                        ),
-                        children: const [
-                          TextSpan(text: 'Zaten bir hesabın var mı? '),
-                          TextSpan(
-                            text: 'Giriş yap',
-                            style: TextStyle(
-                              color: AppColors.accentColor,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
+
+                const SizedBox(height: 24),
+
+                // --- 5. ALT BİLGİ (Giriş Yap) ---
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Zaten bir hesabın var mı?",
+                      style: GoogleFonts.inter(
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
                       ),
                     ),
-                  ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        "Giriş yap",
+                        style: GoogleFonts.inter(
+                          color: kSecondaryColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
+
+                const SizedBox(height: 16),
               ],
             ),
           ),
@@ -281,51 +463,117 @@ class _SignUpViewState extends State<SignUpView> {
     );
   }
 
-  void _onToggleChanged(int index) {
-    setState(() {
-      for (int i = 0; i < _isSelected.length; i++) {
-        _isSelected[i] = i == index;
-      }
-      if (index == 0) {
-        _stkNameController.clear();
-        _stkEmailController.clear();
-        _stkPasswordController.clear();
-      } else {
-        _volNameController.clear();
-        _volSurnameController.clear();
-        _volEmailController.clear();
-        _volPasswordController.clear();
-      }
-    });
+  Widget _buildModernInput({
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    bool isPassword = false,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: controller,
+        obscureText: isPassword && !_isPasswordVisible,
+        keyboardType: keyboardType,
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          color: kTextColor,
+        ),
+        decoration: InputDecoration(
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(color: Colors.grey.shade400),
+          prefixIcon: Icon(icon, color: Colors.grey.shade400),
+          suffixIcon: isPassword
+              ? IconButton(
+                  icon: Icon(
+                    _isPasswordVisible
+                        ? Icons.visibility
+                        : Icons.visibility_off,
+                    color: Colors.grey.shade400,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _isPasswordVisible = !_isPasswordVisible;
+                    });
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+          ),
+        ),
+      ),
+    );
   }
 
-  Widget _buildToggleChild(String text, bool isSelected, int index) {
+  Widget _buildToggleButton({
+    required String text,
+    required IconData icon,
+    required bool isSelected,
+    required Color activeColor,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
-      onTap: () => _onToggleChanged(index),
-      child: Container(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(10.0),
+          color: isSelected ? activeColor : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
-                  const BoxShadow(
-                    color: Colors.black,
-                    blurRadius: 4,
-                    offset: Offset(0, 2),
+                  BoxShadow(
+                    color: activeColor.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   )
                 ]
               : [],
         ),
-        child: Center(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? AppColors.accentColor : Colors.grey[700],
-              fontSize: 15,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 20,
+              color: isSelected ? Colors.white : Colors.grey.shade500,
             ),
-          ),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: GoogleFonts.inter(
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.grey.shade500,
+                fontSize: 14,
+              ),
+            ),
+          ],
         ),
       ),
     );

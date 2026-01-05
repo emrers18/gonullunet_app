@@ -52,10 +52,11 @@ class _AddEventModalState extends State<AddEventModal> {
     }
   }
 
-  Future<void> _pickDate() async {
-    final DateTime? picked = await showDatePicker(
+  Future<void> _pickDateTime() async {
+    // 1. Tarih Seçimi
+    final DateTime? date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: _selectedDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime(2101),
       builder: (context, child) {
@@ -68,9 +69,43 @@ class _AddEventModalState extends State<AddEventModal> {
         );
       },
     );
-    if (picked != null) {
-      setState(() => _selectedDate = picked);
-    }
+
+    // Eğer tarih seçilmediyse iptal et
+    if (date == null) return;
+
+    // 2. Saat Seçimi (Tarih seçildikten hemen sonra)
+    if (!mounted) return;
+
+    final TimeOfDay? time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(_selectedDate ?? DateTime.now()),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme:
+                const ColorScheme.light(primary: AppColors.primaryColor),
+          ),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: true),
+            child: child!,
+          ),
+        );
+      },
+    );
+
+    // Eğer saat seçilmediyse iptal et
+    if (time == null) return;
+
+    // 3. Tarih ve Saati Birleştirme
+    setState(() {
+      _selectedDate = DateTime(
+        date.year,
+        date.month,
+        date.day,
+        time.hour,
+        time.minute,
+      );
+    });
   }
 
   Future<void> _pickImage() async {
@@ -239,7 +274,7 @@ class _AddEventModalState extends State<AddEventModal> {
               ),
               const SizedBox(height: 16),
               InkWell(
-                onTap: _pickDate,
+                onTap: _pickDateTime,
                 child: Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 16),

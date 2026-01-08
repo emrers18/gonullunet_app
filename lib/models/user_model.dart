@@ -2,15 +2,22 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
-  final String email;
+  final String email; // E-posta zaten burada var
   final String userType;
   final Timestamp createdAt;
 
+  // Gönüllü Alanları
   final String? name;
   final String? surname;
 
+  // STK (Kurum) Alanları
   final String? stkName;
   final String? imageUrl;
+  final String? description; // Açıklama (Genel Tanıtım)
+  final String? location; // Konum (Adres/Şehir)
+  final String? vision; // YENİ: Vizyon
+  final String? mission; // YENİ: Misyon
+  final String? phone; // YENİ: Telefon Numarası
 
   UserModel({
     required this.uid,
@@ -21,8 +28,14 @@ class UserModel {
     this.surname,
     this.stkName,
     this.imageUrl,
+    this.description,
+    this.location,
+    this.vision,
+    this.mission,
+    this.phone,
   });
 
+  // Firestore veri okuma
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     Map<String, dynamic> data = doc.data()!;
 
@@ -35,9 +48,16 @@ class UserModel {
       surname: data['surname'],
       stkName: data['stkName'],
       imageUrl: data['imageUrl'],
+      // Yeni alanları güvenli bir şekilde çekiyoruz
+      description: data['description'],
+      location: data['location'],
+      vision: data['vision'],
+      mission: data['mission'],
+      phone: data['phone'],
     );
   }
 
+  // Firestore veri yazma
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -48,12 +68,19 @@ class UserModel {
       'surname': surname,
       'stkName': stkName,
       'imageUrl': imageUrl,
+      // Yeni alanları veritabanına yazıyoruz
+      'description': description,
+      'location': location,
+      'vision': vision,
+      'mission': mission,
+      'phone': phone,
     };
   }
 
   bool get isNgo => userType == 'ngo';
   bool get isVolunteer => userType == 'volunteer';
 
+  // Profil sayfasında gösterilecek isim
   String get displayName {
     if (isNgo) {
       return stkName ?? 'STK Adı';
@@ -62,6 +89,7 @@ class UserModel {
     }
   }
 
+  // Profil sayfasındaki baş harfler
   String get initials {
     if (isNgo && stkName != null && stkName!.isNotEmpty) {
       var parts = stkName!.split(' ');

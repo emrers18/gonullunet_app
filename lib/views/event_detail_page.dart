@@ -9,7 +9,9 @@ import '../logic/event_detail_cubit.dart';
 import '../logic/event_detail_state.dart';
 import '../models/event_model.dart';
 import '../repo/event_repository.dart';
+import '../repo/notification_repository.dart';
 import '../utils/app_colors.dart';
+import 'manage_applications_page.dart';
 
 class EventDetailPage extends StatelessWidget {
   final Event event;
@@ -28,23 +30,50 @@ class EventDetailPage extends StatelessWidget {
   }
 }
 
-class _EventBody extends StatelessWidget {
+// YENİ: StatelessWidget -> StatefulWidget'a çevrildi
+class _EventBody extends StatefulWidget {
   final Event event;
 
   const _EventBody({required this.event});
 
   @override
+  State<_EventBody> createState() => _EventBodyState();
+}
+
+class _EventBodyState extends State<_EventBody> {
+  bool _isNgo = false; // Kullanıcının STK olup olmadığını tutan değişken
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserRole();
+  }
+
+  // Kullanıcı rolünü kontrol et
+  Future<void> _checkUserRole() async {
+    final isNgo = await EventRepository().isUserNgo();
+    if (mounted) {
+      setState(() {
+        _isNgo = isNgo;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final user = FirebaseAuth.instance.currentUser;
-    final bool isJoined = user != null && event.participants.contains(user.uid);
+    final event = widget.event;
 
+    // Tarih formatlama
     final formattedDate = DateFormat('d MMMM yyyy', 'tr_TR').format(event.date);
     final formattedTime = DateFormat('HH:mm').format(event.date);
     final dayName = DateFormat('EEEE', 'tr_TR').format(event.date);
 
+    final bool isProject = (event.type == 'Proje');
+
     return Stack(
       children: [
+        // 1. KATMAN: Arka Plan Resmi
         Positioned(
           top: 0,
           left: 0,
@@ -76,6 +105,7 @@ class _EventBody extends StatelessWidget {
           ),
         ),
 
+        // 2. KATMAN: İçerik Kartı
         Positioned.fill(
           child: SingleChildScrollView(
             child: Column(
@@ -94,7 +124,8 @@ class _EventBody extends StatelessWidget {
                           offset: Offset(0, -10)),
                     ],
                   ),
-                  padding: const EdgeInsets.fromLTRB(24, 40, 24, 120),
+                  // Eğer kullanıcı STK ise alttaki boşluğu azalt (Buton yok çünkü)
+                  padding: EdgeInsets.fromLTRB(24, 40, 24, _isNgo ? 40 : 120),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -111,7 +142,7 @@ class _EventBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      // Kategori Etiketi
+                      // Kategori ve Tür Etiketi
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -123,12 +154,28 @@ class _EventBody extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              "ETKİNLİK",
+                              event.type.toUpperCase(),
                               style: GoogleFonts.plusJakartaSans(
                                 color: const Color(0xFF1A659E),
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                                 letterSpacing: 1,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              event.category,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: Colors.grey.shade700,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12,
                               ),
                             ),
                           ),
@@ -169,7 +216,7 @@ class _EventBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 32),
 
-                      // Organizatör
+                      // Organizatör Bilgisi
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -180,7 +227,7 @@ class _EventBody extends StatelessWidget {
                           children: [
                             const CircleAvatar(
                               radius: 24,
-                              child: Icon(Icons.person),
+                              child: Icon(Icons.business),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
@@ -194,26 +241,22 @@ class _EventBody extends StatelessWidget {
                                       color: const Color(0xFF6B7280),
                                     ),
                                   ),
-                                  // FutureBuilder gitti, yerine BlocBuilder'dan gelen state'i kullanıyoruz
                                   BlocBuilder<EventDetailCubit,
                                       EventDetailState>(
                                     builder: (context, state) {
+                                      String orgName = "Yükleniyor...";
                                       if (state is EventDetailLoaded) {
-                                        return Text(
-                                          state
-                                              .organizerName, // Veriyi direkt Cubit'ten alıyoruz
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: const Color(0xFF1F2937),
-                                          ),
-                                        );
+                                        orgName = state.organizerName;
+                                      } else if (state is EventDetailUpdated) {
+                                        orgName = state.organizerName;
                                       }
-                                      // Veri yüklenirken
-                                      return const Text(
-                                        "Yükleniyor...",
-                                        style: TextStyle(
-                                            fontSize: 14, color: Colors.grey),
+                                      return Text(
+                                        orgName,
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF1F2937),
+                                        ),
                                       );
                                     },
                                   ),
@@ -225,36 +268,38 @@ class _EventBody extends StatelessWidget {
                       ),
                       const SizedBox(height: 24),
 
-                      BlocBuilder<EventDetailCubit, EventDetailState>(
-                          builder: (context, state) {
-                        int count = event.participants.length;
-                        if (state is EventDetailUpdated) {
-                          count = state.participantCount;
-                        }
-                        return Row(
-                          children: [
-                            Expanded(
-                                child: _buildInfoCard(
-                                    Icons.calendar_month,
-                                    "Tarih",
-                                    formattedDate,
-                                    "$dayName, $formattedTime",
-                                    AppColors.kPrimaryColor)),
-                            const SizedBox(width: 16),
-                            Expanded(
-                                child: _buildInfoCard(
-                                    Icons.group,
-                                    "Katılımcı",
-                                    "$count Kişi",
-                                    "Şimdiye kadar",
-                                    const Color(0xFF004E89))),
-                          ],
-                        );
-                      }),
+                      // Tarih ve Katılımcı Bilgisi
+                      Row(
+                        children: [
+                          Expanded(
+                              child: _buildInfoCard(
+                                  Icons.calendar_month,
+                                  "Tarih",
+                                  formattedDate,
+                                  "$dayName, $formattedTime",
+                                  AppColors.kPrimaryColor)),
+                          const SizedBox(width: 16),
+                          Expanded(child:
+                              BlocBuilder<EventDetailCubit, EventDetailState>(
+                            builder: (context, state) {
+                              int count = event.participants.length;
+                              if (state is EventDetailUpdated) {
+                                count = state.participantCount;
+                              }
+                              return _buildInfoCard(
+                                  Icons.group,
+                                  isProject ? "Başvuru" : "Katılımcı",
+                                  "$count Kişi",
+                                  "Şimdiye kadar",
+                                  const Color(0xFF004E89));
+                            },
+                          )),
+                        ],
+                      ),
                       const SizedBox(height: 32),
 
                       // Açıklama
-                      Text("Etkinlik Hakkında",
+                      Text("Detaylar",
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -275,6 +320,7 @@ class _EventBody extends StatelessWidget {
           ),
         ),
 
+        // 3. KATMAN: Üst Butonlar
         Positioned(
           top: 0,
           left: 0,
@@ -300,34 +346,124 @@ class _EventBody extends StatelessWidget {
           ),
         ),
 
-        // 4. KATMAN: Sabit Alt Buton
         Positioned(
           bottom: 30,
           left: 20,
           right: 20,
           child: BlocBuilder<EventDetailCubit, EventDetailState>(
             builder: (context, state) {
-              // Varsayılan durum
-              bool isJoined = false;
+              final currentUser = FirebaseAuth.instance.currentUser;
 
-              // Eğer Cubit bir state yaymışsa onu kullan
+              // 1. DURUM: EĞER BEN BU ETKİNLİĞİN SAHİBİYSEM (STK) -> Yönet
+              if (currentUser != null && event.organizerId == currentUser.uid) {
+                return SizedBox(
+                  height: 64,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RepositoryProvider(
+                            create: (context) => NotificationRepository(),
+                            child: ManageApplicationsPage(
+                              eventId: event.id,
+                              eventTitle: event.title,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primaryColor,
+                      elevation: 10,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(
+                            color: AppColors.primaryColor, width: 2),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.admin_panel_settings_outlined),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Başvuruları Yönet",
+                          style: GoogleFonts.plusJakartaSans(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // 2. DURUM: BAŞKA BİR STK İSEM -> Buton Yok (Gizle)
+              if (_isNgo) {
+                return const SizedBox.shrink();
+              }
+
+              // 3. DURUM: GÖNÜLLÜYSEM -> Katıl/Başvur
+              bool isJoined = false;
+              int currentCount = event.participants.length;
+
               if (state is EventDetailUpdated) {
                 isJoined = state.isJoined;
+                currentCount = state.participantCount;
+              } else {
+                if (currentUser != null) {
+                  isJoined = event.participants.contains(currentUser.uid);
+                }
+              }
+
+              bool isFull = false;
+              if (event.quota != null && event.quota! > 0) {
+                isFull = currentCount >= event.quota!;
+              }
+
+              bool isButtonEnabled = isJoined || !isFull;
+
+              String buttonText = isProject
+                  ? (isJoined ? "Başvuruldu" : "Başvur")
+                  : (isJoined ? "Katıldın" : "Katıl");
+
+              if (!isJoined && isFull) {
+                buttonText = "Kontenjan Dolu";
+              }
+
+              IconData buttonIcon = isJoined
+                  ? Icons.check_circle
+                  : (isProject
+                      ? Icons.assignment_turned_in
+                      : Icons.volunteer_activism);
+
+              if (!isJoined && isFull) {
+                buttonIcon = Icons.lock_outline;
               }
 
               return SizedBox(
                 height: 64,
                 child: ElevatedButton(
-                  onPressed: () {
-                    context.read<EventDetailCubit>().toggleJoin();
-                  },
+                  onPressed: isButtonEnabled
+                      ? () {
+                          context.read<EventDetailCubit>().toggleJoin();
+
+                          if (isProject && !isJoined) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Başvurunuz alındı!")));
+                          }
+                        }
+                      : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
-                        isJoined ? Colors.green : AppColors.kPrimaryColor,
+                        isJoined ? Colors.green : AppColors.primaryColor,
                     foregroundColor: Colors.white,
-                    shadowColor:
-                        (isJoined ? Colors.green : AppColors.kPrimaryColor)
-                            .withOpacity(0.4),
+                    shadowColor: (isButtonEnabled
+                            ? (isJoined ? Colors.green : AppColors.primaryColor)
+                            : Colors.grey)
+                        .withOpacity(0.4),
                     elevation: 10,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16)),
@@ -335,12 +471,10 @@ class _EventBody extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(isJoined
-                          ? Icons.check_circle
-                          : Icons.volunteer_activism),
+                      Icon(buttonIcon),
                       const SizedBox(width: 10),
                       Text(
-                        isJoined ? "Katıldın" : "Katıl",
+                        buttonText,
                         style: GoogleFonts.plusJakartaSans(
                             fontSize: 18, fontWeight: FontWeight.bold),
                       ),
@@ -355,34 +489,8 @@ class _EventBody extends StatelessWidget {
     );
   }
 
-  Widget _buildGlassButton(IconData icon, VoidCallback onTap) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(50),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
-        child: Container(
-          width: 44,
-          height: 44,
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.2),
-            border: Border.all(color: Colors.white.withOpacity(0.3)),
-            shape: BoxShape.circle,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(50),
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard(IconData icon, String label, String value, String sub,
-      Color accentColor) {
+  Widget _buildInfoCard(
+      IconData icon, String title, String value, String subtitle, Color color) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -391,10 +499,9 @@ class _EventBody extends StatelessWidget {
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 16,
-            offset: const Offset(0, 4),
-          )
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: Column(
@@ -403,27 +510,46 @@ class _EventBody extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: accentColor.withOpacity(0.1),
-              shape: BoxShape.circle,
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: accentColor, size: 20),
+            child: Icon(icon, color: color, size: 24),
           ),
-          const SizedBox(height: 12),
-          Text(label,
+          const SizedBox(height: 16),
+          Text(title,
               style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  color: const Color(0xFF6B7280),
-                  fontWeight: FontWeight.w500)),
+                  fontSize: 12, color: const Color(0xFF9CA3AF))),
           const SizedBox(height: 4),
           Text(value,
               style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF1F2937))),
-          Text(sub,
+          Text(subtitle,
               style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12, color: const Color(0xFF6B7280))),
+                  fontSize: 12, color: const Color(0xFF9CA3AF))),
         ],
+      ),
+    );
+  }
+
+  Widget _buildGlassButton(IconData icon, VoidCallback onPressed) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              border: Border.all(color: Colors.white.withOpacity(0.2)),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
+          ),
+        ),
       ),
     );
   }

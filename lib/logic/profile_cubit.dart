@@ -18,7 +18,11 @@ class EditProfileCubit extends Cubit<EditProfileState> {
           stkName: data['stkName'] ?? '',
           description: data['description'] ?? '',
           location: data['location'] ?? '',
+          phone: data['phone'] ?? '',
+          vision: data['vision'] ?? '',
+          mission: data['mission'] ?? '',
           imageUrl: data['imageUrl'],
+          email: data['email'],
         ));
       } else {
         emit(const EditProfileError("Kullanıcı verisi bulunamadı."));
@@ -32,6 +36,9 @@ class EditProfileCubit extends Cubit<EditProfileState> {
     required String stkName,
     required String description,
     required String location,
+    required String phone,
+    required String vision,
+    required String mission,
     File? imageFile,
   }) async {
     try {
@@ -47,6 +54,9 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         description: description,
         location: location,
         imageUrl: imageUrl,
+        phone: phone,
+        vision: vision,
+        mission: mission,
       );
 
       emit(EditProfileSuccess());

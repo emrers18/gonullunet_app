@@ -1,11 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
 import 'package:gonullunet_app/widgets/posts/post_card.dart';
+
+import '../widgets/ngos/build_contact_title_widget.dart';
+import '../widgets/ngos/build_info_card_widget.dart';
+import '../widgets/ngos/build_section_title.dart';
+import '../widgets/ngos/build_social_button_widget.dart';
+import '../widgets/ngos/build_stat_item_widget.dart';
+import '../widgets/ngos/silver_appbar_delegate.dart';
 
 class NgoDetailPage extends StatefulWidget {
   final Ngo ngo;
@@ -35,119 +43,381 @@ class _NgoDetailPageState extends State<NgoDetailPage>
 
   @override
   Widget build(BuildContext context) {
+    // STK'nın detaylı verilerini (Vizyon, Misyon, Telefon vb.) çekmek için StreamBuilder
     return Scaffold(
-      backgroundColor: AppColors.kBackgroundColor,
-      body: NestedScrollView(
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              expandedHeight: 250.0,
-              floating: false,
-              pinned: true,
-              backgroundColor: Colors.white,
-              iconTheme: const IconThemeData(color: Colors.black87),
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                title: Text(
-                  widget.ngo.name,
-                  style: TextStyle(
-                    color: innerBoxIsScrolled ? Colors.black87 : Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.bold,
-                    shadows: innerBoxIsScrolled
-                        ? null
-                        : [
-                            const Shadow(
-                              offset: Offset(0, 1),
-                              blurRadius: 3.0,
-                              color: Colors.black54,
-                            ),
-                          ],
+      backgroundColor: const Color(0xFFF8F6F5), // background-light
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: _firestore.collection('users').doc(widget.ngo.id).snapshots(),
+        builder: (context, snapshot) {
+          // Varsayılan veriler (Liste ekranından gelenler)
+          String name = widget.ngo.name;
+          String location = widget.ngo.location;
+          String description = widget.ngo.description;
+          String imageUrl = widget.ngo.imageUrl;
+          String? vision;
+          String? mission;
+          String? phone;
+          String? email;
+
+          // Eğer detaylı veri geldiyse güncelle
+          if (snapshot.hasData && snapshot.data!.exists) {
+            final data = snapshot.data!.data() as Map<String, dynamic>;
+            name = data['stkName'] ?? name;
+            location = data['location'] ?? location;
+            description = data['description'] ?? description;
+            imageUrl = data['imageUrl'] ?? imageUrl;
+            vision = data['vision'];
+            mission = data['mission'];
+            phone = data['phone'];
+            email = data['email'];
+          }
+
+          return NestedScrollView(
+            headerSliverBuilder: (context, innerBoxIsScrolled) {
+              return [
+                // 1. App Bar (Sabit Üst Kısım)
+                SliverAppBar(
+                  pinned: true,
+                  floating: false,
+                  backgroundColor: Colors.white.withOpacity(0.95),
+                  elevation: 0,
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Color(0xFF181210)),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                ),
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      widget.ngo.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        // ignore: deprecated_member_use
-                        color: AppColors.primaryColor.withOpacity(0.3),
-                        child: const Icon(Icons.business, size: 60),
-                      ),
+                  centerTitle: true,
+                  title: Text(
+                    "STK Detayı",
+                    style: GoogleFonts.plusJakartaSans(
+                      color: const Color(0xFF181210),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
                     ),
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.transparent,
-                            Colors.black54,
-                          ],
-                        ),
-                      ),
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.share_outlined,
+                          color: Color(0xFF181210)),
+                      onPressed: () {},
                     ),
                   ],
                 ),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Container(
-                color: Colors.white,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.location_on,
-                              color: AppColors.primaryColor, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              widget.ngo.location,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
+
+                // 2. Profil Başlığı (Scroll ile kaybolan kısım)
+                SliverToBoxAdapter(
+                  child: Container(
+                    color: Colors.white, // surface-light
+                    padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+                    child: Column(
+                      children: [
+                        // Logo (Yuvarlak ve Gölgeli)
+                        Container(
+                          width: 112,
+                          height: 112,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                                color: Colors.grey.shade200, width: 4),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                            image: DecorationImage(
+                              image: NetworkImage(imageUrl),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          // Online durumunu gösteren yeşil nokta (Opsiyonel)
+                          child: Align(
+                            alignment: Alignment.bottomRight,
+                            child: Container(
+                              width: 20,
+                              height: 20,
+                              margin: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white, width: 3),
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        const SizedBox(height: 16),
+
+                        // İsim ve Kategori
+                        Text(
+                          name,
+                          textAlign: TextAlign.center,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: const Color(0xFF181210),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Sivil Toplum Kuruluşu",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          location,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Butonlar (Takip Et / İletişim)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.kPrimaryColor,
+                                  foregroundColor: Colors.white,
+                                  elevation: 4,
+                                  shadowColor:
+                                      AppColors.kPrimaryColor.withOpacity(0.3),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                                child: const Text("Takip Et",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: () {},
+                                icon: const Icon(Icons.chat_bubble_outline,
+                                    size: 18),
+                                label: const Text("İletişim",
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold)),
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF181210),
+                                  side: BorderSide(color: Colors.grey.shade300),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                  ),
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const SizedBox(height: 24),
+                        Divider(color: Colors.grey.shade100, height: 1),
+                        const SizedBox(height: 16),
+
+                        // İstatistikler (Hızlı Bakış)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            buildStatItem("12.5K", "Takipçi"),
+                            // Etkinlik Sayısını Canlı Çek
+                            StreamBuilder<QuerySnapshot>(
+                                stream: _firestore
+                                    .collection('events')
+                                    .where('organizerId',
+                                        isEqualTo: widget.ngo.id)
+                                    .snapshots(),
+                                builder: (context, snap) {
+                                  String count = "0";
+                                  if (snap.hasData) {
+                                    count = snap.data!.docs.length.toString();
+                                  }
+                                  return buildStatItem(count, "Etkinlik");
+                                }),
+                            buildStatItem("4.9", "Puan"),
+                          ],
+                        ),
+                      ],
                     ),
+                  ),
+                ),
+
+                // 3. TabBar (Yapışkan Sekmeler)
+                SliverPersistentHeader(
+                  delegate: SliverAppBarDelegate(
                     TabBar(
                       controller: _tabController,
-                      labelColor: AppColors.primaryColor,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorColor: AppColors.primaryColor,
+                      labelColor: AppColors.kPrimaryColor,
+                      unselectedLabelColor: Colors.grey.shade400,
+                      indicatorColor: AppColors.kPrimaryColor,
+                      indicatorWeight: 3,
+                      indicatorSize: TabBarIndicatorSize.label,
+                      labelStyle: GoogleFonts.plusJakartaSans(
+                          fontWeight: FontWeight.bold, fontSize: 14),
                       tabs: const [
-                        Tab(text: "Hakkında"),
+                        Tab(text: "Açıklama"),
                         Tab(text: "Etkinlikler"),
                         Tab(text: "Gönderiler"),
                       ],
                     ),
-                  ],
+                  ),
+                  pinned: true,
                 ),
-              ),
+              ];
+            },
+            body: TabBarView(
+              controller: _tabController,
+              children: [
+                // --- 1. Sekme: Açıklama ---
+                SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Hakkımızda Bölümü
+                      buildSectionTitle(Icons.info_outline, "Hakkımızda"),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade100),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.black.withOpacity(0.02),
+                                blurRadius: 10,
+                                offset: const Offset(0, 2)),
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              description,
+                              style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  height: 1.6,
+                                  fontSize: 14),
+                            ),
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: () {},
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "Devamını Oku",
+                                    style: TextStyle(
+                                        color: AppColors.kPrimaryColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14),
+                                  ),
+                                  Icon(Icons.expand_more,
+                                      color: AppColors.kPrimaryColor, size: 20),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Misyon & Vizyon Grid
+                      if (mission != null || vision != null)
+                        Row(
+                          children: [
+                            if (mission != null)
+                              Expanded(
+                                  child: buildInfoCard(
+                                      "Misyonumuz",
+                                      mission,
+                                      Icons.flag_outlined,
+                                      Colors.blue.shade600,
+                                      Colors.blue.shade50)),
+                            if (mission != null && vision != null)
+                              const SizedBox(width: 16),
+                            if (vision != null)
+                              Expanded(
+                                  child: buildInfoCard(
+                                      "Vizyonumuz",
+                                      vision,
+                                      Icons.visibility_outlined,
+                                      Colors.orange.shade600,
+                                      Colors.orange.shade50)),
+                          ],
+                        ),
+
+                      const SizedBox(height: 24),
+
+                      // İletişim Bilgileri
+                      buildSectionTitle(
+                          Icons.contact_support_outlined, "İletişim Bilgileri"),
+                      const SizedBox(height: 12),
+
+                      // İletişim Listesi
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade100),
+                        ),
+                        child: Column(
+                          children: [
+                            buildContactTile(
+                                Icons.location_on_outlined, "Adres", location),
+                            if (phone != null)
+                              buildContactTile(
+                                  Icons.call_outlined, "Telefon", phone),
+                            if (email != null)
+                              buildContactTile(
+                                  Icons.mail_outline, "E-posta", email),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+                      // Sosyal Medya İkonları (Tasarım Amaçlı)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          buildSocialButton("f", const Color(0xFF1877F2)),
+                          const SizedBox(width: 12),
+                          buildSocialButton("in", const Color(0xFF0077b5)),
+                          const SizedBox(width: 12),
+                          buildSocialButton("X", Colors.black),
+                        ],
+                      ),
+                      const SizedBox(height: 80),
+                    ],
+                  ),
+                ),
+
+                // --- 2. Sekme: Etkinlikler ---
+                _buildEventsList(),
+
+                // --- 3. Sekme: Gönderiler ---
+                _buildPostsList(),
+              ],
             ),
-          ];
+          );
         },
-        body: TabBarView(
-          controller: _tabController,
-          children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                widget.ngo.description,
-                style: const TextStyle(fontSize: 16, height: 1.5),
-              ),
-            ),
-            _buildEventsList(),
-            _buildPostsList(),
-          ],
-        ),
       ),
     );
   }
@@ -157,7 +427,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
       stream: _firestore
           .collection('events')
           .where('organizerId', isEqualTo: widget.ngo.id)
-          .orderBy('date', descending: false)
+          .orderBy('startDate', descending: false)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {

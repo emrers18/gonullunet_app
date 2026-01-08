@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
-import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
 import '../../logic/post_cubit.dart';
 
@@ -46,10 +45,11 @@ class _AddPostModalState extends State<AddPostModal> {
         });
       }
     } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Resim seçilemedi: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Resim seçilemedi: $e")),
+        );
+      }
     }
   }
 
@@ -84,7 +84,7 @@ class _AddPostModalState extends State<AddPostModal> {
     await context.read<PostCubit>().addPostWithImage(
           title,
           description,
-          _selectedImage, 
+          _selectedImage,
           user.uid,
         );
 
@@ -103,118 +103,199 @@ class _AddPostModalState extends State<AddPostModal> {
     }
   }
 
+  // Ortak Input Dekorasyonu (Modern Stil)
+  InputDecoration _buildInputDecoration(String label) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: TextStyle(color: Colors.grey[500], fontSize: 14),
+      floatingLabelStyle: const TextStyle(color: AppColors.primaryColor),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      filled: true,
+      fillColor: Colors.white, // input-bg-light
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12), // rounded-xl
+        borderSide: BorderSide(
+            color: Colors.grey.shade300), // border-input-border-light
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    // Klavye açıldığında padding
     final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: keyboardPadding),
+    return Container(
+      // Modal arka planı
+      padding: EdgeInsets.fromLTRB(24, 12, 24, 24 + keyboardPadding),
+      decoration: const BoxDecoration(
+        color: Colors.white, // bg-modal-light
+        borderRadius:
+            BorderRadius.vertical(top: Radius.circular(24)), // rounded-t-3xl
+      ),
       child: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(24.0),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(16.0),
-              topRight: Radius.circular(16.0),
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // --- SÜRÜKLEME ÇUBUĞU (DRAG HANDLE) ---
+            Center(
+              child: Container(
+                width: 48, // w-12
+                height: 6, // h-1.5
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(3), // rounded-full
                 ),
               ),
-              const Text(
+            ),
+
+            // --- BAŞLIK ---
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
                 'Yeni Gönderi Oluştur',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 20, // text-xl
                   fontWeight: FontWeight.bold,
-                  color: AppColors.primaryText,
+                  color: Color(0xFF111827), // text-gray-900
+                  letterSpacing: -0.5, // tracking-tight
                 ),
               ),
-              const SizedBox(height: 24),
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  height: 200,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
-                    image: _selectedImage != null
-                        ? DecorationImage(
-                            image: FileImage(_selectedImage!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+            ),
+            const SizedBox(height: 20),
+
+            // --- RESİM SEÇME ALANI (Dashed Border Görünümü) ---
+            GestureDetector(
+              onTap: _pickImage,
+              child: Container(
+                height: 192, // h-48
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF9FAFB), // bg-gray-50
+                  borderRadius: BorderRadius.circular(16), // rounded-2xl
+                  border: Border.all(
+                    color: Colors.grey.shade300, // border-gray-200
+                    width: 2,
+                    // Not: Flutter'da yerleşik "dashed" border yok,
+                    // dotted_border paketi olmadan solid kullanıyoruz ama stilini benzetiyoruz.
                   ),
-                  child: _selectedImage == null
-                      ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_photo_alternate_outlined,
-                                size: 50, color: Colors.grey[400]),
-                            const SizedBox(height: 8),
-                            Text(
-                              "Fotoğraf Ekle (İsteğe Bağlı)",
-                              style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500),
-                            ),
-                          ],
+                  image: _selectedImage != null
+                      ? DecorationImage(
+                          image: FileImage(_selectedImage!),
+                          fit: BoxFit.cover,
                         )
                       : null,
                 ),
+                child: _selectedImage == null
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add_photo_alternate_outlined,
+                            size: 48,
+                            color: Colors.grey[400],
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            "Fotoğraf Ekle (İsteğe Bağlı)",
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      )
+                    : Stack(
+                        children: [
+                          // Resmi kaldırma butonu
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedImage = null;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 4,
+                                    )
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
               ),
-              if (_selectedImage != null)
-                TextButton.icon(
-                  onPressed: () {
-                    setState(() {
-                      _selectedImage = null;
-                    });
-                  },
-                  icon: const Icon(Icons.delete_outline,
-                      color: Colors.red, size: 20),
-                  label: const Text("Fotoğrafı Kaldır",
-                      style: TextStyle(color: Colors.red)),
-                ),
-              const SizedBox(height: 24),
-              CustomInputField(
-                controller: _titleController,
-                hintText: 'Başlık',
-              ),
-              const SizedBox(height: 16),
-              CustomInputField(
-                controller: _descriptionController,
-                hintText: 'Açıklama...',
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
+            ),
+
+            const SizedBox(height: 20),
+
+            // --- BAŞLIK INPUT ---
+            TextField(
+              controller: _titleController,
+              style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+              decoration: _buildInputDecoration("Başlık"),
+              textInputAction: TextInputAction.next,
+            ),
+
+            const SizedBox(height: 16),
+
+            // --- AÇIKLAMA INPUT ---
+            TextField(
+              controller: _descriptionController,
+              style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+              maxLines: 4, // rows="3" karşılığı yaklaşık
+              decoration: _buildInputDecoration("Açıklama..."),
+            ),
+
+            const SizedBox(height: 24), // pt-2 + spacing
+
+            // --- PAYLAŞ BUTONU ---
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
                 onPressed: _isSaving ? null : _savePost,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
+                  backgroundColor: AppColors.primaryColor, // bg-primary
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  elevation: 4,
+                  shadowColor:
+                      AppColors.primaryColor.withOpacity(0.3), // shadow-lg
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+                    borderRadius: BorderRadius.circular(16), // rounded-2xl
                   ),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
                 child: _isSaving
                     ? const SizedBox(
-                        width: 24,
                         height: 24,
+                        width: 24,
                         child: CircularProgressIndicator(
                           color: Colors.white,
                           strokeWidth: 3,
@@ -223,13 +304,27 @@ class _AddPostModalState extends State<AddPostModal> {
                     : const Text(
                         'Paylaş',
                         style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 18, // text-lg
+                          fontWeight: FontWeight.w600, // font-semibold
                         ),
                       ),
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // --- ALT DEKORATİF ÇİZGİ ---
+            Center(
+              child: Container(
+                width: 128, // w-32
+                height: 4, // h-1
+                decoration: BoxDecoration(
+                  color: Colors.grey[200], // bg-gray-900/10
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

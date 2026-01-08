@@ -8,7 +8,6 @@ import 'package:gonullunet_app/logic/ngo_cubit.dart';
 import 'package:gonullunet_app/logic/ngo_state.dart';
 import 'package:gonullunet_app/repo/ngo_repository.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
-import 'package:gonullunet_app/models/ngo_model.dart';
 
 class NgosPage extends StatelessWidget {
   const NgosPage({super.key});
@@ -36,10 +35,8 @@ class _NgosViewState extends State<NgosView> {
   // Tasarım Renkleri (Tailwind Config'den alındı)
   static const Color kPrimaryColor = Color(0xFFFF6B35);
   static const Color kSecondaryColor = Color(0xFF004E89);
-  static const Color kTealColor = Color(0xFF1A659E);
   static const Color kBackgroundColor = Color(0xFFF7F9FC);
   static const Color kTextMain = Color(0xFF1F2937);
-  static const Color kTextSub = Color(0xFF6B7280);
 
   @override
   void dispose() {
@@ -141,10 +138,7 @@ class _NgosViewState extends State<NgosView> {
               ],
             ),
           ),
-
           const SizedBox(height: 24),
-
-          // --- 3. GRID LİSTE (Scrollable Content) ---
           Expanded(
             child: BlocBuilder<NgoCubit, NgoState>(
               builder: (context, state) {
@@ -195,30 +189,6 @@ class _NgosViewState extends State<NgosView> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCircleButton(IconData icon, VoidCallback onPressed) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: kTextMain, size: 22),
-        onPressed: onPressed,
-        padding: EdgeInsets.zero,
       ),
     );
   }

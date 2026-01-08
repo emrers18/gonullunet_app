@@ -17,4 +17,5 @@ class AppColors {
   static const Color kTealColor = Color(0xFF1A659E);
   static const Color kTextColor = Color(0xFF1F2937);
   static const Color textSub = Color(0xFF8D6A5E);
+  static const Color kSurfaceColor = Color(0xFFFFFFFF);
 }

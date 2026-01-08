@@ -15,12 +15,9 @@ class EventDetailCubit extends Cubit<EventDetailState> {
   }
 
   Future<void> _loadPageData() async {
-    // 1. Katılma durumu
     final isJoined = _event.participants.contains(_currentUserId);
     final count = _event.participants.length;
 
-    // 2. Organizatör ismini Repository'den çek
-    // (UI açılırken yükleniyor göstereceğiz, veri gelince güncelleyeceğiz)
     final organizerName =
         await _repository.getOrganizerName(_event.organizerId);
 
@@ -36,21 +33,29 @@ class EventDetailCubit extends Cubit<EventDetailState> {
 
     final currentState = state;
     if (currentState is EventDetailLoaded) {
-      // Optimistic Update (Anlık tepki)
-      final newStatus = !currentState.isJoined;
-      final newCount = newStatus
-          ? currentState.participantCount + 1
-          : currentState.participantCount - 1;
-
-      emit(currentState.copyWith(
-        isJoined: newStatus,
-        participantCount: newCount,
-      ));
-
       try {
-        await _repository.toggleJoinEvent(_event.id, _currentUserId);
+        if (_event.type == 'Proje') {
+          if (!currentState.isJoined) {
+            emit(currentState.copyWith(isJoined: true));
+
+            await _repository.applyToEvent(_event.id, _currentUserId);
+          } else {
+            return;
+          }
+        } else {
+          final newStatus = !currentState.isJoined;
+          final newCount = newStatus
+              ? currentState.participantCount + 1
+              : currentState.participantCount - 1;
+
+          emit(currentState.copyWith(
+            isJoined: newStatus,
+            participantCount: newCount,
+          ));
+
+          await _repository.toggleJoinEvent(_event.id, _currentUserId);
+        }
       } catch (e) {
-        // Hata olursa geri al
         emit(currentState);
       }
     }

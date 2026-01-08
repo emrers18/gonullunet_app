@@ -53,6 +53,9 @@ class UserRepository {
     required String stkName,
     required String description,
     required String location,
+    required String phone,
+    required String vision,
+    required String mission,
     String? imageUrl,
   }) async {
     final user = _auth.currentUser;
@@ -62,6 +65,9 @@ class UserRepository {
       'stkName': stkName,
       'description': description,
       'location': location,
+      'phone': phone,
+      'vision': vision,
+      'mission': mission,
     };
 
     if (imageUrl != null) {

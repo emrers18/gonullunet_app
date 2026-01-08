@@ -171,6 +171,10 @@ class _EventsPageState extends State<EventsPage> {
               onPressed: _showAddEventModal,
               heroTag: 'add_event_fab',
               backgroundColor: AppColors.primaryColor,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(32),
+              ),
               child: const Icon(Icons.add, color: Colors.white),
             );
           }

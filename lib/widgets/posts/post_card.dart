@@ -12,14 +12,15 @@ class PostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(16.0),
+        border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05), // Daha hafif, şeffaf gölge
-            spreadRadius: 1,
+            color: Colors.black.withOpacity(0.04),
+            spreadRadius: 0,
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -29,83 +30,23 @@ class PostCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(),
+          if (post.description.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+              child: Text(
+                post.description,
+                style: GoogleFonts.poppins(
+                  color: Colors.grey.shade800,
+                  fontSize: 14,
+                  height: 1.5,
+                ),
+              ),
+            ),
           if (post.imageUrl.isNotEmpty) _buildPostImage(),
-          Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  post.title,
-                  style: GoogleFonts.poppins(
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 17,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  post.description,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.poppins(
-                    color: const Color(0xFF424242),
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
-            child: Row(
-              children: [
-                _buildActionButton(
-                  icon: Icons.favorite_border_rounded,
-                  text: post.likeCount.toString(),
-                  onPressed: () {},
-                ),
-                _buildActionButton(
-                  icon: Icons.chat_bubble_outline_rounded,
-                  text: post.commentCount.toString(),
-                  onPressed: () {},
-                ),
-                const Spacer(),
-                IconButton(
-                  icon: const Icon(Icons.share_outlined, color: Colors.grey),
-                  onPressed: () {},
-                  splashRadius: 24,
-                ),
-              ],
-            ),
-          ),
+          _buildStats(),
+          Divider(height: 1, thickness: 1, color: Colors.grey.shade50),
+          _buildActionButtons(),
         ],
-      ),
-    );
-  }
-
-  Widget _buildPostImage() {
-    return Container(
-      width: double.infinity,
-      height: 280, // Görseli biraz daha yüksek yaptım, modern durur
-      margin: const EdgeInsets.only(bottom: 8),
-      color: const Color(0xFFF5F5F5),
-      child: Image.network(
-        post.imageUrl,
-        fit: BoxFit.cover,
-        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-          if (wasSynchronouslyLoaded) return child;
-          return AnimatedOpacity(
-            opacity: frame == null ? 0 : 1,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeOut,
-            child: child,
-          );
-        },
-        errorBuilder: (context, error, stackTrace) =>
-            const Center(child: Icon(Icons.error_outline, color: Colors.grey)),
       ),
     );
   }
@@ -134,19 +75,21 @@ class PostCard extends StatelessWidget {
         }
 
         return Padding(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.all(16.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              // Avatar
               Container(
-                width: 40,
                 height: 40,
+                width: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
+                  color: Colors.grey.shade200,
                   image: (avatarUrl != null && avatarUrl.isNotEmpty)
                       ? DecorationImage(
                           image: NetworkImage(avatarUrl), fit: BoxFit.cover)
                       : null,
-                  color: Colors.grey[200],
                 ),
                 child: (avatarUrl == null || avatarUrl.isEmpty)
                     ? Center(
@@ -161,7 +104,8 @@ class PostCard extends StatelessWidget {
                       )
                     : null,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 12),
+
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -169,10 +113,9 @@ class PostCard extends StatelessWidget {
                     Text(
                       displayName,
                       style: GoogleFonts.poppins(
-                        // Poppins
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: Colors.grey.shade900,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -180,15 +123,14 @@ class PostCard extends StatelessWidget {
                     Text(
                       post.timeAgo,
                       style: GoogleFonts.poppins(
-                        // Poppins
-                        color: Colors.grey[500],
+                        color: Colors.grey.shade500,
                         fontSize: 12,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.more_vert_rounded, color: Colors.grey),
+              Icon(Icons.more_horiz, color: Colors.grey.shade400),
             ],
           ),
         );
@@ -196,30 +138,127 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String text,
-    required VoidCallback onPressed,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(20),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-        child: Row(
-          children: [
-            Icon(icon, size: 24, color: Colors.grey[700]),
-            const SizedBox(width: 6),
-            Text(
-              text,
-              style: GoogleFonts.poppins(
-                // Rakamlar için de Poppins
-                color: Colors.grey[700],
-                fontWeight: FontWeight.w500,
-                fontSize: 14,
+  Widget _buildPostImage() {
+    return AspectRatio(
+      aspectRatio: 4 / 3,
+      child: Container(
+        width: double.infinity,
+        color: Colors.grey.shade100,
+        child: Image.network(
+          post.imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: AppColors.kPrimaryColor.withOpacity(0.5),
               ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) =>
+              const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStats() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            "${post.likeCount} Beğeni",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey.shade500,
             ),
-          ],
+          ),
+          Row(
+            children: [
+              Text(
+                "${post.commentCount} Yorum",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Eğer paylaşım sayısı modelde yoksa statik veya gizli kalabilir
+              Text(
+                "Paylaşım",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        children: [
+          _buildSingleActionButton(
+            icon: Icons.favorite_border,
+            label: "Beğen",
+            color: Colors.grey.shade600,
+            onTap: () {},
+          ),
+          _buildSingleActionButton(
+            icon: Icons.chat_bubble_outline,
+            label: "Yorum",
+            color: Colors.grey.shade600,
+            onTap: () {},
+          ),
+          _buildSingleActionButton(
+            icon: Icons.share_outlined,
+            label: "Paylaş",
+            color: Colors.grey.shade600,
+            onTap: () {},
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSingleActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 22, color: color),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

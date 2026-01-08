@@ -7,6 +7,7 @@ class CustomInputField extends StatefulWidget {
   final bool isPassword;
   final TextEditingController? controller;
   final TextInputType? keyboardType;
+  final int maxLines;
 
   const CustomInputField({
     super.key,
@@ -14,6 +15,7 @@ class CustomInputField extends StatefulWidget {
     this.isPassword = false,
     this.controller,
     this.keyboardType,
+    this.maxLines = 3,
   });
 
   @override

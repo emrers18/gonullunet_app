@@ -16,12 +16,20 @@ class EditProfileLoaded extends EditProfileState {
   final String description;
   final String location;
   final String? imageUrl;
+  final String vision;
+  final String mission;
+  final String phone;
+  final String email;
 
   const EditProfileLoaded({
     required this.stkName,
     required this.description,
     required this.location,
     this.imageUrl,
+    required this.vision,
+    required this.mission,
+    required this.phone,
+    required this.email,
   });
 
   @override

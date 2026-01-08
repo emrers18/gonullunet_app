@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
 
             return RefreshIndicator(
               onRefresh: () => context.read<PostCubit>().refresh(),
-              color: AppColors.primaryColor,
+              color: AppColors.kPrimaryColor,
               child: ListView.separated(
                 controller: _scrollController,
                 padding: const EdgeInsets.fromLTRB(
@@ -238,6 +238,9 @@ class _HomePageState extends State<HomePage> {
         heroTag: 'add_post_fab',
         backgroundColor: AppColors.primaryColor, // Ana Mavi Renk
         elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(32), // Daha yuvarlak köşeler
+        ),
         child: const Icon(Icons.add, color: Colors.white),
       ),
     );

@@ -7,10 +7,13 @@ class Event {
   final String location;
   final GeoPoint? geoPoint;
   final DateTime date;
+  final DateTime? endDate;
   final String imageUrl;
   final String organizerId;
   final List<String> participants;
   final String category;
+  final String type; // 'Etkinlik' veya 'Proje'
+  final int? quota;
 
   Event({
     required this.id,
@@ -19,14 +22,29 @@ class Event {
     required this.location,
     this.geoPoint,
     required this.date,
+    this.endDate,
     required this.imageUrl,
     required this.organizerId,
     required this.participants,
     required this.category,
+    required this.type,
+    this.quota,
   });
 
   factory Event.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+    DateTime startDateTime = DateTime.now();
+    if (data['startDate'] != null) {
+      startDateTime = (data['startDate'] as Timestamp).toDate();
+    } else if (data['date'] != null) {
+      startDateTime = (data['date'] as Timestamp).toDate();
+    }
+
+    DateTime? endDateTime;
+    if (data['endDate'] != null) {
+      endDateTime = (data['endDate'] as Timestamp).toDate();
+    }
 
     return Event(
       id: doc.id,
@@ -34,11 +52,14 @@ class Event {
       description: data['description'] ?? '',
       location: data['location'] ?? 'Konum Belirtilmemiş',
       geoPoint: data['geoPoint'],
-      date: (data['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      date: startDateTime,
+      endDate: endDateTime,
       imageUrl: data['imageUrl'] ?? '',
       organizerId: data['organizerId'] ?? '',
       participants: List<String>.from(data['participants'] ?? []),
       category: data['category'] ?? 'Genel',
+      type: data['type'] ?? 'Etkinlik',
+      quota: data['quota'],
     );
   }
 }

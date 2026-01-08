@@ -34,7 +34,7 @@ class MyEventsPage extends StatelessWidget {
               stream: FirebaseFirestore.instance
                   .collection('events')
                   .where('organizerId', isEqualTo: user.uid)
-                  .orderBy('date', descending: false)
+                  .orderBy('startDate', descending: false)
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

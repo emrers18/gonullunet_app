@@ -13,9 +13,12 @@ class EventDetailInitial extends EventDetailState {}
 class EventDetailUpdated extends EventDetailState {
   final bool isJoined;
   final int participantCount;
+  final String organizerName;
 
   const EventDetailUpdated(
-      {required this.isJoined, required this.participantCount});
+      {required this.isJoined,
+      required this.participantCount,
+      required this.organizerName});
 
   @override
   List<Object> get props => [isJoined, participantCount];

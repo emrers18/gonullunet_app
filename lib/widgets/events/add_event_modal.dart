@@ -18,7 +18,6 @@ class AddEventModal extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Cubit'i burada sağlıyoruz
     return BlocProvider(
       create: (context) => AddEventCubit(context.read<EventRepository>()),
       child: const AddEventView(),

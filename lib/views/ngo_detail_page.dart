@@ -258,7 +258,6 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   ),
                 ),
 
-                // 3. TabBar (Yapışkan Sekmeler)
                 SliverPersistentHeader(
                   delegate: SliverAppBarDelegate(
                     TabBar(
@@ -284,13 +283,11 @@ class _NgoDetailPageState extends State<NgoDetailPage>
             body: TabBarView(
               controller: _tabController,
               children: [
-                // --- 1. Sekme: Açıklama ---
                 SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Hakkımızda Bölümü
                       buildSectionTitle(Icons.info_outline, "Hakkımızda"),
                       const SizedBox(height: 12),
                       Container(
@@ -316,30 +313,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                   height: 1.6,
                                   fontSize: 14),
                             ),
-                            const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () {},
-                              child: const Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Devamını Oku",
-                                    style: TextStyle(
-                                        color: AppColors.kPrimaryColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 14),
-                                  ),
-                                  Icon(Icons.expand_more,
-                                      color: AppColors.kPrimaryColor, size: 20),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Misyon & Vizyon Grid
                       if (mission != null || vision != null)
                         Row(
                           children: [
@@ -363,15 +340,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                       Colors.orange.shade50)),
                           ],
                         ),
-
                       const SizedBox(height: 24),
-
-                      // İletişim Bilgileri
                       buildSectionTitle(
                           Icons.contact_support_outlined, "İletişim Bilgileri"),
                       const SizedBox(height: 12),
-
-                      // İletişim Listesi
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -391,9 +363,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 24),
-                      // Sosyal Medya İkonları (Tasarım Amaçlı)
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -408,11 +378,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                     ],
                   ),
                 ),
-
-                // --- 2. Sekme: Etkinlikler ---
                 _buildEventsList(),
-
-                // --- 3. Sekme: Gönderiler ---
                 _buildPostsList(),
               ],
             ),

@@ -67,6 +67,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
         });
       }
     } catch (e) {
+      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Resim seçilemedi: $e")),
       );
@@ -95,12 +96,12 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F5), // background-light
+      backgroundColor: const Color(0xFFF8F6F5),
       appBar: AppBar(
         title: Text(
           'STK Profilini Düzenle',
           style: GoogleFonts.plusJakartaSans(
-            color: const Color(0xFF181210), // text-main
+            color: const Color(0xFF181210),
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -243,13 +244,11 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                     ),
                     const SizedBox(height: 32),
 
-                    // --- Form Alanları ---
                     _buildLabel("STK Adı"),
                     _buildInput(controller: _stkNameController, hint: ""),
 
                     const SizedBox(height: 20),
 
-                    // İletişim Grubu
                     Row(
                       children: [
                         Expanded(
@@ -309,7 +308,6 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
 
                     const SizedBox(height: 32),
 
-                    // --- Aksiyon Butonları ---
                     ElevatedButton(
                       onPressed: () => _onSavePressed(context),
                       style: ElevatedButton.styleFrom(
@@ -349,7 +347,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const SizedBox(height: 40), // Alt boşluk
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -359,8 +357,6 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
       ),
     );
   }
-
-  // --- Yardımcı Widgetlar ---
 
   Widget _buildLabel(String text) {
     return Padding(

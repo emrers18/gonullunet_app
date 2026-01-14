@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gonullunet_app/views/ngo_detail_page.dart';
+import 'package:gonullunet_app/widgets/ngos/ngos_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/logic/ngo_cubit.dart';
@@ -32,12 +32,6 @@ class _NgosViewState extends State<NgosView> {
   final TextEditingController _searchController = TextEditingController();
   Timer? _debounce;
 
-  // Tasarım Renkleri (Tailwind Config'den alındı)
-  static const Color kPrimaryColor = Color(0xFFFF6B35);
-  static const Color kSecondaryColor = Color(0xFF004E89);
-  static const Color kBackgroundColor = Color(0xFFF7F9FC);
-  static const Color kTextMain = Color(0xFF1F2937);
-
   @override
   void dispose() {
     _debounce?.cancel();
@@ -55,7 +49,7 @@ class _NgosViewState extends State<NgosView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
           elevation: 0,
           centerTitle: true,
@@ -71,7 +65,7 @@ class _NgosViewState extends State<NgosView> {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-            color: kBackgroundColor,
+            color: AppColors.kBackgroundColor,
             child: Column(
               children: [
                 Row(
@@ -96,7 +90,7 @@ class _NgosViewState extends State<NgosView> {
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: kTextMain,
+                            color: AppColors.kTextMain,
                           ),
                           decoration: InputDecoration(
                             hintText: "STK veya kategori ara...",
@@ -115,11 +109,11 @@ class _NgosViewState extends State<NgosView> {
                       height: 56,
                       width: 56,
                       decoration: BoxDecoration(
-                        color: kSecondaryColor,
+                        color: AppColors.kSecondaryColor,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: kSecondaryColor.withOpacity(0.2),
+                            color: AppColors.kSecondaryColor.withOpacity(0.2),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -144,7 +138,8 @@ class _NgosViewState extends State<NgosView> {
               builder: (context, state) {
                 if (state is NgoLoading) {
                   return const Center(
-                      child: CircularProgressIndicator(color: kPrimaryColor));
+                      child: CircularProgressIndicator(
+                          color: AppColors.kPrimaryColor));
                 }
 
                 if (state is NgoError) {
@@ -179,139 +174,13 @@ class _NgosViewState extends State<NgosView> {
                     itemCount: state.ngos.length,
                     itemBuilder: (context, index) {
                       final ngo = state.ngos[index];
-                      return _buildNgoCard(ngo);
+                      return NgoCard(ngo: ngo);
                     },
                   );
                 }
 
                 return const SizedBox.shrink();
               },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNgoCard(dynamic ngo) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        border: Border.all(color: Colors.grey.shade50),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(12),
-      child: Column(
-        children: [
-          // Üst Kısım: Resim ve Badge
-          Expanded(
-            flex: 3,
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade50,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.grey.shade100),
-                image: DecorationImage(
-                  // Modelinizde imageUrl yoksa placeholder kullanın
-                  image: NetworkImage(
-                      ngo.imageUrl ?? "https://via.placeholder.com/150"),
-                  fit: BoxFit
-                      .contain, // Logo olduğu için contain daha iyi durabilir
-                ),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(
-                    top: 12,
-                    right: 12,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // Alt Kısım: Bilgiler ve Buton
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      ngo.name,
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: kTextMain,
-                      ),
-                    ),
-                    // const SizedBox(height: 4),
-                    // Text(
-                    //   ngo.description ?? "Açıklama bulunmuyor.",
-                    //   textAlign: TextAlign.center,
-                    //   maxLines: 2,
-                    //   overflow: TextOverflow.ellipsis,
-                    //   style: GoogleFonts.plusJakartaSans(
-                    //     fontSize: 12,
-                    //     color: kTextSub,
-                    //     height: 1.4,
-                    //   ),
-                    // ),
-                  ],
-                ),
-                SizedBox(
-                  width: double.infinity,
-                  height: 36,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => NgoDetailPage(ngo: ngo),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: kBackgroundColor,
-                      foregroundColor: kTextMain,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: Text(
-                      "Detayları Görüntüle",
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
         ],

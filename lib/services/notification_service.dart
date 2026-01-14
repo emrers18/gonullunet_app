@@ -14,14 +14,12 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
 
   Future<void> initialize() async {
-    // Kullanıcıdan izin isteme kısımları
     await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    // Andorid ve IOS için ayarlamalar
     const AndroidInitializationSettings androidSettings =
         AndroidInitializationSettings('@drawable/ic_notification');
 
@@ -34,14 +32,11 @@ class NotificationService {
     await _localNotifications.initialize(initSettings);
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // Ekranda pop-up göster
       _showLocalNotification(message);
 
-      // YENİ: Veritabanına kaydet (Listede görünsün diye)
       _saveNotificationToFirestore(message);
     });
 
-    // Uygulama tamamen kapalıyken açılırsa da kaydetmeyi deneyebiliriz
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _saveNotificationToFirestore(message);
     });

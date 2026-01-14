@@ -111,7 +111,7 @@ class EventRepository {
   }
 
   Future<void> applyToEvent(String eventId, String userId) async {
-    // events/{eventId}/applications/{userId} yoluna kaydediyoruz
+    // events/{eventId}/applications/{userId} yolu
     await _firestore
         .collection('events')
         .doc(eventId)
@@ -126,7 +126,6 @@ class EventRepository {
   }
 
   Future<List<ApplicationModel>> getEventApplications(String eventId) async {
-    // Önce o etkinliğe ait başvuruları çek
     final querySnapshot = await _firestore
         .collection('events')
         .doc(eventId)
@@ -136,14 +135,12 @@ class EventRepository {
 
     List<ApplicationModel> applications = [];
 
-    // Her başvuru için kullanıcı detaylarını (isim, resim) 'users' koleksiyonundan al
     for (var doc in querySnapshot.docs) {
       var app = ApplicationModel.fromFirestore(doc);
 
       var userDoc = await _firestore.collection('users').doc(app.userId).get();
       if (userDoc.exists) {
         var userData = userDoc.data();
-        // Modeli kullanıcı verileriyle zenginleştir
         app = app.copyWithUser(
           name: userData?['name'],
           surname: userData?['surname'],
@@ -155,12 +152,12 @@ class EventRepository {
     return applications;
   }
 
-  // 3. BAŞVURU ONAYLA / REDDET (STK Tarafı)
+  //Stk tarafı
   Future<void> updateApplicationStatus(
       String eventId, String userId, String newStatus) async {
     final batch = _firestore.batch();
 
-    // a. Başvuru durumunu güncelle (approved / rejected)
+    // basvuru durumunu guncelleme
     var appRef = _firestore
         .collection('events')
         .doc(eventId)
@@ -168,8 +165,6 @@ class EventRepository {
         .doc(userId);
     batch.update(appRef, {'status': newStatus});
 
-    // b. Eğer ONAYLANDIYSA (approved), kullanıcıyı etkinliğin 'participants' listesine de ekle
-    // Böylece kartlarda katılımcı sayısı artar ve kullanıcı "Katıldın" görür.
     var eventRef = _firestore.collection('events').doc(eventId);
 
     if (newStatus == 'approved') {
@@ -177,7 +172,6 @@ class EventRepository {
         'participants': FieldValue.arrayUnion([userId])
       });
     } else if (newStatus == 'rejected' || newStatus == 'pending') {
-      // Eğer reddedilirse veya geri alınırsa listeden çıkar
       batch.update(eventRef, {
         'participants': FieldValue.arrayRemove([userId])
       });
@@ -186,7 +180,6 @@ class EventRepository {
     await batch.commit();
   }
 
-  // 4. Kullanıcının bu etkinliğe başvurusu var mı? (EventDetail sayfasında butonu yönetmek için)
   Future<String?> getUserApplicationStatus(
       String eventId, String userId) async {
     final doc = await _firestore
@@ -199,6 +192,6 @@ class EventRepository {
     if (doc.exists) {
       return doc.data()?['status'] as String?;
     }
-    return null; // Başvuru yok
+    return null;
   }
 }

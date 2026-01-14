@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,6 +10,8 @@ import '../models/event_model.dart';
 import '../repo/event_repository.dart';
 import '../repo/notification_repository.dart';
 import '../utils/app_colors.dart';
+import '../widgets/events/build_glass_button_widget.dart';
+import '../widgets/events/build_info_card_widget.dart';
 import 'manage_applications_page.dart';
 
 class EventDetailPage extends StatelessWidget {
@@ -30,7 +31,6 @@ class EventDetailPage extends StatelessWidget {
   }
 }
 
-// YENİ: StatelessWidget -> StatefulWidget'a çevrildi
 class _EventBody extends StatefulWidget {
   final Event event;
 
@@ -41,7 +41,7 @@ class _EventBody extends StatefulWidget {
 }
 
 class _EventBodyState extends State<_EventBody> {
-  bool _isNgo = false; // Kullanıcının STK olup olmadığını tutan değişken
+  bool _isNgo = false;
 
   @override
   void initState() {
@@ -49,7 +49,6 @@ class _EventBodyState extends State<_EventBody> {
     _checkUserRole();
   }
 
-  // Kullanıcı rolünü kontrol et
   Future<void> _checkUserRole() async {
     final isNgo = await EventRepository().isUserNgo();
     if (mounted) {
@@ -64,7 +63,6 @@ class _EventBodyState extends State<_EventBody> {
     final size = MediaQuery.of(context).size;
     final event = widget.event;
 
-    // Tarih formatlama
     final formattedDate = DateFormat('d MMMM yyyy', 'tr_TR').format(event.date);
     final formattedTime = DateFormat('HH:mm').format(event.date);
     final dayName = DateFormat('EEEE', 'tr_TR').format(event.date);
@@ -73,7 +71,6 @@ class _EventBodyState extends State<_EventBody> {
 
     return Stack(
       children: [
-        // 1. KATMAN: Arka Plan Resmi
         Positioned(
           top: 0,
           left: 0,
@@ -104,8 +101,6 @@ class _EventBodyState extends State<_EventBody> {
             ),
           ),
         ),
-
-        // 2. KATMAN: İçerik Kartı
         Positioned.fill(
           child: SingleChildScrollView(
             child: Column(
@@ -124,12 +119,10 @@ class _EventBodyState extends State<_EventBody> {
                           offset: Offset(0, -10)),
                     ],
                   ),
-                  // Eğer kullanıcı STK ise alttaki boşluğu azalt (Buton yok çünkü)
                   padding: EdgeInsets.fromLTRB(24, 40, 24, _isNgo ? 40 : 120),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tutamaç
                       Center(
                         child: Container(
                           width: 48,
@@ -141,8 +134,6 @@ class _EventBodyState extends State<_EventBody> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Kategori ve Tür Etiketi
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -182,8 +173,6 @@ class _EventBodyState extends State<_EventBody> {
                         ],
                       ),
                       const SizedBox(height: 16),
-
-                      // Başlık
                       Text(
                         event.title,
                         style: GoogleFonts.plusJakartaSans(
@@ -194,8 +183,6 @@ class _EventBodyState extends State<_EventBody> {
                         ),
                       ),
                       const SizedBox(height: 12),
-
-                      // Konum
                       Row(
                         children: [
                           const Icon(Icons.location_on,
@@ -215,8 +202,6 @@ class _EventBodyState extends State<_EventBody> {
                         ],
                       ),
                       const SizedBox(height: 32),
-
-                      // Organizatör Bilgisi
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -267,12 +252,10 @@ class _EventBodyState extends State<_EventBody> {
                         ),
                       ),
                       const SizedBox(height: 24),
-
-                      // Tarih ve Katılımcı Bilgisi
                       Row(
                         children: [
                           Expanded(
-                              child: _buildInfoCard(
+                              child: buildInfoCard(
                                   Icons.calendar_month,
                                   "Tarih",
                                   formattedDate,
@@ -286,7 +269,7 @@ class _EventBodyState extends State<_EventBody> {
                               if (state is EventDetailUpdated) {
                                 count = state.participantCount;
                               }
-                              return _buildInfoCard(
+                              return buildInfoCard(
                                   Icons.group,
                                   isProject ? "Başvuru" : "Katılımcı",
                                   "$count Kişi",
@@ -297,8 +280,6 @@ class _EventBodyState extends State<_EventBody> {
                         ],
                       ),
                       const SizedBox(height: 32),
-
-                      // Açıklama
                       Text("Detaylar",
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 18,
@@ -319,8 +300,6 @@ class _EventBodyState extends State<_EventBody> {
             ),
           ),
         ),
-
-        // 3. KATMAN: Üst Butonlar
         Positioned(
           top: 0,
           left: 0,
@@ -331,13 +310,13 @@ class _EventBodyState extends State<_EventBody> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildGlassButton(
+                  buildGlassButton(
                       Icons.arrow_back, () => Navigator.pop(context)),
                   Row(
                     children: [
-                      _buildGlassButton(Icons.ios_share, () {}),
+                      buildGlassButton(Icons.ios_share, () {}),
                       const SizedBox(width: 12),
-                      _buildGlassButton(Icons.favorite_border, () {}),
+                      buildGlassButton(Icons.favorite_border, () {}),
                     ],
                   ),
                 ],
@@ -345,7 +324,6 @@ class _EventBodyState extends State<_EventBody> {
             ),
           ),
         ),
-
         Positioned(
           bottom: 30,
           left: 20,
@@ -354,7 +332,6 @@ class _EventBodyState extends State<_EventBody> {
             builder: (context, state) {
               final currentUser = FirebaseAuth.instance.currentUser;
 
-              // 1. DURUM: EĞER BEN BU ETKİNLİĞİN SAHİBİYSEM (STK) -> Yönet
               if (currentUser != null && event.organizerId == currentUser.uid) {
                 return SizedBox(
                   height: 64,
@@ -399,12 +376,10 @@ class _EventBodyState extends State<_EventBody> {
                 );
               }
 
-              // 2. DURUM: BAŞKA BİR STK İSEM -> Buton Yok (Gizle)
               if (_isNgo) {
                 return const SizedBox.shrink();
               }
 
-              // 3. DURUM: GÖNÜLLÜYSEM -> Katıl/Başvur
               bool isJoined = false;
               int currentCount = event.participants.length;
 
@@ -486,71 +461,6 @@ class _EventBodyState extends State<_EventBody> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildInfoCard(
-      IconData icon, String title, String value, String subtitle, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 16),
-          Text(title,
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12, color: const Color(0xFF9CA3AF))),
-          const SizedBox(height: 4),
-          Text(value,
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1F2937))),
-          Text(subtitle,
-              style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12, color: const Color(0xFF9CA3AF))),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGlassButton(IconData icon, VoidCallback onPressed) {
-    return GestureDetector(
-      onTap: onPressed,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              border: Border.all(color: Colors.white.withOpacity(0.2)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: Colors.white, size: 24),
-          ),
-        ),
-      ),
     );
   }
 }

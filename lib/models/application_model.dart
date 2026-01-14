@@ -2,14 +2,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class ApplicationModel {
-  final String id; // Kullanıcı ID ile aynı olabilir
+  final String id;
   final String userId;
   final String eventId;
   final String
       status; // 'pending' (bekliyor), 'approved' (onaylandı), 'rejected' (red)
   final Timestamp appliedAt;
 
-  // UI'da göstermek için kullanıcı detaylarını sonradan dolduracağız
   final String? userName;
   final String? userSurname;
   final String? userImageUrl;
@@ -41,7 +40,6 @@ class ApplicationModel {
     );
   }
 
-  // Kullanıcı verisi eklendikten sonra yeni bir kopya oluşturmak için
   ApplicationModel copyWithUser({
     String? name,
     String? surname,

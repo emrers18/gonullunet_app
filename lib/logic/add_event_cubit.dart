@@ -25,12 +25,10 @@ class AddEventCubit extends Cubit<AddEventState> {
       emit(AddEventLoading());
 
       String? imageUrl;
-      // Resim varsa yükle
       if (imageFile != null) {
         imageUrl = await _repository.uploadEventImage(imageFile);
       }
 
-      // Etkinliği kaydet
       await _repository.addEvent(
         title: title,
         description: description,

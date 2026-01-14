@@ -1,4 +1,3 @@
-// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,10 +6,6 @@ import 'package:gonullunet_app/repo/user_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
-
-// import 'package:gonullunet_app/services/auth.dart';
-// import 'package:gonullunet_app/views/login_page.dart';
-// import 'package:gonullunet_app/views/main_page.dart';
 
 import 'logic/event_cubit.dart';
 import 'logic/post_cubit.dart';

@@ -2,22 +2,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
   final String uid;
-  final String email; // E-posta zaten burada var
+  final String email;
   final String userType;
   final Timestamp createdAt;
 
-  // Gönüllü Alanları
   final String? name;
   final String? surname;
 
-  // STK (Kurum) Alanları
   final String? stkName;
   final String? imageUrl;
-  final String? description; // Açıklama (Genel Tanıtım)
-  final String? location; // Konum (Adres/Şehir)
-  final String? vision; // YENİ: Vizyon
-  final String? mission; // YENİ: Misyon
-  final String? phone; // YENİ: Telefon Numarası
+  final String? description;
+  final String? location;
+  final String? vision;
+  final String? mission;
+  final String? phone;
 
   UserModel({
     required this.uid,
@@ -35,7 +33,6 @@ class UserModel {
     this.phone,
   });
 
-  // Firestore veri okuma
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
     Map<String, dynamic> data = doc.data()!;
 
@@ -48,7 +45,6 @@ class UserModel {
       surname: data['surname'],
       stkName: data['stkName'],
       imageUrl: data['imageUrl'],
-      // Yeni alanları güvenli bir şekilde çekiyoruz
       description: data['description'],
       location: data['location'],
       vision: data['vision'],
@@ -57,7 +53,6 @@ class UserModel {
     );
   }
 
-  // Firestore veri yazma
   Map<String, dynamic> toJson() {
     return {
       'uid': uid,
@@ -68,7 +63,6 @@ class UserModel {
       'surname': surname,
       'stkName': stkName,
       'imageUrl': imageUrl,
-      // Yeni alanları veritabanına yazıyoruz
       'description': description,
       'location': location,
       'vision': vision,
@@ -80,7 +74,6 @@ class UserModel {
   bool get isNgo => userType == 'ngo';
   bool get isVolunteer => userType == 'volunteer';
 
-  // Profil sayfasında gösterilecek isim
   String get displayName {
     if (isNgo) {
       return stkName ?? 'STK Adı';

@@ -16,6 +16,7 @@ class EventRepository {
   Stream<List<Event>> getEventsStream() {
     return _firestore
         .collection('events')
+        .where('startDate', isGreaterThanOrEqualTo: DateTime.now())
         .orderBy('startDate', descending: false)
         .snapshots()
         .map((snapshot) {

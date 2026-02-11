@@ -231,8 +231,6 @@ class _HomePageState extends State<HomePage> {
           return const SizedBox.shrink();
         },
       ),
-
-      // --- FLOATING ACTION BUTTON (POST EKLE) ---
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPostModal,
         heroTag: 'add_post_fab',
@@ -246,7 +244,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // --- KULLANICI BAŞLIĞI (UserCubit Entegrasyonu) ---
   Widget _buildUserHeader() {
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, state) {
@@ -289,7 +286,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Başlık Tasarımı (Avatar + İsim)
   Widget _buildHeaderContent(String displayName, String? imageUrl) {
     return Row(
       children: [

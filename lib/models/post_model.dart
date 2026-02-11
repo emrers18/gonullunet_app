@@ -30,21 +30,11 @@ class Post {
   factory Post.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
-    final dynamic imageUrlData = data['imageUrl'];
-    String finalImageUrl = '';
-
-    if (imageUrlData != null &&
-        imageUrlData is String &&
-        imageUrlData.isNotEmpty &&
-        imageUrlData.startsWith('http')) {
-      finalImageUrl = imageUrlData;
-    }
-
     return Post(
         id: doc.id,
         title: data['title'] ?? 'Başlık yok.',
         description: data['description'] ?? 'Açıklama yok.',
-        imageUrl: finalImageUrl,
+        imageUrl: data['imageUrl'] ?? '',
         createdAt: data['createdAt'] ?? Timestamp.now(),
         likeCount: data['likeCount'] ?? 0,
         commentCount: data['commentCount'] ?? 0,

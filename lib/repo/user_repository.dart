@@ -76,4 +76,40 @@ class UserRepository {
 
     await _firestore.collection('users').doc(user.uid).update(data);
   }
+
+  Future<void> toggleFollowNgo(String ngoId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
+
+    final userRef = _firestore.collection('users').doc(user.uid);
+    final ngoRef = _firestore.collection('users').doc(ngoId);
+
+    return _firestore.runTransaction((transaction) async {
+      final userSnapshot = await transaction.get(userRef);
+      final ngoSnapshot = await transaction.get(ngoRef);
+
+      if (!userSnapshot.exists || !ngoSnapshot.exists) {
+        throw Exception("Kullanıcı veya Kurum verisi bulunamadı.");
+      }
+
+      final List<String> following =
+          List<String>.from(userSnapshot.data()?['following'] ?? []);
+      final bool isFollowing = following.contains(ngoId);
+
+      if (isFollowing) {
+        // Takibi bırak
+        transaction.update(userRef, {
+          'following': FieldValue.arrayRemove([ngoId])
+        });
+        transaction
+            .update(ngoRef, {'followersCount': FieldValue.increment(-1)});
+      } else {
+        // Takip et
+        transaction.update(userRef, {
+          'following': FieldValue.arrayUnion([ngoId])
+        });
+        transaction.update(ngoRef, {'followersCount': FieldValue.increment(1)});
+      }
+    });
+  }
 }

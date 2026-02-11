@@ -1,7 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/logic/post_cubit.dart';
+import 'package:gonullunet_app/logic/post_state.dart';
+import 'package:gonullunet_app/widgets/posts/comment_modal.dart';
 import '../../models/post_model.dart';
 
 class PostCard extends StatelessWidget {
@@ -205,30 +209,57 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildActionButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-      child: Row(
-        children: [
-          _buildSingleActionButton(
-            icon: Icons.favorite_border,
-            label: "Beğen",
-            color: Colors.grey.shade600,
-            onTap: () {},
+    return BlocBuilder<PostCubit, PostState>(
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+          child: Row(
+            children: [
+              // Beğen Butonu
+              FutureBuilder<bool>(
+                future:
+                    context.read<PostCubit>().repository.isPostLiked(post.id),
+                builder: (context, snapshot) {
+                  final isLiked = snapshot.data ?? false;
+                  return _buildSingleActionButton(
+                    icon: isLiked ? Icons.favorite : Icons.favorite_border,
+                    label: "Beğen",
+                    color: isLiked ? Colors.red : Colors.grey.shade600,
+                    onTap: () {
+                      context.read<PostCubit>().toggleLike(post.id);
+                    },
+                  );
+                },
+              ),
+              // Yorum Butonu
+              _buildSingleActionButton(
+                icon: Icons.chat_bubble_outline,
+                label: "Yorum",
+                color: Colors.grey.shade600,
+                onTap: () {
+                  _showCommentModal(context);
+                },
+              ),
+              _buildSingleActionButton(
+                icon: Icons.share_outlined,
+                label: "Paylaş",
+                color: Colors.grey.shade600,
+                onTap: () {},
+              ),
+            ],
           ),
-          _buildSingleActionButton(
-            icon: Icons.chat_bubble_outline,
-            label: "Yorum",
-            color: Colors.grey.shade600,
-            onTap: () {},
-          ),
-          _buildSingleActionButton(
-            icon: Icons.share_outlined,
-            label: "Paylaş",
-            color: Colors.grey.shade600,
-            onTap: () {},
-          ),
-        ],
-      ),
+        );
+      },
+    );
+  }
+
+  void _showCommentModal(BuildContext context) {
+    // CommentModal henüz oluşturulmadı, birazdan ekleyeceğiz.
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CommentModal(postId: post.id),
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:intl/intl.dart';
 
+import '../../constants/app_constants.dart';
 import '../../logic/event_cubit.dart';
 
 class EventFilterModal extends StatefulWidget {
@@ -26,17 +27,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
     'Antalya',
     'Leiden'
   ];
-  final List<String> _categories = [
-    'Tümü',
-    'Eğitim',
-    'Çevre',
-    'Sağlık',
-    'Hayvan Hakları',
-    'Afet',
-    'Genel',
-    'Konser',
-    'Seminer'
-  ];
+  final List<String> _categories = ['Tümü', ...AppConstants.eventCategories];
 
   void _pickDateRange() async {
     final DateTimeRange? picked = await showDateRangePicker(

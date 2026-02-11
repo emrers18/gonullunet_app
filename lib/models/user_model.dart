@@ -16,6 +16,8 @@ class UserModel {
   final String? vision;
   final String? mission;
   final String? phone;
+  final List<String> following;
+  final int followersCount;
 
   UserModel({
     required this.uid,
@@ -31,6 +33,8 @@ class UserModel {
     this.vision,
     this.mission,
     this.phone,
+    this.following = const [],
+    this.followersCount = 0,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -50,6 +54,8 @@ class UserModel {
       vision: data['vision'],
       mission: data['mission'],
       phone: data['phone'],
+      following: List<String>.from(data['following'] ?? []),
+      followersCount: data['followersCount'] ?? 0,
     );
   }
 
@@ -68,6 +74,8 @@ class UserModel {
       'vision': vision,
       'mission': mission,
       'phone': phone,
+      'following': following,
+      'followersCount': followersCount,
     };
   }
 

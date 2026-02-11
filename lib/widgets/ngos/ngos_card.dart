@@ -40,8 +40,7 @@ class NgoCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 border: Border.all(color: Colors.grey.shade100),
                 image: DecorationImage(
-                  image: NetworkImage(
-                      ngo.imageUrl ?? "https://via.placeholder.com/150"),
+                  image: NetworkImage(ngo.imageUrl),
                   fit: BoxFit.contain,
                 ),
               ),
@@ -97,7 +96,7 @@ class NgoCard extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.kPrimaryColor,
+                      backgroundColor: AppColors.kCardBackgroundColor,
                       foregroundColor: AppColors.kTextMain,
                       elevation: 0,
                       padding: EdgeInsets.zero,

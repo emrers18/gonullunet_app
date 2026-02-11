@@ -51,6 +51,7 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   flutter_launcher_icons: ^0.14.4
   google_fonts: ^6.3.3
+  google_generative_ai: ^0.4.7
 
 dev_dependencies:
   flutter_test:

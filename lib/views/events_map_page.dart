@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:intl/intl.dart';
 
+import '../constants/app_constants.dart';
 import 'event_detail_page.dart';
 
 class EventsMapPage extends StatefulWidget {
@@ -17,8 +19,13 @@ class EventsMapPage extends StatefulWidget {
 class _EventsMapPageState extends State<EventsMapPage> {
   GoogleMapController? _mapController;
   late Set<Marker> _markers;
-  late List<Event> _validEvents;
+  late List<Event> _allEvents; // geoPoint'i olan tüm etkinlikler
+  late List<Event> _filteredEvents; // arama + kategori sonrası liste
   late PageController _pageController;
+
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  String _selectedCategory = 'Tümü';
 
   int _currentIndex = 0;
   static const LatLng _defaultLocation = LatLng(41.0082, 28.9784);
@@ -26,31 +33,77 @@ class _EventsMapPageState extends State<EventsMapPage> {
   @override
   void initState() {
     super.initState();
-    _validEvents = widget.events.where((e) => e.geoPoint != null).toList();
+    _allEvents = widget.events.where((e) => e.geoPoint != null).toList();
+    _filteredEvents = List.from(_allEvents);
     _markers = _createMarkers();
-    _pageController =
-        PageController(viewportFraction: 0.9); // Kartlar yanda hafif görünsün
+    _pageController = PageController(viewportFraction: 0.9);
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
-  // Markerları oluştur
+  // ---------- FİLTRELEME ----------
+
+  void _applyFilters() {
+    List<Event> result = _allEvents;
+
+    // Arama filtresi
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      result = result.where((e) {
+        return e.title.toLowerCase().contains(q) ||
+            e.location.toLowerCase().contains(q);
+      }).toList();
+    }
+
+    // Kategori filtresi
+    if (_selectedCategory != 'Tümü') {
+      result = result.where((e) => e.category == _selectedCategory).toList();
+    }
+
+    setState(() {
+      _filteredEvents = result;
+      _currentIndex = 0;
+      _markers = _createMarkers();
+    });
+
+    // PageController'ı sıfırla
+    if (_filteredEvents.isNotEmpty && _pageController.hasClients) {
+      _pageController.jumpToPage(0);
+    }
+
+    // Kamera konumunu güncelle
+    if (_filteredEvents.isNotEmpty) {
+      _moveCameraToEvent(0);
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    _searchQuery = query;
+    _applyFilters();
+  }
+
+  void _onCategorySelected(String category) {
+    _selectedCategory = category;
+    _applyFilters();
+  }
+
+  // ---------- HARİTA ----------
+
   Set<Marker> _createMarkers() {
-    return _validEvents.asMap().entries.map((entry) {
+    return _filteredEvents.asMap().entries.map((entry) {
       final index = entry.key;
       final e = entry.value;
 
-      // Seçili olan marker daha belirgin olsun (Hue Orange), diğerleri daha soluk veya farklı renk
       final isSelected = index == _currentIndex;
 
       return Marker(
         markerId: MarkerId(e.id),
         position: LatLng(e.geoPoint!.latitude, e.geoPoint!.longitude),
-        // Seçili ise ikon rengini veya boyutunu değiştirebiliriz (Burada standart renk değişimi yapıldı)
         icon: BitmapDescriptor.defaultMarkerWithHue(isSelected
             ? BitmapDescriptor.hueOrange
             : BitmapDescriptor.hueAzure),
@@ -61,13 +114,11 @@ class _EventsMapPageState extends State<EventsMapPage> {
     }).toSet();
   }
 
-  // Haritada marker'a tıklanınca
   void _onMarkerTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _markers = _createMarkers(); // Marker renklerini güncelle
+      _markers = _createMarkers();
     });
-    // Alt kartı ilgili etkinliğe kaydır
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -75,7 +126,6 @@ class _EventsMapPageState extends State<EventsMapPage> {
     );
   }
 
-  // Alt kart kaydırılınca
   void _onPageChanged(int index) {
     setState(() {
       _currentIndex = index;
@@ -85,14 +135,14 @@ class _EventsMapPageState extends State<EventsMapPage> {
   }
 
   void _moveCameraToEvent(int index) {
-    if (_validEvents.isEmpty || _mapController == null) return;
-    final event = _validEvents[index];
+    if (_filteredEvents.isEmpty || _mapController == null) return;
+    final event = _filteredEvents[index];
 
     _mapController!.animateCamera(
       CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(event.geoPoint!.latitude, event.geoPoint!.longitude),
-          zoom: 15, // Etkinliğe yaklaş
+          zoom: 15,
         ),
       ),
     );
@@ -100,6 +150,9 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Kategori listesi: "Tümü" + merkezi sabitler
+    final categories = ['Tümü', ...AppConstants.eventCategories];
+
     return Scaffold(
       body: Stack(
         children: [
@@ -109,17 +162,16 @@ class _EventsMapPageState extends State<EventsMapPage> {
             width: MediaQuery.of(context).size.width,
             child: GoogleMap(
               initialCameraPosition: CameraPosition(
-                target: _validEvents.isNotEmpty
-                    ? LatLng(_validEvents.first.geoPoint!.latitude,
-                        _validEvents.first.geoPoint!.longitude)
+                target: _filteredEvents.isNotEmpty
+                    ? LatLng(_filteredEvents.first.geoPoint!.latitude,
+                        _filteredEvents.first.geoPoint!.longitude)
                     : _defaultLocation,
                 zoom: 12,
               ),
               markers: _markers,
               myLocationEnabled: true,
-              myLocationButtonEnabled: false, // Kendi butonumuzu yapacağız
-              zoomControlsEnabled:
-                  false, // Zoom butonlarını gizle (temiz görünüm)
+              myLocationButtonEnabled: false,
+              zoomControlsEnabled: false,
               mapToolbarEnabled: false,
               onMapCreated: (controller) {
                 _mapController = controller;
@@ -172,8 +224,10 @@ class _EventsMapPageState extends State<EventsMapPage> {
                               ),
                             ],
                           ),
-                          child: const TextField(
-                            decoration: InputDecoration(
+                          child: TextField(
+                            controller: _searchController,
+                            onChanged: _onSearchChanged,
+                            decoration: const InputDecoration(
                               hintText: "Etkinlik ara...",
                               hintStyle: TextStyle(color: AppColors.textSub),
                               prefixIcon:
@@ -186,22 +240,32 @@ class _EventsMapPageState extends State<EventsMapPage> {
                         ),
                       ),
                       const SizedBox(width: 12),
-                      _buildCircleButton(icon: Icons.tune, onTap: () {}),
+                      _buildCircleButton(
+                        icon: Icons.tune,
+                        onTap: () {
+                          // Filtreleri temizle
+                          _searchController.clear();
+                          _searchQuery = '';
+                          _selectedCategory = 'Tümü';
+                          _applyFilters();
+                        },
+                      ),
                     ],
                   ),
 
                   const SizedBox(height: 12),
 
-                  // Kategoriler (Yatay Scroll)
+                  // Kategoriler (Yatay Scroll) — merkezi listeden
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: [
-                        _buildCategoryChip("Tümü", true),
-                        _buildCategoryChip("Çevre", false),
-                        _buildCategoryChip("Eğitim", false),
-                        _buildCategoryChip("Hayvanlar", false),
-                      ],
+                      children: categories
+                          .map((cat) => GestureDetector(
+                                onTap: () => _onCategorySelected(cat),
+                                child: _buildCategoryChip(
+                                    cat, _selectedCategory == cat),
+                              ))
+                          .toList(),
                     ),
                   ),
                 ],
@@ -211,7 +275,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
           // 3. KATMAN: LİSTE GÖRÜNÜM BUTONU (Sağ Üst)
           Positioned(
-            top: 140, // Header'ın altına
+            top: 140,
             right: 16,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -243,7 +307,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
           // 4. KATMAN: KONUM BUTONU (Sağ Alt)
           Positioned(
-            bottom: 160, // Kartların üstünde
+            bottom: 160,
             right: 16,
             child: _buildCircleButton(
                 icon: Icons.my_location,
@@ -258,15 +322,33 @@ class _EventsMapPageState extends State<EventsMapPage> {
             bottom: 20,
             left: 0,
             right: 0,
-            height: 140, // Kart yüksekliği
-            child: _validEvents.isEmpty
-                ? const SizedBox.shrink()
+            height: 140,
+            child: _filteredEvents.isEmpty
+                ? Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 10),
+                        ],
+                      ),
+                      child: const Text("Bu kritere uygun etkinlik bulunamadı.",
+                          style: TextStyle(
+                              color: AppColors.primaryText,
+                              fontWeight: FontWeight.w500)),
+                    ),
+                  )
                 : PageView.builder(
                     controller: _pageController,
                     onPageChanged: _onPageChanged,
-                    itemCount: _validEvents.length,
+                    itemCount: _filteredEvents.length,
                     itemBuilder: (context, index) {
-                      final event = _validEvents[index];
+                      final event = _filteredEvents[index];
                       return _buildEventCard(event);
                     },
                   ),
@@ -279,6 +361,10 @@ class _EventsMapPageState extends State<EventsMapPage> {
   // --- WIDGET YARDIMCILARI ---
 
   Widget _buildEventCard(Event event) {
+    // Dinamik tarih formatlama
+    final formattedDate =
+        DateFormat('dd MMM, HH:mm', 'tr_TR').format(event.date);
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
       padding: const EdgeInsets.all(12),
@@ -302,8 +388,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
               image: DecorationImage(
-                image: NetworkImage(
-                    event.imageUrl), // Placeholder veya event resmi
+                image: NetworkImage(event.imageUrl),
                 fit: BoxFit.cover,
               ),
             ),
@@ -316,7 +401,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Başlık ve Puan
+                // Başlık ve Katılımcı Sayısı
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -336,20 +421,20 @@ class _EventsMapPageState extends State<EventsMapPage> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade50,
+                        color: AppColors.kPrimaryColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.star,
-                              size: 12, color: Colors.green.shade700),
+                          const Icon(Icons.group,
+                              size: 12, color: AppColors.kPrimaryColor),
                           const SizedBox(width: 2),
                           Text(
-                            "4.8", // Dinamik veri varsa event.rating kullanılabilir
-                            style: TextStyle(
+                            "${event.participants.length}",
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: Colors.green.shade700,
+                              color: AppColors.kPrimaryColor,
                             ),
                           ),
                         ],
@@ -358,11 +443,10 @@ class _EventsMapPageState extends State<EventsMapPage> {
                   ],
                 ),
 
-                // Tarih ve Konum Bilgisi
+                // Tarih ve Konum Bilgisi (Dinamik)
                 Column(
                   children: [
-                    _buildInfoRow(Icons.calendar_month,
-                        "12 Mayıs, 10:00"), // Dinamik tarih verisi
+                    _buildInfoRow(Icons.calendar_month, formattedDate),
                     const SizedBox(height: 4),
                     _buildInfoRow(Icons.location_on, event.location),
                   ],
@@ -372,18 +456,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Fake Avatar Stack
-                    SizedBox(
-                      width: 60,
-                      height: 24,
-                      child: Stack(
-                        children: [
-                          _buildAvatar(0, Colors.blue),
-                          _buildAvatar(15, Colors.red),
-                          _buildAvatar(30, Colors.orange),
-                        ],
-                      ),
-                    ),
+                    // Gerçek katılımcı sayısı
+                    _buildParticipantsBadge(event.participants.length),
 
                     ElevatedButton(
                       onPressed: () {
@@ -419,19 +493,27 @@ class _EventsMapPageState extends State<EventsMapPage> {
     );
   }
 
-  Widget _buildAvatar(double left, Color color) {
-    return Positioned(
-      left: left,
-      child: Container(
-        width: 24,
-        height: 24,
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.2),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 2),
+  /// Katılımcı sayısını gösteren basit badge widget'ı
+  Widget _buildParticipantsBadge(int count) {
+    if (count == 0) {
+      return Text(
+        "İlk sen ol!",
+        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+      );
+    }
+    return Row(
+      children: [
+        Icon(Icons.people, size: 16, color: Colors.grey[500]),
+        const SizedBox(width: 4),
+        Text(
+          "$count katılımcı",
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
         ),
-        child: Icon(Icons.person, size: 14, color: color),
-      ),
+      ],
     );
   }
 

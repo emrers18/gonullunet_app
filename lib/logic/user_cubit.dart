@@ -26,6 +26,14 @@ class UserCubit extends Cubit<UserState> {
     );
   }
 
+  Future<void> toggleFollow(String ngoId) async {
+    try {
+      await _repository.toggleFollowNgo(ngoId);
+    } catch (e) {
+      emit(UserError("Takip işlemi başarısız: $e"));
+    }
+  }
+
   @override
   Future<void> close() {
     _userSubscription?.cancel();

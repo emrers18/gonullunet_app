@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../logic/user_cubit.dart';
+import '../logic/user_state.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/models/post_model.dart';
@@ -60,6 +63,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
           String? email;
 
           // Eğer detaylı veri geldiyse güncelle
+          int followersCount = 0;
           if (snapshot.hasData && snapshot.data!.exists) {
             final data = snapshot.data!.data() as Map<String, dynamic>;
             name = data['stkName'] ?? name;
@@ -70,6 +74,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
             mission = data['mission'];
             phone = data['phone'];
             email = data['email'];
+            followersCount = data['followersCount'] ?? 0;
           }
 
           return NestedScrollView(
@@ -182,49 +187,71 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         const SizedBox(height: 24),
 
                         // Butonlar (Takip Et / İletişim)
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ElevatedButton(
-                                onPressed: () {},
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.kPrimaryColor,
-                                  foregroundColor: Colors.white,
-                                  elevation: 4,
-                                  shadowColor:
-                                      AppColors.kPrimaryColor.withOpacity(0.3),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                        BlocBuilder<UserCubit, UserState>(
+                          builder: (context, userState) {
+                            bool isFollowing = false;
+                            if (userState is UserLoaded) {
+                              isFollowing = userState.user.following
+                                  .contains(widget.ngo.id);
+                            }
+
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      context
+                                          .read<UserCubit>()
+                                          .toggleFollow(widget.ngo.id);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: isFollowing
+                                          ? Colors.grey.shade200
+                                          : AppColors.kPrimaryColor,
+                                      foregroundColor: isFollowing
+                                          ? Colors.grey.shade700
+                                          : Colors.white,
+                                      elevation: isFollowing ? 0 : 4,
+                                      shadowColor: AppColors.kPrimaryColor
+                                          .withOpacity(0.3),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                    child: Text(
+                                        isFollowing
+                                            ? "Takibi Bırak"
+                                            : "Takip Et",
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold)),
                                   ),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
                                 ),
-                                child: const Text("Takip Et",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: OutlinedButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.chat_bubble_outline,
-                                    size: 18),
-                                label: const Text("İletişim",
-                                    style:
-                                        TextStyle(fontWeight: FontWeight.bold)),
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFF181210),
-                                  side: BorderSide(color: Colors.grey.shade300),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    onPressed: () {},
+                                    icon: const Icon(Icons.chat_bubble_outline,
+                                        size: 18),
+                                    label: const Text("İletişim",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor: const Color(0xFF181210),
+                                      side: BorderSide(
+                                          color: Colors.grey.shade300),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(30),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
                                   ),
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 12),
                                 ),
-                              ),
-                            ),
-                          ],
+                              ],
+                            );
+                          },
                         ),
 
                         const SizedBox(height: 24),
@@ -235,7 +262,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            buildStatItem("12.5K", "Takipçi"),
+                            buildStatItem(followersCount.toString(), "Takipçi"),
                             // Etkinlik Sayısını Canlı Çek
                             StreamBuilder<QuerySnapshot>(
                                 stream: _firestore
@@ -250,7 +277,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                   }
                                   return buildStatItem(count, "Etkinlik");
                                 }),
-                            buildStatItem("4.9", "Puan"),
+                            buildStatItem("—", "Puan"),
                           ],
                         ),
                       ],

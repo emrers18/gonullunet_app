@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/constants/app_constants.dart';
 import 'package:gonullunet_app/widgets/custom_input_field.dart';
 
 import '../../logic/add_event_cubit.dart';
@@ -44,16 +45,7 @@ class _AddEventViewState extends State<AddEventView> {
   File? _selectedImage;
 
   String _selectedCategory = 'Genel';
-  final List<String> _categories = [
-    'Genel',
-    'Eğitim',
-    'Çevre',
-    'Sağlık',
-    'Hayvan Hakları',
-    'Afet',
-    'Sanat',
-    'Spor'
-  ];
+  final List<String> _categories = AppConstants.eventCategories;
 
   String _selectedType = 'Etkinlik';
   final List<String> _types = ['Etkinlik', 'Proje'];

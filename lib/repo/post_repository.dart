@@ -2,10 +2,13 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:gonullunet_app/models/post_model.dart';
+import 'package:gonullunet_app/models/comment_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   static const int limit = 5;
 
@@ -33,9 +36,7 @@ class PostRepository {
 
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      // ignore: avoid_print
-      print("Resim yükleme hatası: $e");
-      return '';
+      throw Exception("Resim yükleme hatası: $e");
     }
   }
 
@@ -67,5 +68,73 @@ class PostRepository {
       return snapshot.docs.last;
     }
     return null;
+  }
+
+  Future<void> toggleLikePost(String postId) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("Oturum açılmamış.");
+
+    final postRef = _firestore.collection('posts').doc(postId);
+    final likeRef =
+        _firestore.collection('post_likes').doc("${postId}_${user.uid}");
+
+    return _firestore.runTransaction((transaction) async {
+      final likeSnapshot = await transaction.get(likeRef);
+
+      if (likeSnapshot.exists) {
+        // Beğeniyi kaldır
+        transaction.delete(likeRef);
+        transaction.update(postRef, {'likeCount': FieldValue.increment(-1)});
+      } else {
+        // Beğen
+        transaction.set(likeRef, {
+          'postId': postId,
+          'userId': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+        transaction.update(postRef, {'likeCount': FieldValue.increment(1)});
+      }
+    });
+  }
+
+  Future<bool> isPostLiked(String postId) async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    final likeDoc = await _firestore
+        .collection('post_likes')
+        .doc("${postId}_${user.uid}")
+        .get();
+    return likeDoc.exists;
+  }
+
+  Future<void> addComment(String postId, String content) async {
+    final user = _auth.currentUser;
+    if (user == null) throw Exception("Oturum açılmamış.");
+
+    final postRef = _firestore.collection('posts').doc(postId);
+    final commentRef =
+        _firestore.collection('posts').doc(postId).collection('comments').doc();
+
+    return _firestore.runTransaction((transaction) async {
+      transaction.set(commentRef, {
+        'postId': postId,
+        'userId': user.uid,
+        'content': content,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      transaction.update(postRef, {'commentCount': FieldValue.increment(1)});
+    });
+  }
+
+  Stream<List<Comment>> getCommentsStream(String postId) {
+    return _firestore
+        .collection('posts')
+        .doc(postId)
+        .collection('comments')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) => Comment.fromFirestore(doc)).toList();
+    });
   }
 }

@@ -45,6 +45,11 @@ class CustomBottomNavBar extends StatelessWidget {
           activeIcon: Icon(Icons.person),
           label: 'Profil',
         ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.auto_awesome_outlined),
+          activeIcon: Icon(Icons.auto_awesome),
+          label: 'Gönüllü AI',
+        ),
       ],
     );
   }

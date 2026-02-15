@@ -10,6 +10,15 @@ class PostCubit extends Cubit<PostState> {
 
   PostCubit(this.repository) : super(PostInitial());
 
+  Future<List<Post>> _hydrateLikeStatus(List<Post> posts) async {
+    final results = <Post>[];
+    for (final post in posts) {
+      final liked = await repository.isPostLiked(post.id);
+      results.add(post.copyWith(isLiked: liked));
+    }
+    return results;
+  }
+
   Future<void> loadPosts() async {
     if (state is PostLoading) return;
 
@@ -31,7 +40,8 @@ class PostCubit extends Cubit<PostState> {
       final newLastDoc =
           await repository.getLastDocumentFromQuery(lastDocument: lastDoc);
 
-      final totalPosts = [...oldPosts, ...newPosts];
+      final hydratedNewPosts = await _hydrateLikeStatus(newPosts);
+      final totalPosts = [...oldPosts, ...hydratedNewPosts];
 
       final hasMoreData =
           newPosts.isNotEmpty && newPosts.length >= PostRepository.limit;
@@ -70,22 +80,70 @@ class PostCubit extends Cubit<PostState> {
   }
 
   Future<void> toggleLike(String postId) async {
+    final currentState = state;
+    if (currentState is! PostLoaded) return;
+
+    // Optimistic local update
+    final updatedPosts = currentState.posts.map((post) {
+      if (post.id == postId) {
+        final nowLiked = !post.isLiked;
+        return post.copyWith(
+          isLiked: nowLiked,
+          likeCount: post.likeCount + (nowLiked ? 1 : -1),
+        );
+      }
+      return post;
+    }).toList();
+
+    emit(PostLoaded(
+      posts: updatedPosts,
+      hasMore: currentState.hasMore,
+      lastDocument: currentState.lastDocument,
+    ));
+
+    // Fire-and-forget Firestore write
     try {
       await repository.toggleLikePost(postId);
-      // Not: Tam bir state güncellemesi için ilgili postu bulup likeCount'u yerel de güncelleyebiliriz
-      // ya da basitçe refresh() çağırabiliriz. Kullanıcı deneyimi için yerel güncelleme daha iyi.
-      // Şimdilik basitleştirip refresh() çağıralım veya sadece repository işini bitirsin.
-      // Firestore dinleyicisi olmadığı için manuel yenileme gerekebilir.
-      await refresh();
     } catch (e) {
-      emit(PostError("Beğeni işlemi başarısız: $e"));
+      // Rollback on error
+      final rolledBack = updatedPosts.map((post) {
+        if (post.id == postId) {
+          final wasLiked = !post.isLiked;
+          return post.copyWith(
+            isLiked: wasLiked,
+            likeCount: post.likeCount + (wasLiked ? 1 : -1),
+          );
+        }
+        return post;
+      }).toList();
+
+      emit(PostLoaded(
+        posts: rolledBack,
+        hasMore: currentState.hasMore,
+        lastDocument: currentState.lastDocument,
+      ));
     }
   }
 
   Future<void> addComment(String postId, String content) async {
     try {
       await repository.addComment(postId, content);
-      await refresh();
+
+      // Local update for comment count
+      final currentState = state;
+      if (currentState is PostLoaded) {
+        final updatedPosts = currentState.posts.map((post) {
+          if (post.id == postId) {
+            return post.copyWith(commentCount: post.commentCount + 1);
+          }
+          return post;
+        }).toList();
+        emit(PostLoaded(
+          posts: updatedPosts,
+          hasMore: currentState.hasMore,
+          lastDocument: currentState.lastDocument,
+        ));
+      }
     } catch (e) {
       emit(PostError("Yorum eklenemedi: $e"));
     }

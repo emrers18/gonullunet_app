@@ -132,7 +132,7 @@ class _CommentModalState extends State<CommentModal> {
                       _commentController.clear();
                     }
                   },
-                  icon: Icon(Icons.send, color: AppColors.kPrimaryColor),
+                  icon: const Icon(Icons.send, color: AppColors.kPrimaryColor),
                 ),
               ],
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_navbar.dart';
+import 'ai/chat_history_page.dart';
 import 'events_page.dart';
 import 'home_page.dart';
 import 'ngos_page.dart';
@@ -37,6 +38,14 @@ class Profile extends StatelessWidget {
   }
 }
 
+class AiChat extends StatelessWidget {
+  const AiChat({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const ChatHistoryPage();
+  }
+}
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -52,6 +61,7 @@ class _MainPageState extends State<MainPage> {
     Events(),
     Ngos(),
     Profile(),
+    AiChat(),
   ];
 
   void _onItemTapped(int index) {

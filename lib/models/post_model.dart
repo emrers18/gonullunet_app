@@ -10,6 +10,7 @@ class Post {
   final int likeCount;
   final int commentCount;
   final String publisherId;
+  final bool isLiked;
 
   Post({
     required this.id,
@@ -20,7 +21,26 @@ class Post {
     required this.likeCount,
     required this.commentCount,
     required this.publisherId,
+    this.isLiked = false,
   });
+
+  Post copyWith({
+    int? likeCount,
+    int? commentCount,
+    bool? isLiked,
+  }) {
+    return Post(
+      id: id,
+      title: title,
+      description: description,
+      imageUrl: imageUrl,
+      createdAt: createdAt,
+      likeCount: likeCount ?? this.likeCount,
+      commentCount: commentCount ?? this.commentCount,
+      publisherId: publisherId,
+      isLiked: isLiked ?? this.isLiked,
+    );
+  }
 
   String get timeAgo {
     timeago.setLocaleMessages('tr', timeago.TrMessages());

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
-import 'package:gonullunet_app/logic/post_state.dart';
+
 import 'package:gonullunet_app/widgets/posts/comment_modal.dart';
 import '../../models/post_model.dart';
 
@@ -209,26 +209,19 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildActionButtons() {
-    return BlocBuilder<PostCubit, PostState>(
-      builder: (context, state) {
+    return Builder(
+      builder: (context) {
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
           child: Row(
             children: [
               // Beğen Butonu
-              FutureBuilder<bool>(
-                future:
-                    context.read<PostCubit>().repository.isPostLiked(post.id),
-                builder: (context, snapshot) {
-                  final isLiked = snapshot.data ?? false;
-                  return _buildSingleActionButton(
-                    icon: isLiked ? Icons.favorite : Icons.favorite_border,
-                    label: "Beğen",
-                    color: isLiked ? Colors.red : Colors.grey.shade600,
-                    onTap: () {
-                      context.read<PostCubit>().toggleLike(post.id);
-                    },
-                  );
+              _buildSingleActionButton(
+                icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+                label: "Beğen",
+                color: post.isLiked ? Colors.red : Colors.grey.shade600,
+                onTap: () {
+                  context.read<PostCubit>().toggleLike(post.id);
                 },
               ),
               // Yorum Butonu

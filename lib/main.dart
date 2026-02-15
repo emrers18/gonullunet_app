@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/profile_cubit.dart';
+import 'package:gonullunet_app/repo/chat_repository.dart';
 import 'package:gonullunet_app/repo/user_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -21,6 +24,7 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await dotenv.load(fileName: '.env');
   await initializeDateFormatting('tr_TR', null);
 
   final prefs = await SharedPreferences.getInstance();
@@ -40,6 +44,7 @@ class MyApp extends StatelessWidget {
         RepositoryProvider(create: (context) => PostRepository()),
         RepositoryProvider(create: (context) => EventRepository()),
         RepositoryProvider(create: (context) => UserRepository()),
+        RepositoryProvider(create: (context) => ChatRepository()),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -59,6 +64,11 @@ class MyApp extends StatelessWidget {
             create: (context) => UserCubit(
               UserRepository(),
             )..loadUser(),
+          ),
+          BlocProvider(
+            create: (context) => ChatCubit(
+              context.read<ChatRepository>(),
+            ),
           ),
         ],
         child: MaterialApp(

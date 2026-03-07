@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -80,7 +81,7 @@ class _EventBodyState extends State<_EventBody> {
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: event.imageUrl.isNotEmpty
-                    ? NetworkImage(event.imageUrl)
+                    ? CachedNetworkImageProvider(event.imageUrl)
                     : const AssetImage('lib/assets/images/logo.png')
                         as ImageProvider,
                 fit: BoxFit.cover,
@@ -266,7 +267,9 @@ class _EventBodyState extends State<_EventBody> {
                               BlocBuilder<EventDetailCubit, EventDetailState>(
                             builder: (context, state) {
                               int count = event.participants.length;
-                              if (state is EventDetailUpdated) {
+                              if (state is EventDetailLoaded) {
+                                count = state.participantCount;
+                              } else if (state is EventDetailUpdated) {
                                 count = state.participantCount;
                               }
                               return buildInfoCard(
@@ -312,13 +315,6 @@ class _EventBodyState extends State<_EventBody> {
                 children: [
                   buildGlassButton(
                       Icons.arrow_back, () => Navigator.pop(context)),
-                  Row(
-                    children: [
-                      buildGlassButton(Icons.ios_share, () {}),
-                      const SizedBox(width: 12),
-                      buildGlassButton(Icons.favorite_border, () {}),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -383,7 +379,11 @@ class _EventBodyState extends State<_EventBody> {
               bool isJoined = false;
               int currentCount = event.participants.length;
 
-              if (state is EventDetailUpdated) {
+              // EventDetailLoaded veya EventDetailUpdated — her ikisinden de oku
+              if (state is EventDetailLoaded) {
+                isJoined = state.isJoined;
+                currentCount = state.participantCount;
+              } else if (state is EventDetailUpdated) {
                 isJoined = state.isJoined;
                 currentCount = state.participantCount;
               } else {

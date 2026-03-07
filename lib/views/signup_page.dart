@@ -8,6 +8,7 @@ import 'package:gonullunet_app/utils/validators/validators.dart';
 
 import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
+import 'email_verification_screen.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
@@ -124,17 +125,12 @@ class _SignUpViewState extends State<SignUpView> {
       body: BlocListener<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz.',
-                  style: GoogleFonts.inter(),
-                ),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
+            // Kayıt başarılı — doğrulama ekranına yönlendir
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => EmailVerificationScreen(email: state.email),
               ),
             );
-            Navigator.of(context).pop();
           } else if (state is SignUpError) {
             _showError(state.message);
           }
@@ -146,7 +142,6 @@ class _SignUpViewState extends State<SignUpView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Container(
@@ -184,16 +179,13 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                       child: ClipOval(
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(
-                              sigmaX: 10.0,
-                              sigmaY:
-                                  10.0), 
+                          filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
                           child: Container(),
                         ),
                       ),
                     ),
                     Transform.rotate(
-                      angle: -0.05, 
+                      angle: -0.05,
                       child: Container(
                         width: 64,
                         height: 64,

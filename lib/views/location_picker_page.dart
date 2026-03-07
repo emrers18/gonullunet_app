@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 
 import 'package:gonullunet_app/utils/app_colors.dart';
 
@@ -27,15 +28,17 @@ class LocationPickerView extends StatefulWidget {
 }
 
 class _LocationPickerViewState extends State<LocationPickerView> {
-  GoogleMapController? _mapController;
+  final MapController _mapController = MapController();
   final TextEditingController _searchController = TextEditingController();
 
-  LatLng? _currentCameraPosition;
+  bool _isCameraMoving = false;
+
+  static const LatLng _defaultLocation = LatLng(41.0082, 28.9784);
 
   @override
   void dispose() {
     _searchController.dispose();
-    _mapController?.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -45,12 +48,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
       body: BlocListener<LocationCubit, LocationState>(
         listener: (context, state) {
           if (state is LocationLoaded && state.shouldMoveCamera) {
-            _mapController?.animateCamera(
-              CameraUpdate.newCameraPosition(
-                CameraPosition(target: state.location, zoom: 15),
-              ),
-            );
-            _currentCameraPosition = state.location;
+            _mapController.move(state.location, 15.0);
           } else if (state is LocationError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -60,39 +58,58 @@ class _LocationPickerViewState extends State<LocationPickerView> {
         },
         child: Stack(
           children: [
-            BlocBuilder<LocationCubit, LocationState>(
-              buildWhen: (previous, current) {
-                return previous
-                        is LocationInitial && //optimize harita kullanımını sağlıyor, tekrar tekrar rebuild etmiyo
-                    current is LocationLoading;
-              },
-              builder: (context, state) {
-                LatLng initialTarget = const LatLng(41.0082, 28.9784);
-
-                return GoogleMap(
-                  initialCameraPosition: CameraPosition(
-                    target: initialTarget,
-                    zoom: 15,
-                  ),
-                  onMapCreated: (controller) {
-                    _mapController = controller;
-                  },
-                  myLocationEnabled: true,
-                  myLocationButtonEnabled: false,
-                  zoomControlsEnabled: false,
-                  onCameraMove: (position) {
-                    _currentCameraPosition = position.target;
-                  },
-                  onCameraIdle: () {
-                    if (_currentCameraPosition != null) {
-                      context
-                          .read<LocationCubit>()
-                          .onCameraIdle(_currentCameraPosition!);
-                    }
-                  },
-                );
-              },
+            // --- HARİTA ---
+            FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _defaultLocation,
+                initialZoom: 15.0,
+                onMapEvent: (event) {
+                  if (event is MapEventMoveStart) {
+                    setState(() => _isCameraMoving = true);
+                  } else if (event is MapEventMoveEnd ||
+                      event is MapEventFlingAnimationEnd) {
+                    setState(() {
+                      _isCameraMoving = false;
+                    });
+                    context
+                        .read<LocationCubit>()
+                        .onCameraIdle(_mapController.camera.center);
+                  }
+                },
+              ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.gonullunet.gonullunet_app',
+                ),
+              ],
             ),
+
+            // --- Ortadaki Sabit Pin ---
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 40.0),
+                child: AnimatedScale(
+                  scale: _isCameraMoving ? 1.2 : 1.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: const Icon(
+                    Icons.location_on,
+                    size: 50,
+                    color: AppColors.primaryColor,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black26,
+                        blurRadius: 8,
+                        offset: Offset(0, 2),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // --- Üst Arama Çubuğu ---
             Positioned(
               top: MediaQuery.of(context).padding.top + 10,
               left: 16,
@@ -140,16 +157,8 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                 ),
               ),
             ),
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 40.0),
-                child: Icon(
-                  Icons.location_on,
-                  size: 50,
-                  color: AppColors.primaryColor,
-                ),
-              ),
-            ),
+
+            // --- Konumuma Git Butonu ---
             Positioned(
               bottom: 180,
               right: 16,
@@ -163,6 +172,8 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                 },
               ),
             ),
+
+            // --- Alt Onay Paneli ---
             Positioned(
               bottom: 0,
               left: 0,

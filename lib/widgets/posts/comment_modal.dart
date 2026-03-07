@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -166,7 +167,7 @@ class _CommentModalState extends State<CommentModal> {
               radius: 18,
               backgroundColor: Colors.grey.shade200,
               backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-                  ? NetworkImage(imageUrl)
+                  ? CachedNetworkImageProvider(imageUrl)
                   : null,
               child: (imageUrl == null || imageUrl.isEmpty)
                   ? Text(name.isNotEmpty ? name[0].toUpperCase() : "?")

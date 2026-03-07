@@ -50,3 +50,13 @@ class EventDetailLoaded extends EventDetailState {
   @override
   List<Object> get props => [isJoined, participantCount, organizerName];
 }
+
+/// Başvuru gibi işlemler sırasında oluşan geçici hata.
+/// UI bunu SnackBar ile gösterip bir önceki state'e dönebilir.
+class EventDetailError extends EventDetailState {
+  final String message;
+  const EventDetailError(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/application_model.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/event_repository.dart';
 import '../repo/notification_repository.dart';
 import 'manage_applications_state.dart';
@@ -26,7 +27,7 @@ class ManageApplicationsCubit extends Cubit<ManageApplicationsState> {
       final apps = await _eventRepository.getEventApplications(eventId);
       emit(ManageApplicationsLoaded(apps));
     } catch (e) {
-      emit(ManageApplicationsError("Başvurular yüklenemedi: $e"));
+      emit(ManageApplicationsError(FirebaseErrorTranslator.translate(e)));
     }
   }
 
@@ -52,8 +53,7 @@ class ManageApplicationsCubit extends Cubit<ManageApplicationsState> {
       // 3. Listeyi yenile ki güncel durum görünsün
       await loadApplications();
     } catch (e) {
-      emit(ManageApplicationsError("İşlem başarısız: $e"));
-      // Hata olsa bile listeyi tekrar yükle ki tutarlı kalsın
+      emit(ManageApplicationsError(FirebaseErrorTranslator.translate(e)));
       loadApplications();
     }
   }

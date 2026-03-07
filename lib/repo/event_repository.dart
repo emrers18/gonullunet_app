@@ -1,12 +1,14 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:gonullunet_app/models/event_model.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../models/application_model.dart';
+import '../services/image_compress_service.dart';
 
 class EventRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -40,10 +42,23 @@ class EventRepository {
   }
 
   Future<String> uploadEventImage(File imageFile) async {
-    String fileName = 'event_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    Reference ref = _storage.ref().child('event_images/$fileName');
-    UploadTask uploadTask = ref.putFile(imageFile);
-    TaskSnapshot snapshot = await uploadTask;
+    // Görseli sıkıştır (max 1080px, %80 kalite)
+    final Uint8List? compressed =
+        await ImageCompressService.compressFile(imageFile);
+
+    final String fileName =
+        'event_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final Reference ref = _storage.ref().child('event_images/$fileName');
+
+    // Sıkıştırılmış baytları yükle; başarısız olursa orijinal dosyayı kullan
+    final UploadTask uploadTask = compressed != null
+        ? ref.putData(
+            compressed,
+            SettableMetadata(contentType: 'image/jpeg'),
+          )
+        : ref.putFile(imageFile);
+
+    final TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
   }
 

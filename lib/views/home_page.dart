@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -299,7 +300,7 @@ class _HomePageState extends State<HomePage> {
             radius: 24,
             backgroundColor: AppColors.lightPrimaryColor, // Açık Mavi Zemin
             backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-                ? NetworkImage(imageUrl)
+                ? CachedNetworkImageProvider(imageUrl)
                 : null,
             child: (imageUrl == null || imageUrl.isEmpty)
                 ? Text(

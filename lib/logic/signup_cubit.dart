@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/services/auth.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'signup_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
@@ -47,19 +48,12 @@ class SignUpCubit extends Cubit<SignUpState> {
 
       await _firestore.collection('users').doc(uid).set(userData);
 
-      emit(SignUpSuccess());
-    } on FirebaseAuthException catch (e) {
-      String errorMessage = 'Kayıt başarısız.';
-      if (e.code == 'email-already-in-use') {
-        errorMessage = 'Bu e-posta adresi zaten kullanılıyor.';
-      } else if (e.code == 'weak-password') {
-        errorMessage = 'Şifre çok zayıf.';
-      } else if (e.code == 'invalid-email') {
-        errorMessage = 'Geçersiz e-posta adresi.';
-      }
-      emit(SignUpError(errorMessage));
+      // Kayıt başarılı — doğrulama e-postası gönder
+      await userCredential.user?.sendEmailVerification();
+
+      emit(SignUpSuccess(email: email));
     } catch (e) {
-      emit(SignUpError('Bir hata oluştu: $e'));
+      emit(SignUpError(FirebaseErrorTranslator.translate(e)));
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/user_repository.dart';
 import 'profile_state.dart';
 
@@ -28,7 +29,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         emit(const EditProfileError("Kullanıcı verisi bulunamadı."));
       }
     } catch (e) {
-      emit(EditProfileError("Veriler yüklenirken hata oluştu: $e"));
+      emit(EditProfileError(FirebaseErrorTranslator.translate(e)));
     }
   }
 
@@ -61,7 +62,64 @@ class EditProfileCubit extends Cubit<EditProfileState> {
 
       emit(EditProfileSuccess());
     } catch (e) {
-      emit(EditProfileError("Güncelleme başarısız: $e"));
+      emit(EditProfileError(FirebaseErrorTranslator.translate(e)));
+    }
+  }
+
+  Future<void> loadVolunteerProfileData() async {
+    try {
+      emit(EditProfileLoading());
+      final data = await _repository.getCurrentUserData();
+
+      if (data != null) {
+        emit(EditVolunteerProfileLoaded(
+          name: data['name'] ?? '',
+          surname: data['surname'] ?? '',
+          email: data['email'] ?? '',
+          imageUrl: data['imageUrl'],
+          bio: data['bio'] ?? '',
+          interests: List<String>.from(data['interests'] ?? []),
+          skills: List<String>.from(data['skills'] ?? []),
+          birthDate: data['birthDate'],
+          education: data['education'] ?? '',
+          city: data['city'] ?? '',
+          phone: data['phone'] ?? '',
+        ));
+      } else {
+        emit(const EditProfileError("Kullanıcı verisi bulunamadı."));
+      }
+    } catch (e) {
+      emit(EditProfileError(FirebaseErrorTranslator.translate(e)));
+    }
+  }
+
+  Future<void> updateVolunteerProfile({
+    required String bio,
+    required List<String> interests,
+    required List<String> skills,
+    DateTime? birthDate,
+    required String education,
+    required String city,
+    required String phone,
+    File? imageFile,
+  }) async {
+    try {
+      emit(EditProfileUpdating());
+
+      await _repository.updateVolunteerProfile(
+        bio: bio,
+        interests: interests,
+        skills: skills,
+        birthDate: birthDate,
+        education: education,
+        city: city,
+        phone: phone,
+        imageFile: imageFile,
+      );
+
+      emit(EditProfileSuccess());
+    } catch (e) {
+      emit(EditProfileError(FirebaseErrorTranslator.translate(e)));
     }
   }
 }

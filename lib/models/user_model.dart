@@ -19,6 +19,14 @@ class UserModel {
   final List<String> following;
   final int followersCount;
 
+  // Volunteer-specific fields
+  final String? bio;
+  final List<String> interests;
+  final List<String> skills;
+  final Timestamp? birthDate;
+  final String? education;
+  final String? city;
+
   UserModel({
     required this.uid,
     required this.email,
@@ -35,6 +43,12 @@ class UserModel {
     this.phone,
     this.following = const [],
     this.followersCount = 0,
+    this.bio,
+    this.interests = const [],
+    this.skills = const [],
+    this.birthDate,
+    this.education,
+    this.city,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -56,6 +70,12 @@ class UserModel {
       phone: data['phone'],
       following: List<String>.from(data['following'] ?? []),
       followersCount: data['followersCount'] ?? 0,
+      bio: data['bio'],
+      interests: List<String>.from(data['interests'] ?? []),
+      skills: List<String>.from(data['skills'] ?? []),
+      birthDate: data['birthDate'],
+      education: data['education'],
+      city: data['city'],
     );
   }
 
@@ -76,6 +96,12 @@ class UserModel {
       'phone': phone,
       'following': following,
       'followersCount': followersCount,
+      'bio': bio,
+      'interests': interests,
+      'skills': skills,
+      'birthDate': birthDate,
+      'education': education,
+      'city': city,
     };
   }
 

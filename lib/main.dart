@@ -20,6 +20,10 @@ import 'views/onboarding_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+  //     overlays: [SystemUiOverlay.top]);
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

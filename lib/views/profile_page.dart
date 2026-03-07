@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -10,6 +11,7 @@ import '../logic/user_state.dart';
 
 // Sayfa yönlendirmeleri
 import 'edit_ngo_profile_page.dart';
+import 'edit_volunteer_profile_page.dart';
 import 'notifications_page.dart';
 import 'my_events_page.dart';
 import 'joined_events_page.dart';
@@ -53,9 +55,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: GoogleFonts.plusJakartaSans(
                       color: Colors.red, fontWeight: FontWeight.bold)),
               onPressed: () async {
+                // Dialog'u kapat
+                Navigator.of(dialogContext).pop();
+                // Firebase'den çıkış yap; auth stream AuthGate'i tetikler
                 await _auth.signOut();
-                if (dialogContext.mounted) {
-                  Navigator.of(dialogContext).pop();
+                // Güvenlik: mount kontrolü + tüm route stack'ini temizle
+                if (mounted) {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 }
               },
             ),
@@ -283,9 +289,10 @@ class _ProfilePageState extends State<ProfilePage> {
               MaterialPageRoute(
                   builder: (context) => const EditNgoProfilePage()));
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gönüllü profili düzenleme yakında!')),
-          );
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const EditVolunteerProfilePage()));
         }
       },
       child: Container(
@@ -318,7 +325,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                     image: (user.imageUrl != null && user.imageUrl!.isNotEmpty)
                         ? DecorationImage(
-                            image: NetworkImage(user.imageUrl!),
+                            image: CachedNetworkImageProvider(user.imageUrl!),
                             fit: BoxFit.cover)
                         : null,
                     color: Colors.grey.shade200,

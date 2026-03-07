@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/event_repository.dart';
 import '../models/event_model.dart';
 import 'event_detail_state.dart';
@@ -36,11 +37,15 @@ class EventDetailCubit extends Cubit<EventDetailState> {
       try {
         if (_event.type == 'Proje') {
           if (!currentState.isJoined) {
-            emit(currentState.copyWith(isJoined: true));
+            // Başvuruldu durumunu hemen güncelle (optimistic update)
+            emit(currentState.copyWith(
+              isJoined: true,
+              participantCount: currentState.participantCount + 1,
+            ));
 
             await _repository.applyToEvent(_event.id, _currentUserId);
           } else {
-            return;
+            return; // Proje başvurusu geri alınamaz
           }
         } else {
           final newStatus = !currentState.isJoined;
@@ -56,7 +61,10 @@ class EventDetailCubit extends Cubit<EventDetailState> {
           await _repository.toggleJoinEvent(_event.id, _currentUserId);
         }
       } catch (e) {
+        // Hata durumunda state'i geri al
         emit(currentState);
+        // Kullanıcıya anlaşılır hata göster
+        emit(EventDetailError(FirebaseErrorTranslator.translate(e)));
       }
     }
   }

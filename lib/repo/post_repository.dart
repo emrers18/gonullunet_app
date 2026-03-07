@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:gonullunet_app/services/image_compress_service.dart';
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -26,13 +27,32 @@ class PostRepository {
     return snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
   }
 
+  /// Görseli 1080x1080'e sıkıştırarak Firebase Storage'a yükler.
+  /// Sıkıştırma başarısız olursa orijinal dosyayı yükler (fallback).
   Future<String> uploadImage(File imageFile) async {
     try {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = _storage.ref().child('post_images/$fileName.jpg');
+      final String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      final Reference ref = _storage.ref().child('post_images/$fileName.jpg');
 
-      UploadTask uploadTask = ref.putFile(imageFile);
-      TaskSnapshot snapshot = await uploadTask;
+      // 1080x1080 hedefli sıkıştırma (%85 kalite, kare crop yok — oran korunur)
+      final compressed = await ImageCompressService.compressFile(
+        imageFile,
+        minWidth: 1080,
+        minHeight: 1080,
+        quality: 85,
+      );
+
+      TaskSnapshot snapshot;
+      if (compressed != null) {
+        // Sıkıştırılmış baytları yükle
+        snapshot = await ref.putData(
+          compressed,
+          SettableMetadata(contentType: 'image/jpeg'),
+        );
+      } else {
+        // Fallback: sıkıştırılamadıysa orijinali yükle
+        snapshot = await ref.putFile(imageFile);
+      }
 
       return await snapshot.ref.getDownloadURL();
     } catch (e) {

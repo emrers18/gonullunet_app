@@ -36,6 +36,49 @@ class EditProfileLoaded extends EditProfileState {
   List<Object?> get props => [stkName, description, location, imageUrl];
 }
 
+class EditVolunteerProfileLoaded extends EditProfileState {
+  final String name;
+  final String surname;
+  final String email;
+  final String? imageUrl;
+  final String bio;
+  final List<String> interests;
+  final List<String> skills;
+  final dynamic birthDate; // Timestamp?
+  final String education;
+  final String city;
+  final String phone;
+
+  const EditVolunteerProfileLoaded({
+    required this.name,
+    required this.surname,
+    required this.email,
+    this.imageUrl,
+    required this.bio,
+    required this.interests,
+    required this.skills,
+    this.birthDate,
+    required this.education,
+    required this.city,
+    required this.phone,
+  });
+
+  @override
+  List<Object?> get props => [
+        name,
+        surname,
+        email,
+        imageUrl,
+        bio,
+        interests,
+        skills,
+        birthDate,
+        education,
+        city,
+        phone
+      ];
+}
+
 class EditProfileUpdating extends EditProfileState {}
 
 class EditProfileSuccess extends EditProfileState {}

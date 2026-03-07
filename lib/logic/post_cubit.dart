@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/post_model.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/post_repository.dart';
 import 'post_state.dart';
 
@@ -49,7 +50,7 @@ class PostCubit extends Cubit<PostState> {
       emit(PostLoaded(
           posts: totalPosts, hasMore: hasMoreData, lastDocument: newLastDoc));
     } catch (e) {
-      emit(PostError("Postlar yüklenirken hata oluştu: $e"));
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
     }
   }
 
@@ -70,7 +71,7 @@ class PostCubit extends Cubit<PostState> {
       await repository.addPost(title, desc, imageUrl, uid);
       await refresh();
     } catch (e) {
-      emit(PostError("Gönderi paylaşılırken bir hata oluştu: $e"));
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
     }
   }
 
@@ -145,7 +146,7 @@ class PostCubit extends Cubit<PostState> {
         ));
       }
     } catch (e) {
-      emit(PostError("Yorum eklenemedi: $e"));
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
     }
   }
 }

@@ -46,13 +46,16 @@ dependencies:
   intl: ^0.20.2
   geocoding: ^4.0.0
   geolocator: ^10.1.0
-  google_maps_flutter: ^2.6.0
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
   firebase_messaging: ^16.1.0
   flutter_local_notifications: ^19.5.0
   flutter_launcher_icons: ^0.14.4
   google_fonts: ^6.3.3
   google_generative_ai: ^0.4.7
   flutter_dotenv: ^6.0.0
+  flutter_image_compress: ^2.4.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:

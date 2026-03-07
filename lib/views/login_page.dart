@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth.dart';
+import '../services/firebase_error_translator.dart';
 import '../utils/app_colors.dart';
 import '../utils/validators/validators.dart';
 import 'signUp_page.dart';
@@ -70,18 +70,8 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _auth.signIn(email: email, password: password);
       // Başarılı giriş sonrası yönlendirme main.dart'taki AuthGate ile otomatik olacak
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        _showError('Kullanıcı bulunamadı.');
-      } else if (e.code == 'wrong-password') {
-        _showError('Hatalı şifre.');
-      } else if (e.code == 'invalid-credential') {
-        _showError('Geçersiz bilgiler.');
-      } else {
-        _showError('Giriş hatası: ${e.message}');
-      }
     } catch (e) {
-      _showError('Bir hata oluştu: $e');
+      _showError(FirebaseErrorTranslator.translate(e));
     }
 
     if (mounted) setState(() => _isLoading = false);

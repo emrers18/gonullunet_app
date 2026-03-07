@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/ngo_repository.dart';
 import 'ngo_state.dart';
 
@@ -25,17 +26,32 @@ class NgoCubit extends Cubit<NgoState> {
           _applyFilters();
         },
         onError: (error) {
-          emit(NgoError("Kurumlar yüklenirken hata oluştu: $error"));
+          emit(NgoError(FirebaseErrorTranslator.translate(error)));
         },
       );
     } catch (e) {
-      emit(NgoError("Beklenmedik bir hata: $e"));
+      emit(NgoError(FirebaseErrorTranslator.translate(e)));
     }
   }
 
   void searchNgos(String query) {
     _searchQuery = query;
     _applyFilters();
+  }
+
+  void filterByCity(String? city) {
+    _cityFilter = city;
+    _applyFilters();
+  }
+
+  List<String> get availableCities {
+    final cities = _allNgos
+        .map((ngo) => ngo.location.trim())
+        .where((loc) => loc.isNotEmpty && loc != 'Konum Belirtilmemiş')
+        .toSet()
+        .toList();
+    cities.sort();
+    return cities;
   }
 
   void _applyFilters() {

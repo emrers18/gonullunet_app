@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../models/event_model.dart';
 import '../repo/event_repository.dart';
 import 'event_state.dart';
@@ -27,11 +28,11 @@ class EventCubit extends Cubit<EventState> {
           emit(EventLoaded(events: _allEvents, isNgo: _isNgo));
         },
         onError: (error) {
-          emit(EventError("Etkinlikler yüklenirken hata: $error"));
+          emit(EventError(FirebaseErrorTranslator.translate(error)));
         },
       );
     } catch (e) {
-      emit(EventError("Hata: $e"));
+      emit(EventError(FirebaseErrorTranslator.translate(e)));
     }
   }
 

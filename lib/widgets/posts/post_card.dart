@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -92,7 +93,8 @@ class PostCard extends StatelessWidget {
                   color: Colors.grey.shade200,
                   image: (avatarUrl != null && avatarUrl.isNotEmpty)
                       ? DecorationImage(
-                          image: NetworkImage(avatarUrl), fit: BoxFit.cover)
+                          image: CachedNetworkImageProvider(avatarUrl),
+                          fit: BoxFit.cover)
                       : null,
                 ),
                 child: (avatarUrl == null || avatarUrl.isEmpty)
@@ -144,26 +146,19 @@ class PostCard extends StatelessWidget {
 
   Widget _buildPostImage() {
     return AspectRatio(
-      aspectRatio: 4 / 3,
+      aspectRatio: 1 / 1,
       child: Container(
         width: double.infinity,
         color: Colors.grey.shade100,
-        child: Image.network(
-          post.imageUrl,
+        child: CachedNetworkImage(
+          imageUrl: post.imageUrl,
           fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: AppColors.kPrimaryColor.withOpacity(0.5),
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) =>
+          placeholder: (context, url) => Center(
+            child: CircularProgressIndicator(
+              color: AppColors.kPrimaryColor.withOpacity(0.5),
+            ),
+          ),
+          errorWidget: (context, url, error) =>
               const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
         ),
       ),

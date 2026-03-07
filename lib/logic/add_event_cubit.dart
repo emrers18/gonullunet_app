@@ -2,7 +2,8 @@ import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/logic/add_event_state.dart';
 import 'package:gonullunet_app/repo/event_repository.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:latlong2/latlong.dart';
 
 class AddEventCubit extends Cubit<AddEventState> {
   final EventRepository _repository;
@@ -43,7 +44,7 @@ class AddEventCubit extends Cubit<AddEventState> {
 
       emit(AddEventSuccess());
     } catch (e) {
-      emit(AddEventError("Etkinlik oluşturulamadı: $e"));
+      emit(AddEventError(FirebaseErrorTranslator.translate(e)));
     }
   }
 }

@@ -33,7 +33,7 @@ class ChatRepository {
       model: 'gemini-2.5-flash',
       apiKey: apiKey,
       systemInstruction: Content.system(_systemPrompt),
-      generationConfig: GenerationConfig(maxOutputTokens: 500),
+      generationConfig: GenerationConfig(maxOutputTokens: 2500),
     );
   }
 

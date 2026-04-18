@@ -157,4 +157,41 @@ class PostRepository {
       return snapshot.docs.map((doc) => Comment.fromFirestore(doc)).toList();
     });
   }
+
+  /// Kullanıcının kendi gönderilerini çeker (publisherId'ye göre)
+  Future<List<Post>> fetchMyPosts(String userId) async {
+    final snapshot = await _firestore
+        .collection('posts')
+        .where('publisherId', isEqualTo: userId)
+        .orderBy('createdAt', descending: true)
+        .get();
+    return snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+  }
+
+  /// Gönderi başlığını ve açıklamasını günceller
+  Future<void> updatePost(
+      String postId, String title, String description) async {
+    await _firestore.collection('posts').doc(postId).update({
+      'title': title,
+      'description': description,
+    });
+  }
+
+  /// Gönderiyi ve varsa fotoğrafını Storage'dan siler
+  Future<void> deletePost(String postId, String imageUrl) async {
+    final batch = _firestore.batch();
+    final postRef = _firestore.collection('posts').doc(postId);
+    batch.delete(postRef);
+    await batch.commit();
+
+    // Storage'daki resmi de sil (varsa)
+    if (imageUrl.isNotEmpty) {
+      try {
+        final ref = _storage.refFromURL(imageUrl);
+        await ref.delete();
+      } catch (_) {
+        // Görsel silinememişse sessizce geç
+      }
+    }
+  }
 }

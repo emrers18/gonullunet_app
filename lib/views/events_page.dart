@@ -18,10 +18,28 @@ class EventsPage extends StatefulWidget {
 }
 
 class _EventsPageState extends State<EventsPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     context.read<EventCubit>().loadEvents();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent - 200) {
+        final state = context.read<EventCubit>().state;
+        if (state is EventLoaded && state.hasMore) {
+          context.read<EventCubit>().loadEvents();
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _showAddEventModal() {
@@ -64,7 +82,7 @@ class _EventsPageState extends State<EventsPage> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.map, color: Colors.black54),
+            icon: const Icon(Icons.map_outlined, color: Colors.black54),
             tooltip: "Haritada Göster",
             onPressed: () {
               final state = context.read<EventCubit>().state;
@@ -78,14 +96,15 @@ class _EventsPageState extends State<EventsPage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => EventsMapPage(events: activeEvents),
+                      builder: (context) =>
+                          EventsMapPage(events: activeEvents),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                        content:
-                            Text("Haritada gösterilecek güncel etkinlik yok.")),
+                        content: Text(
+                            "Haritada gösterilecek güncel etkinlik yok.")),
                   );
                 }
               } else {
@@ -98,7 +117,8 @@ class _EventsPageState extends State<EventsPage> {
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list_sharp, color: Colors.black54),
+            icon:
+                const Icon(Icons.filter_list_rounded, color: Colors.black54),
             onPressed: _showFilterModal,
             tooltip: "Etkinlikleri Filtrele",
           ),
@@ -106,62 +126,129 @@ class _EventsPageState extends State<EventsPage> {
       ),
       body: BlocBuilder<EventCubit, EventState>(
         builder: (context, state) {
-          if (state is EventLoading) {
+          // İlk yükleme
+          if (state is EventLoading && state.isFirstFetch) {
             return const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.primaryColor));
+                child: CircularProgressIndicator(
+                    color: AppColors.primaryColor));
           }
 
           if (state is EventError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(20.0),
-                child: Text(
-                  state.message,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.red),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<EventCubit>().refresh(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text("Tekrar Dene"),
+                    ),
+                  ],
                 ),
               ),
             );
           }
 
-          if (state is EventLoaded) {
-            if (state.events.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Henüz hiç etkinlik yok veya filtreye uygun sonuç bulunamadı.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 16),
-                    ),
-                    TextButton(
-                      onPressed: () {
-                        context.read<EventCubit>().clearFilters();
-                      },
-                      child: const Text("Filtreleri Temizle",
-                          style: TextStyle(color: AppColors.primaryColor)),
-                    ),
-                  ],
-                ),
-              );
-            }
+          // Loading more (subsequent) or loaded states
+          final List<dynamic> events;
+          final bool hasMore;
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: state.events.length,
-              itemBuilder: (context, index) {
-                final event = state.events[index];
-                return EventCard(event: event);
-              },
-              separatorBuilder: (context, index) => const SizedBox(height: 24),
+          if (state is EventLoaded) {
+            events = state.events;
+            hasMore = state.hasMore;
+          } else if (state is EventLoading && !state.isFirstFetch) {
+            events = state.oldEvents;
+            hasMore = true;
+          } else {
+            return const SizedBox.shrink();
+          }
+
+          if (events.isEmpty && state is EventLoaded) {
+            return RefreshIndicator(
+              onRefresh: () => context.read<EventCubit>().refresh(),
+              color: AppColors.kPrimaryColor,
+              child: ListView(
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.6,
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.event_busy,
+                              size: 60, color: Colors.grey[300]),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Henüz hiç etkinlik yok veya filtreye uygun sonuç bulunamadı.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                color: Colors.grey[500], fontSize: 16),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              context.read<EventCubit>().clearFilters();
+                            },
+                            child: const Text("Filtreleri Temizle",
+                                style: TextStyle(
+                                    color: AppColors.primaryColor)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
 
-          return const SizedBox.shrink();
+          return RefreshIndicator(
+            onRefresh: () => context.read<EventCubit>().refresh(),
+            color: AppColors.kPrimaryColor,
+            child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              itemCount: events.length + (hasMore ? 1 : 0),
+              itemBuilder: (context, index) {
+                if (index < events.length) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: EventCard(event: events[index]),
+                  );
+                }
+                // Loading indicator at the bottom
+                return const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
         },
       ),
       floatingActionButton: BlocBuilder<EventCubit, EventState>(

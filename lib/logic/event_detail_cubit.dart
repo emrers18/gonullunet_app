@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/event_repository.dart';
 import '../models/event_model.dart';
 import 'event_detail_state.dart';
@@ -16,9 +15,14 @@ class EventDetailCubit extends Cubit<EventDetailState> {
   }
 
   Future<void> _loadPageData() async {
-    final isJoined = _event.participants.contains(_currentUserId);
-    final count = _event.participants.length;
+    bool isJoined = _event.participants.contains(_currentUserId);
 
+    // Proje tipi ise applications alt koleksiyonunu da kontrol et
+    if (!isJoined && _event.type == 'Proje' && _currentUserId.isNotEmpty) {
+      isJoined = await _repository.hasUserApplied(_event.id, _currentUserId);
+    }
+
+    final count = _event.participants.length;
     final organizerName =
         await _repository.getOrganizerName(_event.organizerId);
 
@@ -61,10 +65,12 @@ class EventDetailCubit extends Cubit<EventDetailState> {
           await _repository.toggleJoinEvent(_event.id, _currentUserId);
         }
       } catch (e) {
-        // Hata durumunda state'i geri al
-        emit(currentState);
-        // Kullanıcıya anlaşılır hata göster
-        emit(EventDetailError(FirebaseErrorTranslator.translate(e)));
+        // Hata durumunda state'i geri al — copyWith ile yeni instance oluştur
+        // böylece Equatable skip etmez
+        emit(currentState.copyWith(
+          isJoined: currentState.isJoined,
+          participantCount: currentState.participantCount,
+        ));
       }
     }
   }

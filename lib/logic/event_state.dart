@@ -5,21 +5,37 @@ abstract class EventState extends Equatable {
   const EventState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 class EventInitial extends EventState {}
 
-class EventLoading extends EventState {}
+class EventLoading extends EventState {
+  final bool isFirstFetch;
+  final List<Event> oldEvents;
+
+  const EventLoading({
+    this.isFirstFetch = true,
+    this.oldEvents = const [],
+  });
+
+  @override
+  List<Object?> get props => [isFirstFetch, oldEvents];
+}
 
 class EventLoaded extends EventState {
   final List<Event> events;
   final bool isNgo;
+  final bool hasMore;
 
-  const EventLoaded({required this.events, required this.isNgo});
+  const EventLoaded({
+    required this.events,
+    required this.isNgo,
+    this.hasMore = true,
+  });
 
   @override
-  List<Object> get props => [events, isNgo];
+  List<Object?> get props => [events, isNgo, hasMore];
 }
 
 class EventError extends EventState {
@@ -28,5 +44,5 @@ class EventError extends EventState {
   const EventError(this.message);
 
   @override
-  List<Object> get props => [message];
+  List<Object?> get props => [message];
 }

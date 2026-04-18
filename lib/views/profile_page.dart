@@ -14,6 +14,7 @@ import 'edit_ngo_profile_page.dart';
 import 'edit_volunteer_profile_page.dart';
 import 'notifications_page.dart';
 import 'my_events_page.dart';
+import 'my_posts_page.dart';
 import 'joined_events_page.dart';
 import 'settings_page.dart';
 
@@ -128,9 +129,23 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       _buildDivider(),
                       _buildSettingsItem(
-                        icon: Icons.notifications_none_rounded,
+                        icon: Icons.feed_outlined,
                         iconColor: AppColors.kPrimaryColor,
                         iconBg: AppColors.kPrimaryColor.withOpacity(0.1),
+                        title: 'Gönderilerim',
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const MyPostsPage()));
+                        },
+                      ),
+                      _buildDivider(),
+                      _buildSettingsItem(
+                        icon: Icons.notifications_none_rounded,
+                        iconColor: Colors.orange.shade600,
+                        iconBg: Colors.orange.shade50,
                         title: 'Bildirimler',
                         onTap: () {
                           Navigator.push(

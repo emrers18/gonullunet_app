@@ -11,6 +11,9 @@ import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
 import 'package:gonullunet_app/widgets/posts/post_card.dart';
+import 'package:gonullunet_app/logic/post_cubit.dart';
+import 'package:gonullunet_app/logic/post_state.dart';
+import 'package:gonullunet_app/repo/post_repository.dart';
 
 import '../widgets/ngos/build_contact_title_widget.dart';
 import '../widgets/ngos/build_info_card_widget.dart';
@@ -417,22 +420,34 @@ class _NgoDetailPageState extends State<NgoDetailPage>
   }
 
   Widget _buildEventsList() {
+    final now = DateTime.now();
     return StreamBuilder<QuerySnapshot>(
       stream: _firestore
           .collection('events')
           .where('organizerId', isEqualTo: widget.ngo.id)
-          .orderBy('startDate', descending: false)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("Henüz aktif etkinlik yok."));
+          return const Center(child: Text("Henüz etkinlik yok."));
         }
 
-        final events =
+        final allEvents =
             snapshot.data!.docs.map((doc) => Event.fromFirestore(doc)).toList();
+
+        // Aktif etkinlikler önce (en yakın tarih önceliklisi), geçmiş eventler sonda
+        final active = allEvents
+            .where((e) => (e.endDate ?? e.date).isAfter(now))
+            .toList()
+          ..sort((a, b) => a.date.compareTo(b.date));
+        final expired = allEvents
+            .where((e) => !(e.endDate ?? e.date).isAfter(now))
+            .toList()
+          ..sort((a, b) => b.date.compareTo(a.date)); // en yeni geçmiş önce
+
+        final events = [...active, ...expired];
 
         return ListView.separated(
           padding: const EdgeInsets.all(16.0),
@@ -447,32 +462,85 @@ class _NgoDetailPageState extends State<NgoDetailPage>
   }
 
   Widget _buildPostsList() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: _firestore
-          .collection('posts')
-          .where('publisherId', isEqualTo: widget.ngo.id)
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("Henüz paylaşım yapılmamış."));
-        }
+    return BlocProvider(
+      create: (_) => PostCubit(PostRepository())..loadPosts(),
+      child: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('posts')
+            .where('publisherId', isEqualTo: widget.ngo.id)
+            .orderBy('createdAt', descending: true)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text("Henüz paylaşım yapılmamış."));
+          }
 
-        final posts =
-            snapshot.data!.docs.map((doc) => Post.fromFirestore(doc)).toList();
+          final posts = snapshot.data!.docs
+              .map((doc) => Post.fromFirestore(doc))
+              .toList();
 
-        return ListView.separated(
-          padding: const EdgeInsets.all(16.0),
-          itemCount: posts.length,
-          separatorBuilder: (ctx, index) => const SizedBox(height: 16),
-          itemBuilder: (ctx, index) {
-            return PostCard(post: posts[index]);
-          },
-        );
-      },
+          return ListView.separated(
+            padding: const EdgeInsets.all(16.0),
+            itemCount: posts.length,
+            separatorBuilder: (ctx, index) => const SizedBox(height: 16),
+            itemBuilder: (ctx, index) {
+              return _NgoPostCard(post: posts[index]);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// Her post için kendi [PostCubit]'ini oluşturan sarıcı widget.
+/// Bu sayede STK detay sayfasında beğeni butonu doğru çalışır.
+class _NgoPostCard extends StatefulWidget {
+  final Post post;
+  const _NgoPostCard({required this.post});
+
+  @override
+  State<_NgoPostCard> createState() => _NgoPostCardState();
+}
+
+class _NgoPostCardState extends State<_NgoPostCard> {
+  late PostCubit _cubit;
+
+  @override
+  void initState() {
+    super.initState();
+    // Her kart için sadece bu postu içeren tek-post’luk bir cubit başlat
+    _cubit = PostCubit(PostRepository());
+    _initPost();
+  }
+
+  Future<void> _initPost() async {
+    await _cubit.loadSinglePost(widget.post);
+  }
+
+  @override
+  void dispose() {
+    _cubit.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider.value(
+      value: _cubit,
+      child: BlocBuilder<PostCubit, PostState>(
+        builder: (context, state) {
+          // State'ten PostLoaded'daki postumuzu al; yoksa orijinalini kullan
+          Post displayPost = widget.post;
+          if (state is PostLoaded && state.posts.isNotEmpty) {
+            displayPost = state.posts.first;
+          }
+          return PostCard(post: displayPost);
+        },
+      ),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'dart:ui' as ui;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:gonullunet_app/models/event_model.dart';
@@ -122,30 +123,59 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
       return Marker(
         point: LatLng(e.geoPoint!.latitude, e.geoPoint!.longitude),
-        width: isSelected ? 48 : 36,
-        height: isSelected ? 48 : 36,
+        width: isSelected ? 52 : 40,
+        height: isSelected ? 62 : 48,
+        alignment: Alignment.topCenter,
         child: GestureDetector(
           onTap: () => _onMarkerTapped(index),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            decoration: BoxDecoration(
-              color:
-                  isSelected ? AppColors.kPrimaryColor : Colors.blue.shade400,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  color: (isSelected ? AppColors.kPrimaryColor : Colors.blue)
-                      .withOpacity(0.4),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+          child: AnimatedScale(
+            scale: isSelected ? 1.0 : 0.8,
+            duration: const Duration(milliseconds: 250),
+            curve: Curves.easeOutBack,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: isSelected ? 42 : 34,
+                  height: isSelected ? 42 : 34,
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.kPrimaryColor
+                        : AppColors.kSecondaryColor,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.white,
+                      width: isSelected ? 3 : 2,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: (isSelected
+                                ? AppColors.kPrimaryColor
+                                : AppColors.kSecondaryColor)
+                            .withOpacity(0.4),
+                        blurRadius: isSelected ? 12 : 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Icon(
+                    e.type == 'Proje'
+                        ? Icons.work_rounded
+                        : Icons.event_rounded,
+                    color: Colors.white,
+                    size: isSelected ? 20 : 16,
+                  ),
+                ),
+                // Pin tail
+                CustomPaint(
+                  size: Size(12, isSelected ? 10 : 8),
+                  painter: _PinTailPainter(
+                    color: isSelected
+                        ? AppColors.kPrimaryColor
+                        : AppColors.kSecondaryColor,
+                  ),
                 ),
               ],
-            ),
-            child: Icon(
-              Icons.location_on,
-              color: Colors.white,
-              size: isSelected ? 28 : 20,
             ),
           ),
         ),
@@ -173,7 +203,9 @@ class _EventsMapPageState extends State<EventsMapPage> {
             ),
             children: [
               TileLayer(
-                urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                urlTemplate:
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.gonullunet.gonullunet_app',
               ),
               MarkerLayer(
@@ -572,4 +604,25 @@ class _EventsMapPageState extends State<EventsMapPage> {
       ),
     );
   }
+}
+
+/// Pin'in alt ucundaki üçgen kuyruk çizimi
+class _PinTailPainter extends CustomPainter {
+  final Color color;
+  const _PinTailPainter({required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()..color = color;
+    final path = ui.Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..lineTo(size.width, 0)
+      ..close();
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _PinTailPainter oldDelegate) =>
+      color != oldDelegate.color;
 }

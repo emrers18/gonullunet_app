@@ -26,6 +26,29 @@ class EventRepository {
     });
   }
 
+  /// Paginated event fetch: returns (events, lastDocument) tuple.
+  /// Pass [lastDocument] from the previous call to get the next page.
+  Future<({List<Event> events, DocumentSnapshot? lastDoc})> getEventsPaginated({
+    int limit = 10,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = _firestore
+        .collection('events')
+        .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
+        .orderBy('startDate', descending: false)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    final snapshot = await query.get();
+    final events = snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
+    final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+    return (events: events, lastDoc: lastDoc);
+  }
+
   Future<bool> isUserNgo() async {
     final user = _auth.currentUser;
     if (user == null) return false;
@@ -89,6 +112,7 @@ class EventRepository {
       'organizerId': user.uid,
       'createdAt': FieldValue.serverTimestamp(),
       'participants': [],
+      'approved_volunteers': [user.uid],
       'active': true,
       'isProject': type == 'Proje',
     });
@@ -96,19 +120,37 @@ class EventRepository {
 
   Future<void> toggleJoinEvent(String eventId, String userId) async {
     final eventRef = _firestore.collection('events').doc(eventId);
+    final appRef = eventRef.collection('applications').doc(userId);
     final doc = await eventRef.get();
 
     if (doc.exists) {
       List<String> participants =
           List<String>.from(doc.data()?['participants'] ?? []);
 
+      final batch = _firestore.batch();
+
       if (participants.contains(userId)) {
         participants.remove(userId);
+        batch.delete(appRef);
+        batch.update(eventRef, {
+          'participants': participants,
+          'approved_volunteers': FieldValue.arrayRemove([userId])
+        });
       } else {
         participants.add(userId);
+        batch.set(appRef, {
+          'userId': userId,
+          'eventId': eventId,
+          'status': 'approved',
+          'appliedAt': FieldValue.serverTimestamp(),
+        });
+        batch.update(eventRef, {
+          'participants': participants,
+          'approved_volunteers': FieldValue.arrayUnion([userId])
+        });
       }
 
-      await eventRef.update({'participants': participants});
+      await batch.commit();
     }
   }
 
@@ -141,7 +183,21 @@ class EventRepository {
     });
   }
 
+  /// Kullanıcının bu etkinliğe daha önce başvurup başvurmadığını kontrol eder.
+  Future<bool> hasUserApplied(String eventId, String userId) async {
+    final doc = await _firestore
+        .collection('events')
+        .doc(eventId)
+        .collection('applications')
+        .doc(userId)
+        .get();
+    return doc.exists;
+  }
+
   Future<List<ApplicationModel>> getEventApplications(String eventId) async {
+    final eventDoc = await _firestore.collection('events').doc(eventId).get();
+    List<String> participants = List<String>.from(eventDoc.data()?['participants'] ?? []);
+
     final querySnapshot = await _firestore
         .collection('events')
         .doc(eventId)
@@ -150,9 +206,11 @@ class EventRepository {
         .get();
 
     List<ApplicationModel> applications = [];
+    Set<String> processedUserIds = {};
 
     for (var doc in querySnapshot.docs) {
       var app = ApplicationModel.fromFirestore(doc);
+      processedUserIds.add(app.userId);
 
       var userDoc = await _firestore.collection('users').doc(app.userId).get();
       if (userDoc.exists) {
@@ -165,6 +223,27 @@ class EventRepository {
       }
       applications.add(app);
     }
+
+    // Olan participants(katılımcılar) listesinde olup applications koleksiyonunda olmayanlar (eski veriler için)
+    for (String userId in participants) {
+      if (!processedUserIds.contains(userId)) {
+        var userDoc = await _firestore.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          var userData = userDoc.data();
+          applications.add(ApplicationModel(
+            id: userId,
+            userId: userId,
+            eventId: eventId,
+            status: 'approved', // Katılımcıysa zaten onaylı gibidir
+            appliedAt: (eventDoc.data()?['createdAt'] as Timestamp?) ?? Timestamp.now(),
+            userName: userData?['name'],
+            userSurname: userData?['surname'],
+            userImageUrl: userData?['imageUrl'],
+          ));
+        }
+      }
+    }
+
     return applications;
   }
 
@@ -185,11 +264,13 @@ class EventRepository {
 
     if (newStatus == 'approved') {
       batch.update(eventRef, {
-        'participants': FieldValue.arrayUnion([userId])
+        'participants': FieldValue.arrayUnion([userId]),
+        'approved_volunteers': FieldValue.arrayUnion([userId])
       });
     } else if (newStatus == 'rejected' || newStatus == 'pending') {
       batch.update(eventRef, {
-        'participants': FieldValue.arrayRemove([userId])
+        'participants': FieldValue.arrayRemove([userId]),
+        'approved_volunteers': FieldValue.arrayRemove([userId])
       });
     }
 

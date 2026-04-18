@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/posts/post_card.dart';
@@ -15,6 +16,10 @@ import '../logic/user_state.dart';
 import '../repo/notification_repository.dart';
 import '../services/notification_service.dart';
 import 'notifications_page.dart';
+import 'ai/chat_history_page.dart';
+import 'events_page.dart';
+import 'ngos_page.dart';
+import 'active_chats_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -63,6 +68,10 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void _navigate(Widget page) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,21 +87,14 @@ class _HomePageState extends State<HomePage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // SOL TARAF: Kullanıcı Bilgisi (Cubit ile yönetilir)
                   Expanded(child: _buildUserHeader()),
-
-                  // SAĞ TARAF: Bildirim İkonu ve Rozet (Badge)
                   StreamBuilder<int>(
                     stream: _notificationRepo.getUnreadCountStream(),
                     builder: (context, snapshot) {
                       int count = 0;
-                      if (snapshot.hasData) {
-                        count = snapshot.data!;
-                      }
-
+                      if (snapshot.hasData) count = snapshot.data!;
                       return Stack(
-                        clipBehavior:
-                            Clip.none, // Rozetin dışarı taşmasına izin ver
+                        clipBehavior: Clip.none,
                         children: [
                           Container(
                             decoration: BoxDecoration(
@@ -102,10 +104,8 @@ class _HomePageState extends State<HomePage> {
                             ),
                             child: IconButton(
                               icon: const Icon(Icons.notifications_none_rounded,
-                                  color:
-                                      AppColors.primaryText), // Koyu Mavi/Gri
+                                  color: AppColors.primaryText),
                               onPressed: () {
-                                // Bildirimler Sayfasına Yönlendir
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -116,8 +116,6 @@ class _HomePageState extends State<HomePage> {
                               },
                             ),
                           ),
-
-                          // Eğer okunmamış bildirim varsa kırmızı rozet göster
                           if (count > 0)
                             Positioned(
                               right: 0,
@@ -129,14 +127,9 @@ class _HomePageState extends State<HomePage> {
                                   shape: BoxShape.circle,
                                 ),
                                 constraints: const BoxConstraints(
-                                  minWidth: 18,
-                                  minHeight: 18,
-                                ),
+                                    minWidth: 18, minHeight: 18),
                                 child: Text(
-                                  count > 9
-                                      ? '9+'
-                                      : count
-                                          .toString(), // 9'dan büyükse 9+ yaz
+                                  count > 9 ? '9+' : count.toString(),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 10,
@@ -158,64 +151,99 @@ class _HomePageState extends State<HomePage> {
       ),
       body: BlocBuilder<PostCubit, PostState>(
         builder: (context, state) {
-          // 1. Yükleniyor (İlk Açılış)
           if (state is PostLoading && state.isFirstFetch) {
             return const Center(
                 child:
                     CircularProgressIndicator(color: AppColors.primaryColor));
           }
 
-          // 2. Yüklendi (Veriler Var veya Liste Boş)
           if (state is PostLoaded ||
               (state is PostLoading && !state.isFirstFetch)) {
             final posts = (state is PostLoading)
                 ? state.oldPosts
                 : (state as PostLoaded).posts;
 
-            if (posts.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.feed_outlined,
-                        size: 60, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
-                    Text(
-                      "Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              );
-            }
-
             return RefreshIndicator(
               onRefresh: () => context.read<PostCubit>().refresh(),
               color: AppColors.kPrimaryColor,
-              child: ListView.separated(
+              child: CustomScrollView(
                 controller: _scrollController,
-                padding: const EdgeInsets.fromLTRB(
-                    16, 8, 16, 80), // FAB için alttan boşluk
-                itemCount: posts.length + (state is PostLoading ? 1 : 0),
-                separatorBuilder: (_, __) => const SizedBox(height: 16),
-                itemBuilder: (context, index) {
-                  if (index < posts.length) {
-                    return PostCard(post: posts[index]);
-                  } else {
-                    // En alttaki sayfalama (pagination) yükleyicisi
-                    return const Center(
-                        child: Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(
-                                color: AppColors.primaryColor)));
-                  }
-                },
+                slivers: [
+                  // ── Quick Navigation Section ──
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                      child: _QuickNavSection(onNavigate: _navigate),
+                    ),
+                  ),
+
+                  // ── Feed header ──
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 10),
+                      child: Text(
+                        'SON GÖNDERİLER',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade500,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // ── Empty feed ──
+                  if (posts.isEmpty)
+                    SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.feed_outlined,
+                                size: 60, color: Colors.grey[300]),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!',
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.grey[500]),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else ...[
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 80),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index < posts.length) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: PostCard(post: posts[index]),
+                              );
+                            }
+                            return const Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(16),
+                                child: CircularProgressIndicator(
+                                    color: AppColors.primaryColor),
+                              ),
+                            );
+                          },
+                          childCount:
+                              posts.length + (state is PostLoading ? 1 : 0),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             );
           }
 
-          // 3. Hata Durumu
           if (state is PostError) {
             return Center(
               child: Padding(
@@ -235,10 +263,10 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddPostModal,
         heroTag: 'add_post_fab',
-        backgroundColor: AppColors.primaryColor, // Ana Mavi Renk
+        backgroundColor: AppColors.primaryColor,
         elevation: 4,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(32), // Daha yuvarlak köşeler
+          borderRadius: BorderRadius.circular(32),
         ),
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -251,13 +279,10 @@ class _HomePageState extends State<HomePage> {
         String displayName = 'Gönüllü';
         String? imageUrl;
 
-        // Veri UserCubit'ten geldiyse kullan
         if (state is UserLoaded) {
           displayName = state.user.displayName;
           imageUrl = state.user.imageUrl;
-        }
-        // Cubit henüz yüklenmediyse ve elimizde ID varsa geçici olarak Stream dene (Fallback)
-        else if (_currentUserId != null) {
+        } else if (_currentUserId != null) {
           return StreamBuilder<DocumentSnapshot>(
             stream: FirebaseFirestore.instance
                 .collection('users')
@@ -298,7 +323,7 @@ class _HomePageState extends State<HomePage> {
           ),
           child: CircleAvatar(
             radius: 24,
-            backgroundColor: AppColors.lightPrimaryColor, // Açık Mavi Zemin
+            backgroundColor: AppColors.lightPrimaryColor,
             backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImageProvider(imageUrl)
                 : null,
@@ -306,7 +331,7 @@ class _HomePageState extends State<HomePage> {
                 ? Text(
                     displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
                     style: const TextStyle(
-                        color: AppColors.darkPrimaryColor, // Koyu Mavi Harf
+                        color: AppColors.darkPrimaryColor,
                         fontWeight: FontWeight.bold,
                         fontSize: 18),
                   )
@@ -319,19 +344,19 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text(
+              Text(
                 'Merhaba, 👋',
-                style: TextStyle(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 13,
-                  color: AppColors.secondaryText, // Gri Metin
+                  color: AppColors.secondaryText,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               Text(
                 displayName,
-                style: const TextStyle(
+                style: GoogleFonts.plusJakartaSans(
                   fontSize: 17,
-                  color: AppColors.primaryText, // Koyu Metin
+                  color: AppColors.primaryText,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -341,6 +366,99 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  Quick Navigation Section – Instagram Story Style
+// ─────────────────────────────────────────────────
+class _QuickNavSection extends StatelessWidget {
+  final void Function(Widget page) onNavigate;
+
+  const _QuickNavSection({required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 64,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _StoryBubble(
+            icon: Icons.explore_rounded,
+            label: 'Keşfet',
+            gradientColors: const [Color(0xFF6C63FF), Color(0xFF957DFF)],
+            onTap: () => onNavigate(const EventsPage()),
+          ),
+          _StoryBubble(
+            icon: Icons.corporate_fare_rounded,
+            label: 'Kurumlar',
+            gradientColors: const [Color(0xFF00897B), Color(0xFF4DB6AC)],
+            onTap: () => onNavigate(const NgosPage()),
+          ),
+          _StoryBubble(
+            icon: Icons.chat_bubble_rounded,
+            label: 'Mesajlar',
+            gradientColors: const [Color(0xFFFF6B35), Color(0xFFFFAB76)],
+            onTap: () => onNavigate(const ActiveChatsPage()),
+          ),
+          _StoryBubble(
+            icon: Icons.auto_awesome_rounded,
+            label: 'AI Asistan',
+            gradientColors: const [Color(0xFFFF5722), Color(0xFF03A9F4)],
+            onTap: () => onNavigate(const ChatHistoryPage()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StoryBubble extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final List<Color> gradientColors;
+  final VoidCallback onTap;
+
+  const _StoryBubble({
+    required this.icon,
+    required this.label,
+    required this.gradientColors,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors.first.withOpacity(0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Icon(
+            icon,
+            size: 26,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 }

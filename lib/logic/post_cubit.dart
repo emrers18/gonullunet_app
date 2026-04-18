@@ -80,6 +80,13 @@ class PostCubit extends Cubit<PostState> {
     await loadPosts();
   }
 
+  /// STK detay sayfası gibi tek post'u bağımsız olarak yönetmek için.
+  Future<void> loadSinglePost(Post post) async {
+    final liked = await repository.isPostLiked(post.id);
+    final hydrated = post.copyWith(isLiked: liked);
+    emit(PostLoaded(posts: [hydrated], hasMore: false));
+  }
+
   Future<void> toggleLike(String postId) async {
     final currentState = state;
     if (currentState is! PostLoaded) return;
@@ -146,6 +153,80 @@ class PostCubit extends Cubit<PostState> {
         ));
       }
     } catch (e) {
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
+    }
+  }
+
+  /// Kullanıcının kendi gönderilerini yükler
+  Future<void> loadMyPosts(String userId) async {
+    emit(const PostLoading([], isFirstFetch: true));
+    try {
+      final posts = await repository.fetchMyPosts(userId);
+      final hydratedPosts = await _hydrateLikeStatus(posts);
+      emit(PostLoaded(posts: hydratedPosts, hasMore: false));
+    } catch (e) {
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
+    }
+  }
+
+  /// Kendi gönderisini günceller
+  Future<void> updatePost(
+      String postId, String title, String description) async {
+    try {
+      await repository.updatePost(postId, title, description);
+
+      final currentState = state;
+      if (currentState is PostLoaded) {
+        final updatedPosts = currentState.posts.map((post) {
+          if (post.id == postId) {
+            return Post(
+              id: post.id,
+              title: title,
+              description: description,
+              imageUrl: post.imageUrl,
+              createdAt: post.createdAt,
+              likeCount: post.likeCount,
+              commentCount: post.commentCount,
+              publisherId: post.publisherId,
+              isLiked: post.isLiked,
+            );
+          }
+          return post;
+        }).toList();
+        emit(PostLoaded(
+          posts: updatedPosts,
+          hasMore: currentState.hasMore,
+          lastDocument: currentState.lastDocument,
+        ));
+      }
+    } catch (e) {
+      emit(PostError(FirebaseErrorTranslator.translate(e)));
+    }
+  }
+
+  /// Kendi gönderisini siler (optimistik güncelleme)
+  Future<void> deletePost(String postId, String imageUrl) async {
+    final currentState = state;
+    if (currentState is! PostLoaded) return;
+
+    // Optimistik: listeden çıkar
+    final updatedPosts =
+        currentState.posts.where((p) => p.id != postId).toList();
+    emit(PostLoaded(
+      posts: updatedPosts,
+      hasMore: currentState.hasMore,
+      lastDocument: currentState.lastDocument,
+    ));
+
+    try {
+      await repository.deletePost(postId, imageUrl);
+    } catch (e) {
+      // Rollback
+      emit(PostLoaded(
+        posts: currentState.posts,
+        hasMore: currentState.hasMore,
+        lastDocument: currentState.lastDocument,
+      ));
       emit(PostError(FirebaseErrorTranslator.translate(e)));
     }
   }

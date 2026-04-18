@@ -5,6 +5,7 @@ import 'events_page.dart';
 import 'home_page.dart';
 import 'ngos_page.dart';
 import 'profile_page.dart';
+import 'active_chats_page.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -46,6 +47,14 @@ class AiChat extends StatelessWidget {
   }
 }
 
+class ActiveChatsTab extends StatelessWidget {
+  const ActiveChatsTab({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return const ActiveChatsPage();
+  }
+}
+
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
@@ -60,8 +69,9 @@ class _MainPageState extends State<MainPage> {
     Home(),
     Events(),
     Ngos(),
-    Profile(),
+    ActiveChatsTab(),
     AiChat(),
+    Profile(),
   ];
 
   void _onItemTapped(int index) {

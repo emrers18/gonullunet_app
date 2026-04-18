@@ -69,6 +69,9 @@ class _EventBodyState extends State<_EventBody> {
     final dayName = DateFormat('EEEE', 'tr_TR').format(event.date);
 
     final bool isProject = (event.type == 'Proje');
+    // Etkinlik/proje süresi doldu mu?
+    final DateTime effectiveEndDate = event.endDate ?? event.date;
+    final bool isExpired = effectiveEndDate.isBefore(DateTime.now());
 
     return Stack(
       children: [
@@ -376,6 +379,36 @@ class _EventBodyState extends State<_EventBody> {
                 return const SizedBox.shrink();
               }
 
+              // --- Süresi dolmuşsa buton gösterme ---
+              if (isExpired) {
+                return Container(
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.event_busy,
+                            color: Colors.grey.shade500, size: 22),
+                        const SizedBox(width: 10),
+                        Text(
+                          "Bu etkinliğin süresi doldu",
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
               bool isJoined = false;
               int currentCount = event.participants.length;
 
@@ -399,9 +432,7 @@ class _EventBodyState extends State<_EventBody> {
 
               bool isButtonEnabled = isJoined || !isFull;
 
-              String buttonText = isProject
-                  ? (isJoined ? "Başvuruldu" : "Başvur")
-                  : (isJoined ? "Katıldın" : "Katıl");
+              String buttonText = isJoined ? "Başvurdun" : "Başvur";
 
               if (!isJoined && isFull) {
                 buttonText = "Kontenjan Dolu";

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
@@ -8,32 +9,76 @@ import 'event_state.dart';
 
 class EventCubit extends Cubit<EventState> {
   final EventRepository _repository;
-  StreamSubscription? _eventSubscription;
-  List<Event> _allEvents = [];
-
+  final List<Event> _allEvents = [];
+  DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
+  bool _isFetching = false;
   bool _isNgo = false;
+
+  // Filter state
+  String? _filterCity;
+  String? _filterCategory;
+  DateTimeRange? _filterDateRange;
+
+  static const int _pageSize = 10;
 
   EventCubit(this._repository) : super(EventInitial());
 
   Future<void> loadEvents() async {
+    if (_isFetching) return;
+    _isFetching = true;
+
     try {
-      emit(EventLoading());
+      // If first fetch, show full loading
+      if (_allEvents.isEmpty) {
+        emit(const EventLoading(isFirstFetch: true));
+        _isNgo = await _repository.isUserNgo();
+      } else {
+        // Subsequent fetches: show loading indicator at bottom
+        emit(EventLoading(
+          isFirstFetch: false,
+          oldEvents: _getFilteredEvents(),
+        ));
+      }
 
-      _isNgo = await _repository.isUserNgo();
-      _eventSubscription?.cancel();
+      if (!_hasMore) {
+        emit(EventLoaded(
+          events: _getFilteredEvents(),
+          isNgo: _isNgo,
+          hasMore: false,
+        ));
+        _isFetching = false;
+        return;
+      }
 
-      _eventSubscription = _repository.getEventsStream().listen(
-        (events) {
-          _allEvents = events;
-          emit(EventLoaded(events: _allEvents, isNgo: _isNgo));
-        },
-        onError: (error) {
-          emit(EventError(FirebaseErrorTranslator.translate(error)));
-        },
+      final result = await _repository.getEventsPaginated(
+        limit: _pageSize,
+        lastDocument: _lastDocument,
       );
+
+      _allEvents.addAll(result.events);
+      _lastDocument = result.lastDoc;
+      _hasMore = result.events.length >= _pageSize;
+
+      emit(EventLoaded(
+        events: _getFilteredEvents(),
+        isNgo: _isNgo,
+        hasMore: _hasMore,
+      ));
     } catch (e) {
       emit(EventError(FirebaseErrorTranslator.translate(e)));
+    } finally {
+      _isFetching = false;
     }
+  }
+
+  /// Pull-to-refresh: reset pagination and reload from scratch
+  Future<void> refresh() async {
+    _allEvents.clear();
+    _lastDocument = null;
+    _hasMore = true;
+    _isFetching = false;
+    await loadEvents();
   }
 
   void filterEvents({
@@ -41,38 +86,59 @@ class EventCubit extends Cubit<EventState> {
     String? category,
     DateTimeRange? dateRange,
   }) {
-    List<Event> filteredList = _allEvents;
+    _filterCity = city;
+    _filterCategory = category;
+    _filterDateRange = dateRange;
 
-    if (city != null && city.isNotEmpty) {
-      filteredList = filteredList.where((event) {
-        return event.location.toLowerCase().contains(city.toLowerCase());
-      }).toList();
-    }
-
-    if (category != null && category.isNotEmpty && category != 'Tümü') {
-      filteredList = filteredList.where((event) {
-        return event.category == category;
-      }).toList();
-    }
-
-    if (dateRange != null) {
-      filteredList = filteredList.where((event) {
-        return event.date
-                .isAfter(dateRange.start.subtract(const Duration(days: 1))) &&
-            event.date.isBefore(dateRange.end.add(const Duration(days: 1)));
-      }).toList();
-    }
-
-    emit(EventLoaded(events: filteredList, isNgo: _isNgo));
+    emit(EventLoaded(
+      events: _getFilteredEvents(),
+      isNgo: _isNgo,
+      hasMore: _hasMore,
+    ));
   }
 
   void clearFilters() {
-    emit(EventLoaded(events: _allEvents, isNgo: _isNgo));
+    _filterCity = null;
+    _filterCategory = null;
+    _filterDateRange = null;
+
+    emit(EventLoaded(
+      events: _allEvents,
+      isNgo: _isNgo,
+      hasMore: _hasMore,
+    ));
   }
 
-  @override
-  Future<void> close() {
-    _eventSubscription?.cancel();
-    return super.close();
+  List<Event> _getFilteredEvents() {
+    List<Event> filteredList = _allEvents;
+
+    if (_filterCity != null && _filterCity!.isNotEmpty) {
+      filteredList = filteredList.where((event) {
+        return event.location
+            .toLowerCase()
+            .contains(_filterCity!.toLowerCase());
+      }).toList();
+    }
+
+    if (_filterCategory != null &&
+        _filterCategory!.isNotEmpty &&
+        _filterCategory != 'Tümü') {
+      filteredList = filteredList.where((event) {
+        return event.category == _filterCategory;
+      }).toList();
+    }
+
+    if (_filterDateRange != null) {
+      filteredList = filteredList.where((event) {
+        return event.date.isAfter(
+                _filterDateRange!.start.subtract(const Duration(days: 1))) &&
+            event.date
+                .isBefore(_filterDateRange!.end.add(const Duration(days: 1)));
+      }).toList();
+    }
+
+    return filteredList;
   }
+
+
 }

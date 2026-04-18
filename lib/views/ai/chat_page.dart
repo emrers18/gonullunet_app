@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
@@ -48,21 +49,67 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.darkPrimaryColor,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
-        title: const Row(
+        scrolledUnderElevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.kTextColor, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Row(
           children: [
-            Icon(Icons.auto_awesome, size: 22),
-            SizedBox(width: 8),
-            Text(
-              'Gönüllü AI',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 34,
+              height: 34,
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF004E89), Color(0xFF03A9F4)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
               ),
+              child: const Icon(Icons.auto_awesome,
+                  size: 18, color: Colors.white),
+            ),
+            const SizedBox(width: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Gönüllü AI',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.kTextColor,
+                  ),
+                ),
+                Text(
+                  'Akıllı Asistan',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    color: AppColors.primaryColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ],
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.darkPrimaryColor.withOpacity(0.3),
+                  AppColors.primaryColor.withOpacity(0.05),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
       body: BlocConsumer<ChatCubit, ChatState>(
@@ -109,20 +156,28 @@ class _ChatPageState extends State<ChatPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.error_outline,
-                        size: 48, color: AppColors.accentColor),
-                    const SizedBox(height: 12),
+                    Icon(Icons.cloud_off_rounded,
+                        size: 52, color: Colors.grey.shade300),
+                    const SizedBox(height: 16),
                     Text(
                       state.message,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: AppColors.secondaryText),
+                      style: GoogleFonts.plusJakartaSans(
+                          color: Colors.grey.shade500),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => context
                           .read<ChatCubit>()
                           .loadMessages(widget.sessionId),
-                      child: const Text('Tekrar Dene'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.darkPrimaryColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('Tekrar Dene',
+                          style: GoogleFonts.plusJakartaSans()),
                     ),
                   ],
                 ),
@@ -141,81 +196,143 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+      child: Column(
+        children: [
+          // AI Avatar with gradient + glow
+          Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF004E89), Color(0xFF03A9F4)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.darkPrimaryColor.withOpacity(0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: const Icon(Icons.auto_awesome,
+                size: 38, color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Merhaba! 👋',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColors.kTextColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Ben GönüllüNet AI Asistanı.\nErasmus+, gönüllülük projeleri ve STK\'lar\nhakkında sorularınızı yanıtlayabilirim.',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+              height: 1.6,
+            ),
+          ),
+          const SizedBox(height: 28),
+          // Suggestion chips
+          Text(
+            'HIZLI BAŞLANGIÇ',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey.shade400,
+              letterSpacing: 1.2,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: [
+              _SuggestionCard(
+                icon: Icons.public_rounded,
+                text: 'Erasmus+ nedir?',
+                onTap: () => context.read<ChatCubit>().sendMessage('Erasmus+ nedir?'),
+              ),
+              _SuggestionCard(
+                icon: Icons.volunteer_activism_rounded,
+                text: 'Nasıl gönüllü olabilirim?',
+                onTap: () => context.read<ChatCubit>().sendMessage('Nasıl gönüllü olabilirim?'),
+              ),
+              _SuggestionCard(
+                icon: Icons.corporate_fare_rounded,
+                text: 'STK\'lara nasıl katılırım?',
+                onTap: () => context.read<ChatCubit>().sendMessage('STK\'lara nasıl katılırım?'),
+              ),
+              _SuggestionCard(
+                icon: Icons.search_rounded,
+                text: 'Bana yakın etkinlikler',
+                onTap: () => context.read<ChatCubit>().sendMessage('Bana yakın gönüllülük etkinlikleri nelerdir?'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SuggestionCard extends StatelessWidget {
+  final IconData icon;
+  final String text;
+  final VoidCallback onTap;
+
+  const _SuggestionCard({
+    required this.icon,
+    required this.text,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: AppColors.darkPrimaryColor.withOpacity(0.15),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.darkPrimaryColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.auto_awesome,
-                size: 48,
+            Icon(icon, size: 16, color: AppColors.darkPrimaryColor),
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
                 color: AppColors.darkPrimaryColor,
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Merhaba! 👋',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primaryText,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Ben GönüllüNet AI Asistanı.\n'
-              'Erasmus+, gönüllülük projeleri ve STK\'lar\n'
-              'hakkında sorularınızı yanıtlayabilirim.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.secondaryText,
-                height: 1.5,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildSuggestionChip('Erasmus+ nedir?'),
-                _buildSuggestionChip('Nasıl gönüllü olabilirim?'),
-                _buildSuggestionChip('STK\'lara nasıl katılırım?'),
-              ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSuggestionChip(String text) {
-    return ActionChip(
-      label: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 13,
-          color: AppColors.darkPrimaryColor,
-        ),
-      ),
-      backgroundColor: AppColors.lightPrimaryColor.withOpacity(0.4),
-      side: BorderSide(
-        color: AppColors.darkPrimaryColor.withOpacity(0.3),
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      onPressed: () {
-        context.read<ChatCubit>().sendMessage(text);
-      },
     );
   }
 }

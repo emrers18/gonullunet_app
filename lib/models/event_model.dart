@@ -14,6 +14,7 @@ class Event {
   final String category;
   final String type; // 'Etkinlik' veya 'Proje'
   final int? quota;
+  final List<String> approvedVolunteers;
 
   Event({
     required this.id,
@@ -29,6 +30,7 @@ class Event {
     required this.category,
     required this.type,
     this.quota,
+    required this.approvedVolunteers,
   });
 
   factory Event.fromFirestore(DocumentSnapshot doc) {
@@ -60,6 +62,8 @@ class Event {
       category: data['category'] ?? 'Genel',
       type: data['type'] ?? 'Etkinlik',
       quota: data['quota'],
+      approvedVolunteers:
+          List<String>.from(data['approved_volunteers'] ?? []),
     );
   }
 }

@@ -179,16 +179,19 @@ class _NgosViewState extends State<NgosView> {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-          elevation: 0,
-          centerTitle: true,
-          title: const Text(
-            'Kurumlar',
-            style: TextStyle(
-              color: AppColors.primaryText,
-              fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
-            ),
-          )),
+        backgroundColor: AppColors.kBackgroundColor,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        title: Text(
+          'Kurumlar',
+          style: GoogleFonts.plusJakartaSans(
+            color: AppColors.kTextColor,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+      ),
       body: Column(
         children: [
           Container(

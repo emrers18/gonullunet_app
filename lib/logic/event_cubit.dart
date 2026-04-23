@@ -74,6 +74,9 @@ class EventCubit extends Cubit<EventState> {
 
   /// Pull-to-refresh: reset pagination and reload from scratch
   Future<void> refresh() async {
+    _filterCity = null;
+    _filterCategory = null;
+    _filterDateRange = null;
     _allEvents.clear();
     _lastDocument = null;
     _hasMore = true;

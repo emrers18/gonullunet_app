@@ -17,9 +17,13 @@ import '../repo/notification_repository.dart';
 import '../services/notification_service.dart';
 import 'notifications_page.dart';
 import 'ai/chat_history_page.dart';
-import 'events_page.dart';
-import 'ngos_page.dart';
-import 'active_chats_page.dart';
+import 'package:gonullunet_app/views/events_page.dart';
+import 'package:gonullunet_app/views/ngos_page.dart';
+import 'package:gonullunet_app/views/active_chats_page.dart';
+import 'package:gonullunet_app/views/event_detail_page.dart';
+import 'package:gonullunet_app/models/event_model.dart';
+import 'package:gonullunet_app/repo/event_repository.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -61,11 +65,7 @@ class _HomePageState extends State<HomePage> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => const AddPostModal(),
-    ).then((_) {
-      if (mounted) {
-        context.read<PostCubit>().refresh();
-      }
-    });
+    );
   }
 
   void _navigate(Widget page) {
@@ -76,79 +76,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(75.0),
-        child: Container(
-          color: Colors.transparent,
-          child: SafeArea(
-            child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(child: _buildUserHeader()),
-                  StreamBuilder<int>(
-                    stream: _notificationRepo.getUnreadCountStream(),
-                    builder: (context, snapshot) {
-                      int count = 0;
-                      if (snapshot.hasData) count = snapshot.data!;
-                      return Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.grey.shade200),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.notifications_none_rounded,
-                                  color: AppColors.primaryText),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        const NotificationsPage(),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                          if (count > 0)
-                            Positioned(
-                              right: 0,
-                              top: 0,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
-                                  shape: BoxShape.circle,
-                                ),
-                                constraints: const BoxConstraints(
-                                    minWidth: 18, minHeight: 18),
-                                child: Text(
-                                  count > 9 ? '9+' : count.toString(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: null,
       body: BlocBuilder<PostCubit, PostState>(
         builder: (context, state) {
           if (state is PostLoading && state.isFirstFetch) {
@@ -169,12 +97,21 @@ class _HomePageState extends State<HomePage> {
               child: CustomScrollView(
                 controller: _scrollController,
                 slivers: [
-                  // ── Quick Navigation Section ──
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-                      child: _QuickNavSection(onNavigate: _navigate),
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: _HomeHeaderDelegate(
+                      topPadding: MediaQuery.of(context).padding.top,
+                      onNavigate: _navigate,
+                      notificationRepo: _notificationRepo,
+                      scrollController: _scrollController,
+                      buildUserHeader: (isDark) =>
+                          _buildUserHeader(isDark: isDark),
                     ),
+                  ),
+
+                  // ── Events Preview Section ──
+                  SliverToBoxAdapter(
+                    child: _EventPreviewSection(onNavigate: _navigate),
                   ),
 
                   // ── Feed header ──
@@ -273,7 +210,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildUserHeader() {
+  Widget _buildUserHeader({bool isDark = false}) {
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, state) {
         String displayName = 'Gönüllü';
@@ -302,38 +239,45 @@ class _HomePageState extends State<HomePage> {
                 }
                 imageUrl = data['imageUrl'];
               }
-              return _buildHeaderContent(displayName, imageUrl);
+              return _buildHeaderContent(displayName, imageUrl, isDark: isDark);
             },
           );
         }
 
-        return _buildHeaderContent(displayName, imageUrl);
+        return _buildHeaderContent(displayName, imageUrl, isDark: isDark);
       },
     );
   }
 
-  Widget _buildHeaderContent(String displayName, String? imageUrl) {
+  Widget _buildHeaderContent(String displayName, String? imageUrl,
+      {bool isDark = false, bool isCollapsed = false}) {
     return Row(
       children: [
         Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
             border: Border.all(
-                color: AppColors.darkPrimaryColor.withOpacity(0.2), width: 2),
+                color: isDark
+                    ? Colors.white.withOpacity(0.3)
+                    : AppColors.darkPrimaryColor.withOpacity(0.2),
+                width: 2),
           ),
           child: CircleAvatar(
-            radius: 24,
-            backgroundColor: AppColors.lightPrimaryColor,
+            radius: isCollapsed ? 16 : 24,
+            backgroundColor: isDark
+                ? Colors.white.withOpacity(0.2)
+                : AppColors.lightPrimaryColor,
             backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImageProvider(imageUrl)
                 : null,
             child: (imageUrl == null || imageUrl.isEmpty)
                 ? Text(
                     displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
-                    style: const TextStyle(
-                        color: AppColors.darkPrimaryColor,
+                    style: TextStyle(
+                        color:
+                            isDark ? Colors.white : AppColors.darkPrimaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: 18),
+                        fontSize: isCollapsed ? 14 : 18),
                   )
                 : null,
           ),
@@ -344,19 +288,20 @@ class _HomePageState extends State<HomePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'Merhaba, 👋',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  color: AppColors.secondaryText,
-                  fontWeight: FontWeight.w500,
+              if (!isCollapsed)
+                Text(
+                  'Merhaba, 👋',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 13,
+                    color: isDark ? Colors.white70 : AppColors.secondaryText,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              ),
               Text(
                 displayName,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17,
-                  color: AppColors.primaryText,
+                  fontSize: isCollapsed ? 15 : 17,
+                  color: isDark ? Colors.white : AppColors.primaryText,
                   fontWeight: FontWeight.bold,
                 ),
                 maxLines: 1,
@@ -370,44 +315,195 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
+class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double topPadding;
+  final void Function(Widget page) onNavigate;
+  final NotificationRepository notificationRepo;
+  final ScrollController scrollController;
+  final Widget Function(bool isDark) buildUserHeader;
+
+  _HomeHeaderDelegate({
+    required this.topPadding,
+    required this.onNavigate,
+    required this.notificationRepo,
+    required this.scrollController,
+    required this.buildUserHeader,
+  });
+
+  @override
+  double get minExtent => 85 + topPadding;
+
+  @override
+  double get maxExtent => 205 + topPadding;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
+    final isCollapsed = progress > 0.5;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6B35), Color(0xFFFF8E53)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32 * (1 - progress).clamp(0.5, 1.0)),
+          bottomRight: Radius.circular(32 * (1 - progress).clamp(0.5, 1.0)),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFFF6B35).withOpacity(0.3),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(top: topPadding),
+        child: Column(
+          children: [
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: buildUserHeader(true)),
+                  if (isCollapsed)
+                    IconButton(
+                      icon: const Icon(Icons.keyboard_arrow_up_rounded,
+                          color: Colors.white, size: 32),
+                      onPressed: () {
+                        scrollController.animateTo(0,
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut);
+                      },
+                    )
+                  else
+                    StreamBuilder<int>(
+                      stream: notificationRepo.getUnreadCountStream(),
+                      builder: (context, snapshot) {
+                        int count = 0;
+                        if (snapshot.hasData) count = snapshot.data!;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: IconButton(
+                                icon: const Icon(
+                                    Icons.notifications_none_rounded,
+                                    color: Colors.white),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const NotificationsPage(),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            if (count > 0)
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Colors.red,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  constraints: const BoxConstraints(
+                                      minWidth: 18, minHeight: 18),
+                                  child: Text(
+                                    count > 9 ? '9+' : count.toString(),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                ],
+              ),
+            ),
+            ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: (1 - progress * 2).clamp(0.0, 1.0),
+                child: Opacity(
+                  opacity: (1 - progress * 2).clamp(0.0, 1.0),
+                  child: _QuickNavSection(onNavigate: onNavigate, isDark: true),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  bool shouldRebuild(covariant _HomeHeaderDelegate oldDelegate) => true;
+}
+
 // ─────────────────────────────────────────────────
 //  Quick Navigation Section – Instagram Story Style
 // ─────────────────────────────────────────────────
 class _QuickNavSection extends StatelessWidget {
   final void Function(Widget page) onNavigate;
+  final bool isDark;
 
-  const _QuickNavSection({required this.onNavigate});
+  const _QuickNavSection({required this.onNavigate, this.isDark = false});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 64,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _StoryBubble(
+          _NavButton(
             icon: Icons.explore_rounded,
             label: 'Keşfet',
             gradientColors: const [Color(0xFF6C63FF), Color(0xFF957DFF)],
             onTap: () => onNavigate(const EventsPage()),
+            isDark: isDark,
           ),
-          _StoryBubble(
+          _NavButton(
             icon: Icons.corporate_fare_rounded,
             label: 'Kurumlar',
             gradientColors: const [Color(0xFF00897B), Color(0xFF4DB6AC)],
             onTap: () => onNavigate(const NgosPage()),
+            isDark: isDark,
           ),
-          _StoryBubble(
+          _NavButton(
             icon: Icons.chat_bubble_rounded,
             label: 'Mesajlar',
             gradientColors: const [Color(0xFFFF6B35), Color(0xFFFFAB76)],
             onTap: () => onNavigate(const ActiveChatsPage()),
+            isDark: isDark,
           ),
-          _StoryBubble(
+          _NavButton(
             icon: Icons.auto_awesome_rounded,
-            label: 'AI Asistan',
-            gradientColors: const [Color(0xFFFF5722), Color(0xFF03A9F4)],
+            label: 'Asistan',
+            gradientColors: const [Color(0xFF2196F3), Color(0xFF00BCD4)],
             onTap: () => onNavigate(const ChatHistoryPage()),
+            isDark: isDark,
           ),
         ],
       ),
@@ -415,49 +511,375 @@ class _QuickNavSection extends StatelessWidget {
   }
 }
 
-class _StoryBubble extends StatelessWidget {
+class _NavButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final List<Color> gradientColors;
   final VoidCallback onTap;
+  final bool isDark;
 
-  const _StoryBubble({
+  const _NavButton({
     required this.icon,
     required this.label,
     required this.gradientColors,
     required this.onTap,
+    this.isDark = false,
   });
+
+  @override
+  State<_NavButton> createState() => _NavButtonState();
+}
+
+class _NavButtonState extends State<_NavButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+    );
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.92).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => _controller.forward(),
+      onTapUp: (_) {
+        _controller.reverse();
+        widget.onTap();
+      },
+      onTapCancel: () => _controller.reverse(),
+      child: ScaleTransition(
+        scale: _scaleAnimation,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 58,
+              height: 68,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                gradient: LinearGradient(
+                  colors: widget.gradientColors,
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Icon(
+                  widget.icon,
+                  size: 26,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              widget.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: widget.isDark ? Colors.white : AppColors.primaryText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────
+//  Events Preview Section
+// ─────────────────────────────────────────────────
+class _EventPreviewSection extends StatelessWidget {
+  final void Function(Widget page) onNavigate;
+
+  const _EventPreviewSection({required this.onNavigate});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'YAKLAŞAN ETKİNLİKLER',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade500,
+                  letterSpacing: 1.2,
+                ),
+              ),
+              GestureDetector(
+                onTap: () => onNavigate(const EventsPage()),
+                child: Text(
+                  'Tümünü Gör',
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(
+          height: 190,
+          child: FutureBuilder<List<Event>>(
+            future: context.read<EventRepository>().getUpcomingEventsLimit(limit: 5),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: 3,
+                  itemBuilder: (context, index) => const _EventLoadingPlaceholder(),
+                );
+              }
+
+              final events = snapshot.data ?? [];
+              if (events.isEmpty) return const SizedBox.shrink();
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                itemCount: events.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == events.length) {
+                    return _SeeAllCard(onTap: () => onNavigate(const EventsPage()));
+                  }
+                  return _EventPreviewCard(event: events[index]);
+                },
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EventPreviewCard extends StatelessWidget {
+  final Event event;
+  const _EventPreviewCard({required this.event});
+
+  @override
+  Widget build(BuildContext context) {
+    final double cardWidth = MediaQuery.of(context).size.width * 0.75;
+    final String dateString = DateFormat('dd MMMM', 'tr_TR').format(event.date);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => EventDetailPage(event: event),
+          ),
+        );
+      },
+      child: Container(
+        width: cardWidth,
+        margin: const EdgeInsets.only(right: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Stack(
+            children: [
+              // Background Image
+              Positioned.fill(
+                child: event.imageUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: event.imageUrl,
+                        fit: BoxFit.cover,
+                        placeholder: (context, url) => Container(color: Colors.grey[200]),
+                        errorWidget: (context, url, error) => Container(color: Colors.grey[200]),
+                      )
+                    : Container(color: AppColors.lightPrimaryColor),
+              ),
+              // Gradient Overlay
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.8),
+                      ],
+                      stops: const [0.4, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+              // Info
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 16,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        event.type.toUpperCase(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      event.title,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.calendar_today, color: Colors.white70, size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          dateString,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(Icons.location_on, color: Colors.white70, size: 12),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            event.location,
+                            style: GoogleFonts.plusJakartaSans(
+                              color: Colors.white70,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SeeAllCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _SeeAllCard({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 56,
-        height: 56,
+        width: 120,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            colors: gradientColors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: gradientColors.first.withOpacity(0.35),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.grey.shade200),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Hepsini Gör',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primaryText,
+              ),
             ),
           ],
         ),
-        child: Center(
-          child: Icon(
-            icon,
-            size: 26,
-            color: Colors.white,
-          ),
-        ),
+      ),
+    );
+  }
+}
+
+class _EventLoadingPlaceholder extends StatelessWidget {
+  const _EventLoadingPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.75,
+      margin: const EdgeInsets.only(right: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(24),
       ),
     );
   }

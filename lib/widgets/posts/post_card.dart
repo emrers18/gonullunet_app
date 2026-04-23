@@ -6,8 +6,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 
-import 'package:gonullunet_app/widgets/posts/comment_modal.dart';
+import 'package:gonullunet_app/utils/gamification_utils.dart';
 import '../../models/post_model.dart';
+import 'comment_modal.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -65,19 +66,25 @@ class PostCard extends StatelessWidget {
       builder: (context, snapshot) {
         String displayName = '...';
         String? avatarUrl;
+        int xp = 0;
+        bool isVolunteer = true;
 
         if (snapshot.hasData &&
             snapshot.data != null &&
             snapshot.data!.exists) {
           final data = snapshot.data!.data() as Map<String, dynamic>;
           final userType = data['userType'];
+          isVolunteer = userType == 'volunteer';
           if (userType == 'ngo') {
             displayName = data['stkName'] ?? 'STK';
           } else {
             displayName = "${data['name']} ${data['surname'] ?? ''}".trim();
           }
           avatarUrl = data['imageUrl'];
+          xp = data['xp'] ?? 0;
         }
+
+        final levelInfo = GamificationUtils.getLevelInfo(xp);
 
         return Padding(
           padding: const EdgeInsets.all(16.0),
@@ -116,15 +123,43 @@ class PostCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      displayName,
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: Colors.grey.shade900,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            displayName,
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: Colors.grey.shade900,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (isVolunteer) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: levelInfo.color.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                  color: levelInfo.color.withOpacity(0.3),
+                                  width: 0.5),
+                            ),
+                            child: Text(
+                              levelInfo.title,
+                              style: GoogleFonts.poppins(
+                                color: levelInfo.color,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
                     ),
                     Text(
                       post.timeAgo,
@@ -178,26 +213,13 @@ class PostCard extends StatelessWidget {
               color: Colors.grey.shade500,
             ),
           ),
-          Row(
-            children: [
-              Text(
-                "${post.commentCount} Yorum",
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Eğer paylaşım sayısı modelde yoksa statik veya gizli kalabilir
-              Text(
-                "Paylaşım",
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.grey.shade500,
-                ),
-              ),
-            ],
-          )
+          Text(
+            "${post.commentCount} Yorum",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+            ),
+          ),
         ],
       ),
     );
@@ -227,13 +249,7 @@ class PostCard extends StatelessWidget {
                 onTap: () {
                   _showCommentModal(context);
                 },
-              ),
-              _buildSingleActionButton(
-                icon: Icons.share_outlined,
-                label: "Paylaş",
-                color: Colors.grey.shade600,
-                onTap: () {},
-              ),
+              )
             ],
           ),
         );

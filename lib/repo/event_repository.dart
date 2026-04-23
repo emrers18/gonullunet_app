@@ -16,14 +16,27 @@ class EventRepository {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   Stream<List<Event>> getEventsStream() {
+    final now = DateTime.now();
+    final startOfToday = DateTime(now.year, now.month, now.day);
     return _firestore
         .collection('events')
-        .where('startDate', isGreaterThanOrEqualTo: DateTime.now())
+        .where('startDate', isGreaterThanOrEqualTo: startOfToday)
         .orderBy('startDate', descending: false)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
     });
+  }
+
+  Future<List<Event>> getUpcomingEventsLimit({int limit = 5}) async {
+    final now = DateTime.now();
+    final snapshot = await _firestore
+        .collection('events')
+        .where('startDate', isGreaterThanOrEqualTo: now)
+        .orderBy('startDate', descending: false)
+        .limit(limit)
+        .get();
+    return snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
   }
 
   /// Paginated event fetch: returns (events, lastDocument) tuple.
@@ -34,7 +47,8 @@ class EventRepository {
   }) async {
     Query query = _firestore
         .collection('events')
-        .where('startDate', isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
+        .where('startDate',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
         .orderBy('startDate', descending: false)
         .limit(limit);
 
@@ -43,7 +57,8 @@ class EventRepository {
     }
 
     final snapshot = await query.get();
-    final events = snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
+    final events =
+        snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
     final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
 
     return (events: events, lastDoc: lastDoc);
@@ -121,33 +136,38 @@ class EventRepository {
   Future<void> toggleJoinEvent(String eventId, String userId) async {
     final eventRef = _firestore.collection('events').doc(eventId);
     final appRef = eventRef.collection('applications').doc(userId);
-    final doc = await eventRef.get();
 
-    if (doc.exists) {
+    final eventDoc = await eventRef.get();
+    if (eventDoc.exists) {
       List<String> participants =
-          List<String>.from(doc.data()?['participants'] ?? []);
-
+          List<String>.from(eventDoc.data()?['participants'] ?? []);
+      final appDoc = await appRef.get();
       final batch = _firestore.batch();
 
       if (participants.contains(userId)) {
+        // Zaten onaylı katılımcı, ayrılma işlemi
         participants.remove(userId);
         batch.delete(appRef);
         batch.update(eventRef, {
           'participants': participants,
           'approved_volunteers': FieldValue.arrayRemove([userId])
         });
+        // Katılım iptal edildiğinde XP geri çekilir.
+        batch.update(_firestore.collection('users').doc(userId), {
+          'xp': FieldValue.increment(-50),
+        });
+      } else if (appDoc.exists) {
+        // Başvurusu var ama onaylanmamış (pending), iptal et
+        batch.delete(appRef);
       } else {
-        participants.add(userId);
+        // Yeni başvuru oluştur (pending)
         batch.set(appRef, {
           'userId': userId,
           'eventId': eventId,
-          'status': 'approved',
+          'status': 'pending',
           'appliedAt': FieldValue.serverTimestamp(),
         });
-        batch.update(eventRef, {
-          'participants': participants,
-          'approved_volunteers': FieldValue.arrayUnion([userId])
-        });
+        // NOT: Pending aşamasında XP verilmez ve participants listesine eklenmez.
       }
 
       await batch.commit();
@@ -196,7 +216,8 @@ class EventRepository {
 
   Future<List<ApplicationModel>> getEventApplications(String eventId) async {
     final eventDoc = await _firestore.collection('events').doc(eventId).get();
-    List<String> participants = List<String>.from(eventDoc.data()?['participants'] ?? []);
+    List<String> participants =
+        List<String>.from(eventDoc.data()?['participants'] ?? []);
 
     final querySnapshot = await _firestore
         .collection('events')
@@ -219,6 +240,7 @@ class EventRepository {
           name: userData?['name'],
           surname: userData?['surname'],
           imageUrl: userData?['imageUrl'],
+          xp: userData?['xp'],
         );
       }
       applications.add(app);
@@ -235,7 +257,8 @@ class EventRepository {
             userId: userId,
             eventId: eventId,
             status: 'approved', // Katılımcıysa zaten onaylı gibidir
-            appliedAt: (eventDoc.data()?['createdAt'] as Timestamp?) ?? Timestamp.now(),
+            appliedAt: (eventDoc.data()?['createdAt'] as Timestamp?) ??
+                Timestamp.now(),
             userName: userData?['name'],
             userSurname: userData?['surname'],
             userImageUrl: userData?['imageUrl'],
@@ -252,25 +275,38 @@ class EventRepository {
       String eventId, String userId, String newStatus) async {
     final batch = _firestore.batch();
 
-    // basvuru durumunu guncelleme
-    var appRef = _firestore
+    // Mevcut durumu kontrol et (XP çiftlenmesini önlemek için)
+    final appRef = _firestore
         .collection('events')
         .doc(eventId)
         .collection('applications')
         .doc(userId);
+
+    final appDoc = await appRef.get();
+    final oldStatus = appDoc.data()?['status'];
+
+    // basvuru durumunu guncelleme
     batch.update(appRef, {'status': newStatus});
 
     var eventRef = _firestore.collection('events').doc(eventId);
 
-    if (newStatus == 'approved') {
+    if (newStatus == 'approved' && oldStatus != 'approved') {
       batch.update(eventRef, {
         'participants': FieldValue.arrayUnion([userId]),
         'approved_volunteers': FieldValue.arrayUnion([userId])
       });
-    } else if (newStatus == 'rejected' || newStatus == 'pending') {
+      // Onay için 50 XP ödülü
+      batch.update(_firestore.collection('users').doc(userId), {
+        'xp': FieldValue.increment(50),
+      });
+    } else if (newStatus != 'approved' && oldStatus == 'approved') {
       batch.update(eventRef, {
         'participants': FieldValue.arrayRemove([userId]),
         'approved_volunteers': FieldValue.arrayRemove([userId])
+      });
+      // Onay geri çekildiğinde XP azaltımı (isteğe bağlı)
+      batch.update(_firestore.collection('users').doc(userId), {
+        'xp': FieldValue.increment(-50),
       });
     }
 

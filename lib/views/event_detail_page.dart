@@ -409,20 +409,15 @@ class _EventBodyState extends State<_EventBody> {
                 );
               }
 
-              bool isJoined = false;
+              String? applicationStatus;
               int currentCount = event.participants.length;
 
-              // EventDetailLoaded veya EventDetailUpdated — her ikisinden de oku
               if (state is EventDetailLoaded) {
-                isJoined = state.isJoined;
+                applicationStatus = state.applicationStatus;
                 currentCount = state.participantCount;
               } else if (state is EventDetailUpdated) {
-                isJoined = state.isJoined;
+                applicationStatus = state.applicationStatus;
                 currentCount = state.participantCount;
-              } else {
-                if (currentUser != null) {
-                  isJoined = event.participants.contains(currentUser.uid);
-                }
               }
 
               bool isFull = false;
@@ -430,21 +425,24 @@ class _EventBodyState extends State<_EventBody> {
                 isFull = currentCount >= event.quota!;
               }
 
-              bool isButtonEnabled = isJoined || !isFull;
+              // Butonun aktif olup olmayacağı
+              bool isButtonEnabled = applicationStatus != null || !isFull;
 
-              String buttonText = isJoined ? "Başvurdun" : "Başvur";
+              // Duruma göre stil belirleme
+              Color buttonColor = AppColors.primaryColor;
+              String buttonText = "Hemen Başvur";
+              IconData buttonIcon = Icons.send_rounded;
 
-              if (!isJoined && isFull) {
+              if (applicationStatus == 'approved') {
+                buttonColor = Colors.redAccent;
+                buttonText = "Etkinlikten Ayrıl";
+                buttonIcon = Icons.exit_to_app_rounded;
+              } else if (applicationStatus == 'pending') {
+                buttonColor = Colors.orange.shade700;
+                buttonText = "Başvuru Bekleniyor (İptal)";
+                buttonIcon = Icons.hourglass_empty_rounded;
+              } else if (isFull) {
                 buttonText = "Kontenjan Dolu";
-              }
-
-              IconData buttonIcon = isJoined
-                  ? Icons.check_circle
-                  : (isProject
-                      ? Icons.assignment_turned_in
-                      : Icons.volunteer_activism);
-
-              if (!isJoined && isFull) {
                 buttonIcon = Icons.lock_outline;
               }
 
@@ -455,24 +453,25 @@ class _EventBodyState extends State<_EventBody> {
                       ? () {
                           context.read<EventDetailCubit>().toggleJoin();
 
-                          if (isProject && !isJoined) {
+                          if (applicationStatus == null && !isFull) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Başvurunuz alındı!")));
+                              const SnackBar(
+                                content: Text("Başvurunuz iletildi, onay bekleniyor!"),
+                                backgroundColor: Colors.orange,
+                              ),
+                            );
                           }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        isJoined ? Colors.green : AppColors.primaryColor,
+                    backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
-                    shadowColor: (isButtonEnabled
-                            ? (isJoined ? Colors.green : AppColors.primaryColor)
-                            : Colors.grey)
+                    shadowColor: (isButtonEnabled ? buttonColor : Colors.grey)
                         .withOpacity(0.4),
                     elevation: 10,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -482,7 +481,9 @@ class _EventBodyState extends State<_EventBody> {
                       Text(
                         buttonText,
                         style: GoogleFonts.plusJakartaSans(
-                            fontSize: 18, fontWeight: FontWeight.bold),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ],
                   ),

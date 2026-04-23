@@ -62,7 +62,10 @@ class PostRepository {
 
   Future<void> addPost(String title, String description, String imageUrl,
       String publisherId) async {
-    await _firestore.collection('posts').add({
+    final batch = _firestore.batch();
+    
+    final postRef = _firestore.collection('posts').doc();
+    batch.set(postRef, {
       'title': title,
       'description': description,
       'imageUrl': imageUrl,
@@ -71,6 +74,14 @@ class PostRepository {
       'likeCount': 0,
       'commentCount': 0,
     });
+
+    // Paylaşım için 10 XP ödülü
+    final userRef = _firestore.collection('users').doc(publisherId);
+    batch.update(userRef, {
+      'xp': FieldValue.increment(10),
+    });
+
+    await batch.commit();
   }
 
   Future<DocumentSnapshot?> getLastDocumentFromQuery(

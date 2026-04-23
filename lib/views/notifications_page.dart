@@ -40,6 +40,22 @@ class NotificationsView extends StatelessWidget {
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          BlocBuilder<NotificationCubit, NotificationState>(
+            builder: (context, state) {
+              if (state is NotificationLoaded &&
+                  state.notifications.isNotEmpty) {
+                return IconButton(
+                  icon: const Icon(Icons.delete_sweep_outlined,
+                      color: Colors.redAccent),
+                  tooltip: "Tümünü Sil",
+                  onPressed: () => _showDeleteAllDialog(context),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
@@ -77,53 +93,121 @@ class NotificationsView extends StatelessWidget {
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final notification = state.notifications[index];
-                return ListTile(
-                  contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                  tileColor: notification.isRead
-                      ? Colors.white
-                      : AppColors.lightPrimaryColor.withOpacity(0.2),
-                  leading: CircleAvatar(
-                    backgroundColor: AppColors.lightPrimaryColor,
-                    child: Icon(
-                      notification.type == 'event'
-                          ? Icons.event
-                          : Icons.notifications,
-                      color: AppColors.primaryColor,
+                return Dismissible(
+                  key: Key(notification.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.only(right: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          "Sil",
+                          style: TextStyle(
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                        SizedBox(width: 8),
+                        Icon(Icons.delete, color: Colors.white),
+                      ],
                     ),
                   ),
-                  title: Text(
-                    notification.title,
-                    style: TextStyle(
-                      fontWeight: notification.isRead
-                          ? FontWeight.normal
-                          : FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Text(notification.body),
-                      const SizedBox(height: 4),
-                      Text(
-                        notification.timeAgo,
-                        style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
+                  onDismissed: (direction) {
                     context
                         .read<NotificationCubit>()
-                        .markAsRead(notification.id);
+                        .deleteNotification(notification.id);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text("Bildirim silindi"),
+                          duration: Duration(seconds: 2)),
+                    );
                   },
+                  child: ListTile(
+                    contentPadding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                    tileColor: notification.isRead
+                        ? Colors.white
+                        : AppColors.lightPrimaryColor.withOpacity(0.2),
+                    leading: CircleAvatar(
+                      backgroundColor: AppColors.lightPrimaryColor,
+                      child: Icon(
+                        notification.type == 'event'
+                            ? Icons.event
+                            : Icons.notifications,
+                        color: AppColors.primaryColor,
+                      ),
+                    ),
+                    title: Text(
+                      notification.title,
+                      style: TextStyle(
+                        fontWeight: notification.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 4),
+                        Text(notification.body),
+                        const SizedBox(height: 4),
+                        Text(
+                          notification.timeAgo,
+                          style:
+                              TextStyle(color: Colors.grey[500], fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    onTap: () {
+                      context
+                          .read<NotificationCubit>()
+                          .markAsRead(notification.id);
+                    },
+                    trailing: const Icon(
+                      Icons.chevron_left,
+                      color: Colors.black12,
+                      size: 20,
+                    ),
+                  ),
                 );
               },
             );
           }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  void _showDeleteAllDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Tümünü Sil"),
+        content:
+            const Text("Tüm bildirimleri silmek istediğinize emin misiniz?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("İptal"),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<NotificationCubit>().clearAll();
+              Navigator.pop(dialogContext);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Tüm bildirimler silindi")),
+              );
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text("Hepsini Sil"),
+          ),
+        ],
       ),
     );
   }

@@ -8,7 +8,8 @@ import '../logic/manage_applications_cubit.dart';
 import '../logic/manage_applications_state.dart';
 import '../models/application_model.dart';
 import '../repo/event_repository.dart';
-import '../repo/notification_repository.dart';
+import '../utils/gamification_utils.dart';
+
 import 'applicant_profile_page.dart';
 
 class ManageApplicationsPage extends StatelessWidget {
@@ -26,9 +27,7 @@ class ManageApplicationsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => ManageApplicationsCubit(
         eventRepository: context.read<EventRepository>(),
-        notificationRepo: context.read<NotificationRepository>(),
         eventId: eventId,
-        eventTitle: eventTitle,
       )..loadApplications(),
       child: const ManageApplicationsView(),
     );
@@ -233,6 +232,10 @@ class _ApplicationCard extends StatelessWidget {
                           color: const Color(0xFF181210),
                         ),
                       ),
+                      if (app.xp != null) ...[
+                        const SizedBox(height: 4),
+                        _buildLevelBadge(app.xp!),
+                      ],
                       const SizedBox(height: 3),
                       Text(
                         app.timeAgo,
@@ -379,5 +382,32 @@ class _ApplicationCard extends StatelessWidget {
         (surname != null && surname.isNotEmpty) ? surname[0].toUpperCase() : '';
     if (n.isEmpty && s.isEmpty) return '?';
     return '$n$s';
+  }
+
+  Widget _buildLevelBadge(int xp) {
+    final level = GamificationUtils.getLevelInfo(xp);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: level.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: level.color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.stars, size: 12, color: level.color),
+          const SizedBox(width: 4),
+          Text(
+            level.title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: level.color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

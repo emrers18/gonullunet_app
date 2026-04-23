@@ -52,10 +52,12 @@ dependencies:
   flutter_local_notifications: ^19.5.0
   flutter_launcher_icons: ^0.14.4
   google_fonts: ^6.3.3
-  google_generative_ai: ^0.4.7
-  flutter_dotenv: ^6.0.0
   flutter_image_compress: ^2.4.0
   cached_network_image: ^3.4.1
+  http: ^1.6.0
+  googleapis_auth: ^2.3.0
+  firebase_ai: ^3.11.0
+  firebase_remote_config: ^6.4.0
 
 dev_dependencies:
   flutter_test:
@@ -86,7 +88,6 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/images/
-    - .env
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

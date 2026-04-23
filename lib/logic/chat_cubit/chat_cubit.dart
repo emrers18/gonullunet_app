@@ -7,7 +7,10 @@ import 'chat_state.dart';
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
 
-  ChatCubit(this.repository) : super(ChatInitial());
+  ChatCubit(this.repository) : super(ChatInitial()) {
+    // Remote Config'i fetch et ve Firebase AI modelini hazırla
+    repository.initialize();
+  }
 
   // ── Sessions ──────────────────────────────────────────────
 

@@ -26,6 +26,14 @@ class NotificationCubit extends Cubit<NotificationState> {
     await _repository.markAsRead(id);
   }
 
+  Future<void> deleteNotification(String id) async {
+    await _repository.deleteNotification(id);
+  }
+
+  Future<void> clearAll() async {
+    await _repository.deleteAllNotifications();
+  }
+
   @override
   Future<void> close() {
     _subscription?.cancel();

@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../models/user_model.dart';
 import '../repo/user_repository.dart';
 import '../utils/app_colors.dart';
+import '../utils/gamification_utils.dart';
 
 /// STK'ların başvuran gönüllünün profilini inceleyeceği sayfa.
 class ApplicantProfilePage extends StatefulWidget {
@@ -131,14 +132,10 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                           color: const Color(0xFF181210),
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        _user!.email,
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
-                          color: const Color(0xFF8D6A5E),
-                        ),
-                      ),
+                      const SizedBox(height: 8),
+                      _buildLevelBadge(_user!.xp),
+                      const SizedBox(height: 16),
+                      _buildXpProgressBar(_user!.xp),
                       const SizedBox(height: 24),
 
                       // --- Info Cards ---
@@ -337,6 +334,115 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
           color: color,
         ),
       ),
+    );
+  }
+
+  Widget _buildLevelBadge(int xp) {
+    final level = GamificationUtils.getLevelInfo(xp);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: level.color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: level.color.withOpacity(0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.stars, size: 16, color: level.color),
+          const SizedBox(width: 6),
+          Text(
+            level.title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: level.color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildXpProgressBar(int xp) {
+    final level = GamificationUtils.getLevelInfo(xp);
+    final progress = GamificationUtils.getProgress(xp);
+
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Gönüllü Seviyesi',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: const Color(0xFF8D6A5E),
+              ),
+            ),
+            Text(
+              '$xp XP',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: level.color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Stack(
+          children: [
+            Container(
+              height: 10,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Container(
+                  height: 10,
+                  width: constraints.maxWidth * progress,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        level.color.withOpacity(0.7),
+                        level.color,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                    boxShadow: [
+                      BoxShadow(
+                        color: level.color.withOpacity(0.3),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+        if (level.title != 'Efsane') ...[
+          const SizedBox(height: 6),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Text(
+              'Sonraki Seviye: ${level.maxXp} XP',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 10,
+                color: Colors.grey,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

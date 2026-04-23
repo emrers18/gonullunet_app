@@ -31,36 +31,68 @@ class NotificationService {
 
     await _localNotifications.initialize(initSettings);
 
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _showLocalNotification(message);
+    // FCM token'ı al ve Firestore'a kaydet
+    await _saveFcmToken();
 
-      _saveNotificationToFirestore(message);
+    // Token yenilendiğinde otomatik güncelle
+    _firebaseMessaging.onTokenRefresh.listen((newToken) {
+      _updateFcmToken(newToken);
+    });
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // Uygulama ön plandayken FCM gelince sistem bildirimi göster.
+      _showLocalNotification(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _saveNotificationToFirestore(message);
+      // message.data['type'] ile sayfaya yönlendirme eklenebilir
     });
   }
 
-  Future<void> _saveNotificationToFirestore(RemoteMessage message) async {
+  /// Mevcut FCM token'ı alır ve Firestore'a kaydeder.
+  Future<void> _saveFcmToken() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    final notification = message.notification;
-    if (notification == null) return;
+    try {
+      final token = await _firebaseMessaging.getToken();
+      if (token != null) {
+        await _updateFcmToken(token);
+      }
+    } catch (e) {
+      debugPrint('FCM token kaydedilemedi: $e');
+    }
+  }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .collection('notifications')
-        .add({
-      'title': notification.title ?? 'Yeni Bildirim',
-      'body': notification.body ?? '',
-      'type': 'push',
-      'relatedId': '',
-      'isRead': false,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+  /// FCM token'ı Firestore'daki kullanıcı belgesine yazar.
+  Future<void> _updateFcmToken(String token) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'fcmToken': token});
+    } catch (e) {
+      debugPrint('FCM token güncellenemedi: $e');
+    }
+  }
+
+  /// Kullanıcı çıkış yaptığında FCM token'ı temizler.
+  Future<void> clearFcmToken() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .update({'fcmToken': FieldValue.delete()});
+      await _firebaseMessaging.deleteToken();
+    } catch (e) {
+      debugPrint('FCM token temizlenemedi: $e');
+    }
   }
 
   Future<void> _showLocalNotification(RemoteMessage message) async {

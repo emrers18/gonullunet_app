@@ -15,12 +15,8 @@ class EventDetailCubit extends Cubit<EventDetailState> {
   }
 
   Future<void> _loadPageData() async {
-    bool isJoined = _event.participants.contains(_currentUserId);
-
-    // Proje tipi ise applications alt koleksiyonunu da kontrol et
-    if (!isJoined && _event.type == 'Proje' && _currentUserId.isNotEmpty) {
-      isJoined = await _repository.hasUserApplied(_event.id, _currentUserId);
-    }
+    final status = await _repository.getUserApplicationStatus(_event.id, _currentUserId);
+    final isJoined = status == 'approved';
 
     final count = _event.participants.length;
     final organizerName =
@@ -30,6 +26,7 @@ class EventDetailCubit extends Cubit<EventDetailState> {
       isJoined: isJoined,
       participantCount: count,
       organizerName: organizerName,
+      applicationStatus: status,
     ));
   }
 
@@ -39,38 +36,35 @@ class EventDetailCubit extends Cubit<EventDetailState> {
     final currentState = state;
     if (currentState is EventDetailLoaded) {
       try {
-        if (_event.type == 'Proje') {
-          if (!currentState.isJoined) {
-            // Başvuruldu durumunu hemen güncelle (optimistic update)
-            emit(currentState.copyWith(
-              isJoined: true,
-              participantCount: currentState.participantCount + 1,
-            ));
+        final currentStatus = currentState.applicationStatus;
+        String? nextStatus;
+        int nextCount = currentState.participantCount;
 
-            await _repository.applyToEvent(_event.id, _currentUserId);
-          } else {
-            return; // Proje başvurusu geri alınamaz
-          }
+        if (currentStatus == 'approved') {
+          // Ayrılma
+          nextStatus = null;
+          nextCount = nextCount - 1;
+        } else if (currentStatus == 'pending') {
+          // İptal
+          nextStatus = null;
         } else {
-          final newStatus = !currentState.isJoined;
-          final newCount = newStatus
-              ? currentState.participantCount + 1
-              : currentState.participantCount - 1;
-
-          emit(currentState.copyWith(
-            isJoined: newStatus,
-            participantCount: newCount,
-          ));
-
-          await _repository.toggleJoinEvent(_event.id, _currentUserId);
+          // Başvuru
+          nextStatus = 'pending';
         }
-      } catch (e) {
-        // Hata durumunda state'i geri al — copyWith ile yeni instance oluştur
-        // böylece Equatable skip etmez
+
+        // Optimistik güncelleme
         emit(currentState.copyWith(
-          isJoined: currentState.isJoined,
-          participantCount: currentState.participantCount,
+          isJoined: nextStatus == 'approved',
+          applicationStatus: nextStatus,
+          participantCount: nextCount,
         ));
+
+        await _repository.toggleJoinEvent(_event.id, _currentUserId);
+        
+        // İşlem sonrası gerçek durumu tekrar çek (sayaç senkronizasyonu için önemli)
+        await _loadPageData();
+      } catch (e) {
+        emit(currentState);
       }
     }
   }

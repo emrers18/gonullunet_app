@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/profile_cubit.dart';
 import 'package:gonullunet_app/repo/chat_repository.dart';
@@ -17,6 +16,7 @@ import 'repo/event_repository.dart';
 import 'repo/post_repository.dart';
 import 'views/auth_gate.dart';
 import 'views/onboarding_page.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,8 +28,8 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  await dotenv.load(fileName: '.env');
   await initializeDateFormatting('tr_TR', null);
+  await NotificationService().initialize();
 
   final prefs = await SharedPreferences.getInstance();
   final bool showOnboarding = prefs.getBool('showOnboarding') ?? true;

@@ -13,6 +13,8 @@ class ApplicationModel {
   final String? userSurname;
   final String? userImageUrl;
 
+  final int? xp;
+
   ApplicationModel({
     required this.id,
     required this.userId,
@@ -22,6 +24,7 @@ class ApplicationModel {
     this.userName,
     this.userSurname,
     this.userImageUrl,
+    this.xp,
   });
 
   String get timeAgo {
@@ -44,6 +47,7 @@ class ApplicationModel {
     String? name,
     String? surname,
     String? imageUrl,
+    int? xp,
   }) {
     return ApplicationModel(
       id: id,
@@ -54,6 +58,7 @@ class ApplicationModel {
       userName: name,
       userSurname: surname,
       userImageUrl: imageUrl,
+      xp: xp,
     );
   }
 }

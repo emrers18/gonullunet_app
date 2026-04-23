@@ -111,14 +111,19 @@ class UserRepository {
         transaction.update(userRef, {
           'following': FieldValue.arrayRemove([ngoId])
         });
-        transaction
-            .update(ngoRef, {'followersCount': FieldValue.increment(-1)});
+        transaction.update(ngoRef, {
+          'followersCount': FieldValue.increment(-1),
+          'followers': FieldValue.arrayRemove([user.uid]),
+        });
       } else {
         // Takip et
         transaction.update(userRef, {
           'following': FieldValue.arrayUnion([ngoId])
         });
-        transaction.update(ngoRef, {'followersCount': FieldValue.increment(1)});
+        transaction.update(ngoRef, {
+          'followersCount': FieldValue.increment(1),
+          'followers': FieldValue.arrayUnion([user.uid]),
+        });
       }
     });
   }

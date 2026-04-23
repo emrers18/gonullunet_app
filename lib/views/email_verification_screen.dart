@@ -5,7 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import 'main_page.dart';
+import 'auth_gate.dart';
 
 /// E-posta doğrulama ekranı.
 ///
@@ -243,7 +243,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     }
   }
 
-  /// Kullanıcı kayıt sürecini iptal edip Firebase hesabını siler.
+  /// Kullanıcı kayıt sürecini iptal edip Firebase hesabını siler ve çıkış yapar.
   Future<void> _cancelAndGoBack() async {
     _stopAllTimers();
 
@@ -251,19 +251,24 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       // Doğrulanmamış kullanıcıyı temizle
       await FirebaseAuth.instance.currentUser?.delete();
     } catch (_) {
-      // Hesap silinse de, silinmese de çıkış yap
+      // Silme başarısız olursa sign-out yap; AuthGate LoginPage'e yönlendirir
+      try {
+        await FirebaseAuth.instance.signOut();
+      } catch (_) {}
     }
-
-    if (mounted) {
-      // Tüm Route stack'i temizleyerek Login'e dön
-      Navigator.of(context).popUntil((route) => route.isFirst);
-    }
+    // AuthGate'teki StreamBuilder auth state değişimini algılayıp
+    // otomatik olarak LoginPage'e yönlendirecek.
+    // Route temizlemesi gerekmez.
   }
 
-  /// iOS / Android yönlendirmesi – Ana ekrana geç.
+  /// E-posta doğrulandığında AuthGate'e yönlendirir.
+  /// AuthGate'in StreamBuilder'ı user.emailVerified durumuna göre
+  /// MainPage veya LoginPage'i otomatik seçer.
+  /// AuthGate stack'te kalmalı ki ilerideki signOut() çağrıları da çalışsın.
   void _navigateToHome() {
+    if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const MainPage()),
+      MaterialPageRoute(builder: (_) => const AuthGate()),
       (route) => false,
     );
   }

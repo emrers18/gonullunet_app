@@ -17,7 +17,9 @@ class UserModel {
   final String? mission;
   final String? phone;
   final List<String> following;
+  final List<String> followers;
   final int followersCount;
+  final String? fcmToken;
 
   // Volunteer-specific fields
   final String? bio;
@@ -26,6 +28,7 @@ class UserModel {
   final Timestamp? birthDate;
   final String? education;
   final String? city;
+  final int xp;
 
   UserModel({
     required this.uid,
@@ -42,13 +45,16 @@ class UserModel {
     this.mission,
     this.phone,
     this.following = const [],
+    this.followers = const [],
     this.followersCount = 0,
+    this.fcmToken,
     this.bio,
     this.interests = const [],
     this.skills = const [],
     this.birthDate,
     this.education,
     this.city,
+    this.xp = 0,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -69,13 +75,16 @@ class UserModel {
       mission: data['mission'],
       phone: data['phone'],
       following: List<String>.from(data['following'] ?? []),
+      followers: List<String>.from(data['followers'] ?? []),
       followersCount: data['followersCount'] ?? 0,
+      fcmToken: data['fcmToken'],
       bio: data['bio'],
       interests: List<String>.from(data['interests'] ?? []),
       skills: List<String>.from(data['skills'] ?? []),
       birthDate: data['birthDate'],
       education: data['education'],
       city: data['city'],
+      xp: data['xp'] ?? 0,
     );
   }
 
@@ -95,13 +104,16 @@ class UserModel {
       'mission': mission,
       'phone': phone,
       'following': following,
+      'followers': followers,
       'followersCount': followersCount,
+      'fcmToken': fcmToken,
       'bio': bio,
       'interests': interests,
       'skills': skills,
       'birthDate': birthDate,
       'education': education,
       'city': city,
+      'xp': xp,
     };
   }
 

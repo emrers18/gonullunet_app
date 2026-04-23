@@ -8,6 +8,7 @@ import 'package:gonullunet_app/utils/app_colors.dart'; // Mevcut renkleriniz
 import 'package:gonullunet_app/models/user_model.dart';
 import '../logic/user_cubit.dart';
 import '../logic/user_state.dart';
+import '../utils/gamification_utils.dart';
 
 // Sayfa yönlendirmeleri
 import 'edit_ngo_profile_page.dart';
@@ -58,12 +59,9 @@ class _ProfilePageState extends State<ProfilePage> {
               onPressed: () async {
                 // Dialog'u kapat
                 Navigator.of(dialogContext).pop();
-                // Firebase'den çıkış yap; auth stream AuthGate'i tetikler
+                // Firebase'den çıkış yap; AuthGate'deki StreamBuilder
+                // authStateChanges'i dinleyerek otomatik LoginPage'e yönlendirir.
                 await _auth.signOut();
-                // Güvenlik: mount kontrolü + tüm route stack'ini temizle
-                if (mounted) {
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                }
               },
             ),
           ],
@@ -137,8 +135,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) =>
-                                      const MyPostsPage()));
+                                  builder: (context) => const MyPostsPage()));
                         },
                       ),
                       _buildDivider(),
@@ -296,6 +293,9 @@ class _ProfilePageState extends State<ProfilePage> {
   // --- WIDGET YARDIMCILARI ---
 
   Widget _buildProfileCard(UserModel user) {
+    final levelInfo = GamificationUtils.getLevelInfo(user.xp);
+    final progress = GamificationUtils.getProgress(user.xp);
+
     return GestureDetector(
       onTap: () {
         if (user.isNgo) {
@@ -323,84 +323,149 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ],
         ),
-        child: Row(
+        child: Column(
           children: [
-            // Avatar
-            Stack(
+            Row(
               children: [
-                Container(
-                  width: 64,
-                  height: 64,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.black.withOpacity(0.1), blurRadius: 5)
-                    ],
-                    image: (user.imageUrl != null && user.imageUrl!.isNotEmpty)
-                        ? DecorationImage(
-                            image: CachedNetworkImageProvider(user.imageUrl!),
-                            fit: BoxFit.cover)
-                        : null,
-                    color: Colors.grey.shade200,
-                  ),
-                  child: (user.imageUrl == null || user.imageUrl!.isEmpty)
-                      ? Center(
-                          child: Text(
-                            user.initials,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.kPrimaryColor,
-                            ),
-                          ),
-                        )
-                      : null,
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.kPrimaryColor,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
+                // Avatar
+                Stack(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 5)
+                        ],
+                        image: (user.imageUrl != null &&
+                                user.imageUrl!.isNotEmpty)
+                            ? DecorationImage(
+                                image:
+                                    CachedNetworkImageProvider(user.imageUrl!),
+                                fit: BoxFit.cover)
+                            : null,
+                        color: Colors.grey.shade200,
+                      ),
+                      child: (user.imageUrl == null || user.imageUrl!.isEmpty)
+                          ? Center(
+                              child: Text(
+                                user.initials,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.kPrimaryColor,
+                                ),
+                              ),
+                            )
+                          : null,
                     ),
-                    child:
-                        const Icon(Icons.edit, size: 10, color: Colors.white),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: AppColors.kPrimaryColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: const Icon(Icons.edit,
+                            size: 10, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 16),
+                // İsim ve Rol
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        user.displayName,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.kTextColor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        user.isNgo ? "Kurumsal Üye" : "Gönüllü Üye",
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
+                Icon(Icons.chevron_right_rounded, color: Colors.grey.shade300),
               ],
             ),
-            const SizedBox(width: 16),
-            // İsim ve Rol
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (user.isVolunteer) ...[
+              const SizedBox(height: 16),
+              const Divider(height: 1),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    user.displayName,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.kTextColor,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: levelInfo.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          levelInfo.title,
+                          style: GoogleFonts.plusJakartaSans(
+                            color: levelInfo.color,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        "${user.xp} XP",
+                        style: GoogleFonts.plusJakartaSans(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    user.isNgo ? "Kurumsal Üye" : "Gönüllü Üye",
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                      fontWeight: FontWeight.w500,
+                  if (levelInfo.title != 'Efsane')
+                    Text(
+                      "Sonraki Seviye: ${levelInfo.maxXp} XP",
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.grey.shade400,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
                 ],
               ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: Colors.grey.shade300),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  minHeight: 8,
+                  backgroundColor: Colors.grey.shade100,
+                  valueColor: AlwaysStoppedAnimation<Color>(levelInfo.color),
+                ),
+              ),
+            ],
           ],
         ),
       ),

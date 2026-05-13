@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "dart-add-unit-test": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-add-unit-test/SKILL.md",
+      "computedHash": "207787eff2cfccfd27207de447358105305021756884f94441b959526b4dccf1"
+    },
+    "dart-build-cli-app": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-build-cli-app/SKILL.md",
+      "computedHash": "9cd4f1f2015c1243591bdf363b78a34027430866decc78c3792fb29b1de8d821"
+    },
+    "dart-fix-runtime-errors": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-fix-runtime-errors/SKILL.md",
+      "computedHash": "5e4e0dd5390fa1ae08e96ad67aedd3c01a4e81c74ec9c84a6bc095f5f2a1d571"
+    },
+    "dart-resolve-package-conflicts": {
+      "source": "dart-lang/skills",
+      "sourceType": "github",
+      "skillPath": "skills/dart-resolve-package-conflicts/SKILL.md",
+      "computedHash": "737cd83ec6a047ba46ff368efd884435051c82efc5b4b0bbadbbe74e1213961a"
+    }
+  }
+}

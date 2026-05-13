@@ -38,7 +38,7 @@ class EventCard extends StatelessWidget {
 
     final bool isProje = event.type == 'Proje';
     // Proje rengi: koyu teal/mavi-yeşil
-    const Color projeColor = Color(0xFF0D7377);
+    const Color projeColor = Color(0xFF00949F);
 
     return GestureDetector(
       onTap: () {
@@ -55,9 +55,7 @@ class EventCard extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isProje
-                ? projeColor.withOpacity(0.4)
-                : Colors.grey.shade200,
+            color: isProje ? projeColor.withOpacity(0.4) : Colors.grey.shade200,
             width: isProje ? 1.2 : 0.5,
           ),
           boxShadow: [
@@ -185,7 +183,8 @@ class EventCard extends StatelessWidget {
                           // Alt kısım: Katılımcılar + Kontenjan
                           Row(
                             children: [
-                              _buildParticipantsRow(context, event.participants),
+                              _buildParticipantsRow(
+                                  context, event.participants),
                               const Spacer(),
                               if (quotaText.isNotEmpty)
                                 Container(
@@ -249,12 +248,10 @@ class EventCard extends StatelessWidget {
                         child: Center(
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            value:
-                                loadingProgress.expectedTotalBytes != null
-                                    ? loadingProgress
-                                            .cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
-                                    : null,
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
                             color: AppColors.kPrimaryColor,
                           ),
                         ),
@@ -290,7 +287,8 @@ class EventCard extends StatelessWidget {
     );
   }
 
-  Widget _buildParticipantsRow(BuildContext context, List<dynamic> participants) {
+  Widget _buildParticipantsRow(
+      BuildContext context, List<dynamic> participants) {
     if (participants.isEmpty) {
       return Text(
         "İlk sen ol!",
@@ -323,7 +321,8 @@ class EventCard extends StatelessWidget {
                 child: CircleAvatar(
                   radius: 11,
                   backgroundColor: Colors.grey.shade100,
-                  child: Icon(Icons.person, size: 12, color: Colors.grey.shade400),
+                  child:
+                      Icon(Icons.person, size: 12, color: Colors.grey.shade400),
                 ),
               ),
             ),

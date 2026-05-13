@@ -10,6 +10,7 @@ import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
 import 'email_verification_screen.dart';
 
+
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
@@ -43,11 +44,7 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _stkEmailController = TextEditingController();
   final TextEditingController _stkPasswordController = TextEditingController();
 
-  static const Color kPrimaryColor = Color(0xFFFF6B35); // Orange
-  static const Color kSecondaryColor = Color(0xFF004E89); // Dark Blue
-  static const Color kBackgroundColor =
-      Color(0xFFF7F9FC); // Light Gray Background
-  static const Color kTextColor = Color(0xFF1F2937);
+
 
   @override
   void dispose() {
@@ -121,15 +118,17 @@ class _SignUpViewState extends State<SignUpView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       body: BlocListener<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
-            // Kayıt başarılı — doğrulama ekranına yönlendir
-            Navigator.of(context).pushReplacement(
+            // Kayıt + oturum açma başarılı.
+            // AuthGate artık otomatik yönlendirme yapmadığı için manuel yönlendiriyoruz.
+            Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (_) => EmailVerificationScreen(email: state.email),
+                builder: (context) => EmailVerificationScreen(email: state.email),
               ),
+              (route) => false,
             );
           } else if (state is SignUpError) {
             _showError(state.message);
@@ -158,7 +157,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: kTextColor),
+                      icon: const Icon(Icons.arrow_back, color: AppColors.kTextColor),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -174,7 +173,7 @@ class _SignUpViewState extends State<SignUpView> {
                       width: 80,
                       height: 80,
                       decoration: BoxDecoration(
-                        color: kPrimaryColor.withOpacity(0.2),
+                        color: AppColors.kPrimaryColor.withOpacity(0.2),
                         shape: BoxShape.circle,
                       ),
                       child: ClipOval(
@@ -193,12 +192,12 @@ class _SignUpViewState extends State<SignUpView> {
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [kPrimaryColor, Colors.orangeAccent],
+                            colors: [AppColors.kPrimaryColor, Colors.orangeAccent],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: kPrimaryColor.withOpacity(0.3),
+                              color: AppColors.kPrimaryColor.withOpacity(0.3),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
                             ),
@@ -218,7 +217,7 @@ class _SignUpViewState extends State<SignUpView> {
                   style: GoogleFonts.inter(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.darkPrimaryColor,
+                    color: AppColors.kPrimaryColor,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -258,7 +257,7 @@ class _SignUpViewState extends State<SignUpView> {
                           text: "Gönüllü",
                           icon: Icons.person_outline,
                           isSelected: _selectedIndex == 0,
-                          activeColor: AppColors.darkPrimaryColor,
+                          activeColor: AppColors.kPrimaryColor,
                           onTap: () => setState(() => _selectedIndex = 0),
                         ),
                       ),
@@ -267,7 +266,7 @@ class _SignUpViewState extends State<SignUpView> {
                           text: "STK",
                           icon: Icons.business_outlined, // corporate_fare
                           isSelected: _selectedIndex == 1,
-                          activeColor: AppColors.darkPrimaryColor,
+                          activeColor: AppColors.kPrimaryColor,
                           onTap: () => setState(() => _selectedIndex = 1),
                         ),
                       ),
@@ -288,7 +287,7 @@ class _SignUpViewState extends State<SignUpView> {
                         style: GoogleFonts.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: kTextColor,
+                          color: AppColors.kTextColor,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -378,17 +377,17 @@ class _SignUpViewState extends State<SignUpView> {
                             ? null
                             : () => _onSignUpPressed(context),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: kPrimaryColor,
+                          backgroundColor: AppColors.kPrimaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          shadowColor: kPrimaryColor.withOpacity(0.5),
+                          shadowColor: AppColors.kPrimaryColor.withOpacity(0.5),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ).copyWith(
                           elevation: WidgetStateProperty.all(8),
                           shadowColor: WidgetStateProperty.all(
-                              kPrimaryColor.withOpacity(0.4)),
+                              AppColors.kPrimaryColor.withOpacity(0.4)),
                         ),
                         child: (state is SignUpLoading)
                             ? const SizedBox(
@@ -436,7 +435,7 @@ class _SignUpViewState extends State<SignUpView> {
                       child: Text(
                         "Giriş yap",
                         style: GoogleFonts.inter(
-                          color: kSecondaryColor,
+                          color: AppColors.kSecondaryColor,
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
                           decoration: TextDecoration.underline,
@@ -480,7 +479,7 @@ class _SignUpViewState extends State<SignUpView> {
         keyboardType: keyboardType,
         style: GoogleFonts.inter(
           fontWeight: FontWeight.w500,
-          color: kTextColor,
+          color: AppColors.kTextColor,
         ),
         decoration: InputDecoration(
           hintText: hint,
@@ -515,7 +514,7 @@ class _SignUpViewState extends State<SignUpView> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: kPrimaryColor, width: 2),
+            borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2),
           ),
         ),
       ),

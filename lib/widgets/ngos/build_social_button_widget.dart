@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Widget buildSocialButton(String label, Color color) {
+Widget buildSocialButton(BuildContext context, String label, Color color) {
   return Container(
     width: 40,
     height: 40,

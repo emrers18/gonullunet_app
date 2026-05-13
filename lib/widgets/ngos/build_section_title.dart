@@ -1,9 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../utils/app_colors.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 
-Widget buildSectionTitle(IconData icon, String title) {
+Widget buildSectionTitle(BuildContext context, IconData icon, String title) {
   return Row(
     children: [
       Icon(icon, color: AppColors.kPrimaryColor, size: 20),
@@ -13,7 +13,7 @@ Widget buildSectionTitle(IconData icon, String title) {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFF181210),
+          color: AppColors.kTextColor,
         ),
       ),
     ],

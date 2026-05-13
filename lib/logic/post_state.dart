@@ -31,5 +31,17 @@ class PostLoaded extends PostState {
 
 class PostError extends PostState {
   final String message;
-  const PostError(this.message);
+  final List<Post> posts;
+  final bool hasMore;
+  final DocumentSnapshot? lastDocument;
+
+  const PostError({
+    required this.message,
+    this.posts = const [],
+    this.hasMore = false,
+    this.lastDocument,
+  });
+
+  @override
+  List<Object?> get props => [message, posts, hasMore, lastDocument];
 }

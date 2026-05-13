@@ -8,8 +8,9 @@ import 'post_state.dart';
 
 class PostCubit extends Cubit<PostState> {
   final PostRepository repository;
+  final String? publisherType;
 
-  PostCubit(this.repository) : super(PostInitial());
+  PostCubit(this.repository, {this.publisherType}) : super(PostInitial());
 
   Future<List<Post>> _hydrateLikeStatus(List<Post> posts) async {
     final results = <Post>[];
@@ -20,7 +21,7 @@ class PostCubit extends Cubit<PostState> {
     return results;
   }
 
-  Future<void> loadPosts() async {
+  Future<void> loadPosts({bool rethrowError = false}) async {
     if (state is PostLoading) return;
 
     final currentState = state;
@@ -37,28 +38,39 @@ class PostCubit extends Cubit<PostState> {
     emit(PostLoading(oldPosts, isFirstFetch: oldPosts.isEmpty));
 
     try {
-      final newPosts = await repository.fetchPosts(lastDocument: lastDoc);
-      final newLastDoc =
-          await repository.getLastDocumentFromQuery(lastDocument: lastDoc);
+      final result = await repository.fetchPosts(
+          lastDocument: lastDoc, publisherType: publisherType);
 
-      final hydratedNewPosts = await _hydrateLikeStatus(newPosts);
+      final hydratedNewPosts = await _hydrateLikeStatus(result.posts);
       final totalPosts = [...oldPosts, ...hydratedNewPosts];
 
       final hasMoreData =
-          newPosts.isNotEmpty && newPosts.length >= PostRepository.limit;
+          result.posts.isNotEmpty && result.posts.length >= PostRepository.limit;
 
       emit(PostLoaded(
-          posts: totalPosts, hasMore: hasMoreData, lastDocument: newLastDoc));
+          posts: totalPosts,
+          hasMore: hasMoreData,
+          lastDocument: result.lastDocument));
     } catch (e) {
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: oldPosts,
+        hasMore: currentState is PostLoaded ? currentState.hasMore : false,
+        lastDocument: lastDoc,
+      ));
+      if (rethrowError) rethrow;
     }
   }
 
   Future<void> addPostWithImage(
       String title, String desc, File? imageFile, String uid) async {
+    final currentState = state;
+    final List<Post> currentPosts = currentState is PostLoaded
+        ? currentState.posts
+        : (currentState is PostLoading ? currentState.oldPosts : []);
+
     try {
-      emit(PostLoading(state is PostLoaded ? (state as PostLoaded).posts : [],
-          isFirstFetch: false));
+      emit(PostLoading(currentPosts, isFirstFetch: false));
 
       String imageUrl = '';
       if (imageFile != null) {
@@ -69,15 +81,24 @@ class PostCubit extends Cubit<PostState> {
       }
 
       await repository.addPost(title, desc, imageUrl, uid);
-      await refresh();
+      // Post eklendikten sonra mutlaka yenilemeyi bekle ve hata varsa fırlat.
+      // Bu sayede modal "başarılı" diyerek kapanmaz, hata modalda kalır.
+      await refresh(rethrowError: true);
     } catch (e) {
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: currentPosts,
+        hasMore: currentState is PostLoaded ? currentState.hasMore : false,
+        lastDocument:
+            currentState is PostLoaded ? currentState.lastDocument : null,
+      ));
+      rethrow;
     }
   }
 
-  Future<void> refresh() async {
+  Future<void> refresh({bool rethrowError = false}) async {
     emit(PostInitial());
-    await loadPosts();
+    await loadPosts(rethrowError: rethrowError);
   }
 
   /// STK detay sayfası gibi tek post'u bağımsız olarak yönetmek için.
@@ -153,7 +174,14 @@ class PostCubit extends Cubit<PostState> {
         ));
       }
     } catch (e) {
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
+      final currentState = state;
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: currentState is PostLoaded ? currentState.posts : [],
+        hasMore: currentState is PostLoaded ? currentState.hasMore : false,
+        lastDocument:
+            currentState is PostLoaded ? currentState.lastDocument : null,
+      ));
     }
   }
 
@@ -165,7 +193,11 @@ class PostCubit extends Cubit<PostState> {
       final hydratedPosts = await _hydrateLikeStatus(posts);
       emit(PostLoaded(posts: hydratedPosts, hasMore: false));
     } catch (e) {
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: const [],
+        hasMore: false,
+      ));
     }
   }
 
@@ -188,6 +220,7 @@ class PostCubit extends Cubit<PostState> {
               likeCount: post.likeCount,
               commentCount: post.commentCount,
               publisherId: post.publisherId,
+              publisherType: post.publisherType,
               isLiked: post.isLiked,
             );
           }
@@ -200,7 +233,14 @@ class PostCubit extends Cubit<PostState> {
         ));
       }
     } catch (e) {
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
+      final currentState = state;
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: currentState is PostLoaded ? currentState.posts : [],
+        hasMore: currentState is PostLoaded ? currentState.hasMore : false,
+        lastDocument:
+            currentState is PostLoaded ? currentState.lastDocument : null,
+      ));
     }
   }
 
@@ -221,13 +261,15 @@ class PostCubit extends Cubit<PostState> {
     try {
       await repository.deletePost(postId, imageUrl);
     } catch (e) {
-      // Rollback
-      emit(PostLoaded(
-        posts: currentState.posts,
-        hasMore: currentState.hasMore,
-        lastDocument: currentState.lastDocument,
+      // Rollback already happened above if state was PostLoaded
+      final currentState = state;
+      emit(PostError(
+        message: FirebaseErrorTranslator.translate(e),
+        posts: currentState is PostLoaded ? currentState.posts : [],
+        hasMore: currentState is PostLoaded ? currentState.hasMore : false,
+        lastDocument:
+            currentState is PostLoaded ? currentState.lastDocument : null,
       ));
-      emit(PostError(FirebaseErrorTranslator.translate(e)));
     }
   }
 }

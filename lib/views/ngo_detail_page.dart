@@ -3,12 +3,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 import '../logic/user_cubit.dart';
 import '../logic/user_state.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/models/post_model.dart';
-import 'package:gonullunet_app/utils/app_colors.dart';
+
 import 'package:gonullunet_app/widgets/events/event_card.dart';
 import 'package:gonullunet_app/widgets/posts/post_card.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
@@ -52,7 +53,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
   Widget build(BuildContext context) {
     // STK'nın detaylı verilerini (Vizyon, Misyon, Telefon vb.) çekmek için StreamBuilder
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F5), // background-light
+      backgroundColor: Colors.white,
       body: StreamBuilder<DocumentSnapshot>(
         stream: _firestore.collection('users').doc(widget.ngo.id).snapshots(),
         builder: (context, snapshot) {
@@ -92,14 +93,14 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   elevation: 0,
                   leading: IconButton(
                     icon: const Icon(Icons.arrow_back_ios_new,
-                        color: Color(0xFF181210)),
+                        color: AppColors.kTextColor),
                     onPressed: () => Navigator.pop(context),
                   ),
                   centerTitle: true,
                   title: Text(
                     "STK Detayı",
                     style: GoogleFonts.plusJakartaSans(
-                      color: const Color(0xFF181210),
+                      color: AppColors.kTextColor,
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
                     ),
@@ -107,7 +108,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   actions: [
                     IconButton(
                       icon: const Icon(Icons.share_outlined,
-                          color: Color(0xFF181210)),
+                          color: AppColors.kTextColor),
                       onPressed: () {},
                     ),
                   ],
@@ -121,37 +122,40 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                     child: Column(
                       children: [
                         // Logo (Yuvarlak ve Gölgeli)
-                        Container(
-                          width: 112,
-                          height: 112,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: Colors.grey.shade200, width: 4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
+                        Hero(
+                          tag: 'ngo_image_${widget.ngo.id}',
+                          child: Container(
+                            width: 112,
+                            height: 112,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.grey.shade200, width: 4),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                ),
+                              ],
+                              image: DecorationImage(
+                                image: CachedNetworkImageProvider(imageUrl),
+                                fit: BoxFit.cover,
                               ),
-                            ],
-                            image: DecorationImage(
-                              image: CachedNetworkImageProvider(imageUrl),
-                              fit: BoxFit.cover,
                             ),
-                          ),
-                          // Online durumunu gösteren yeşil nokta (Opsiyonel)
-                          child: Align(
-                            alignment: Alignment.bottomRight,
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              margin: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: Colors.green,
-                                shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.white, width: 3),
+                            // Online durumunu gösteren yeşil nokta (Opsiyonel)
+                            child: Align(
+                              alignment: Alignment.bottomRight,
+                              child: Container(
+                                width: 20,
+                                height: 20,
+                                margin: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  shape: BoxShape.circle,
+                                  border:
+                                      Border.all(color: Colors.white, width: 3),
+                                ),
                               ),
                             ),
                           ),
@@ -165,7 +169,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: const Color(0xFF181210),
+                            color: AppColors.kTextColor,
                             letterSpacing: -0.5,
                           ),
                         ),
@@ -242,9 +246,9 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
                                     style: OutlinedButton.styleFrom(
-                                      foregroundColor: const Color(0xFF181210),
+                                      foregroundColor: AppColors.kTextColor,
                                       side: BorderSide(
-                                          color: Colors.grey.shade300),
+                                          color: Colors.grey.shade200),
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(30),
                                       ),
@@ -259,14 +263,15 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         ),
 
                         const SizedBox(height: 24),
-                        Divider(color: Colors.grey.shade100, height: 1),
+                        Divider(color: Colors.grey.shade200, height: 1),
                         const SizedBox(height: 16),
 
                         // İstatistikler (Hızlı Bakış)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            buildStatItem(followersCount.toString(), "Takipçi"),
+                            buildStatItem(
+                                context, followersCount.toString(), "Takipçi"),
                             // Etkinlik Sayısını Canlı Çek
                             StreamBuilder<QuerySnapshot>(
                                 stream: _firestore
@@ -279,9 +284,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                   if (snap.hasData) {
                                     count = snap.data!.docs.length.toString();
                                   }
-                                  return buildStatItem(count, "Etkinlik");
+                                  return buildStatItem(
+                                      context, count, "Etkinlik");
                                 }),
-                            buildStatItem("—", "Puan"),
+                            buildStatItem(context, "—", "Puan"),
                           ],
                         ),
                       ],
@@ -294,7 +300,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                     TabBar(
                       controller: _tabController,
                       labelColor: AppColors.kPrimaryColor,
-                      unselectedLabelColor: Colors.grey.shade400,
+                      unselectedLabelColor: Colors.grey,
                       indicatorColor: AppColors.kPrimaryColor,
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
@@ -319,14 +325,15 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildSectionTitle(Icons.info_outline, "Hakkımızda"),
+                      buildSectionTitle(
+                          context, Icons.info_outline, "Hakkımızda"),
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade100),
+                          border: Border.all(color: Colors.grey.shade200),
                           boxShadow: [
                             BoxShadow(
                                 color: Colors.black.withOpacity(0.02),
@@ -340,7 +347,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                             Text(
                               description,
                               style: TextStyle(
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.kTextColor.withOpacity(0.7),
                                   height: 1.6,
                                   fontSize: 14),
                             ),
@@ -354,6 +361,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                             if (mission != null)
                               Expanded(
                                   child: buildInfoCard(
+                                      context,
                                       "Misyonumuz",
                                       mission,
                                       Icons.flag_outlined,
@@ -364,6 +372,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                             if (vision != null)
                               Expanded(
                                   child: buildInfoCard(
+                                      context,
                                       "Vizyonumuz",
                                       vision,
                                       Icons.visibility_outlined,
@@ -372,25 +381,25 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                           ],
                         ),
                       const SizedBox(height: 24),
-                      buildSectionTitle(
-                          Icons.contact_support_outlined, "İletişim Bilgileri"),
+                      buildSectionTitle(context, Icons.contact_support_outlined,
+                          "İletişim Bilgileri"),
                       const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: Colors.grey.shade100),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Column(
                           children: [
-                            buildContactTile(
-                                Icons.location_on_outlined, "Adres", location),
+                            buildContactTile(context, Icons.location_on_outlined,
+                                "Adres", location),
                             if (phone != null)
-                              buildContactTile(
-                                  Icons.call_outlined, "Telefon", phone),
+                              buildContactTile(context, Icons.call_outlined,
+                                  "Telefon", phone),
                             if (email != null)
-                              buildContactTile(
-                                  Icons.mail_outline, "E-posta", email),
+                              buildContactTile(context, Icons.mail_outline,
+                                  "E-posta", email),
                           ],
                         ),
                       ),
@@ -398,11 +407,13 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          buildSocialButton("f", const Color(0xFF1877F2)),
+                          buildSocialButton(
+                              context, "f", const Color(0xFF1877F2)),
                           const SizedBox(width: 12),
-                          buildSocialButton("in", const Color(0xFF0077b5)),
+                          buildSocialButton(
+                              context, "in", const Color(0xFF0077b5)),
                           const SizedBox(width: 12),
-                          buildSocialButton("X", Colors.black),
+                          buildSocialButton(context, "X", Colors.black),
                         ],
                       ),
                       const SizedBox(height: 80),

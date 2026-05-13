@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -10,7 +11,6 @@ import '../logic/event_detail_state.dart';
 import '../models/event_model.dart';
 import '../repo/event_repository.dart';
 import '../repo/notification_repository.dart';
-import '../utils/app_colors.dart';
 import '../widgets/events/build_glass_button_widget.dart';
 import '../widgets/events/build_info_card_widget.dart';
 import 'manage_applications_page.dart';
@@ -25,7 +25,7 @@ class EventDetailPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => EventDetailCubit(EventRepository(), event),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF7F9FC),
+        backgroundColor: Colors.white,
         body: _EventBody(event: event),
       ),
     );
@@ -112,15 +112,16 @@ class _EventBodyState extends State<_EventBody> {
                 SizedBox(height: size.height * 0.38),
                 Container(
                   constraints: BoxConstraints(minHeight: size.height * 0.62),
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(40)),
+                        const BorderRadius.vertical(top: Radius.circular(40)),
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 40,
-                          offset: Offset(0, -10)),
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 40,
+                        offset: const Offset(0, -10),
+                      ),
                     ],
                   ),
                   padding: EdgeInsets.fromLTRB(24, 40, 24, _isNgo ? 40 : 120),
@@ -132,7 +133,7 @@ class _EventBodyState extends State<_EventBody> {
                           width: 48,
                           height: 6,
                           decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
+                            color: Colors.grey.shade300,
                             borderRadius: BorderRadius.circular(3),
                           ),
                         ),
@@ -145,13 +146,13 @@ class _EventBodyState extends State<_EventBody> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1A659E).withOpacity(0.1),
+                              color: AppColors.kPrimaryColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
                               event.type.toUpperCase(),
                               style: GoogleFonts.plusJakartaSans(
-                                color: const Color(0xFF1A659E),
+                                color: AppColors.kPrimaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                                 letterSpacing: 1,
@@ -168,7 +169,7 @@ class _EventBodyState extends State<_EventBody> {
                             child: Text(
                               event.category,
                               style: GoogleFonts.plusJakartaSans(
-                                color: Colors.grey.shade700,
+                                color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 12,
                               ),
@@ -182,7 +183,7 @@ class _EventBodyState extends State<_EventBody> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1F2937),
+                          color: AppColors.kTextColor,
                           height: 1.2,
                         ),
                       ),
@@ -190,7 +191,8 @@ class _EventBodyState extends State<_EventBody> {
                       Row(
                         children: [
                           const Icon(Icons.location_on,
-                              color: AppColors.kPrimaryColor, size: 20),
+                              color: AppColors.kPrimaryColor,
+                              size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -198,7 +200,7 @@ class _EventBodyState extends State<_EventBody> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
-                                color: const Color(0xFF6B7280),
+                                color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -209,7 +211,7 @@ class _EventBodyState extends State<_EventBody> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF7F9FC),
+                          color: Colors.grey.shade100.withOpacity(0.3),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
@@ -227,7 +229,7 @@ class _EventBodyState extends State<_EventBody> {
                                     "Düzenleyen",
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12,
-                                      color: const Color(0xFF6B7280),
+                                      color: Colors.grey.shade600,
                                     ),
                                   ),
                                   BlocBuilder<EventDetailCubit,
@@ -244,7 +246,7 @@ class _EventBodyState extends State<_EventBody> {
                                         style: GoogleFonts.plusJakartaSans(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
-                                          color: const Color(0xFF1F2937),
+                                          color: AppColors.kTextColor,
                                         ),
                                       );
                                     },
@@ -260,6 +262,7 @@ class _EventBodyState extends State<_EventBody> {
                         children: [
                           Expanded(
                               child: buildInfoCard(
+                                  context,
                                   Icons.calendar_month,
                                   "Tarih",
                                   formattedDate,
@@ -276,11 +279,12 @@ class _EventBodyState extends State<_EventBody> {
                                 count = state.participantCount;
                               }
                               return buildInfoCard(
+                                  context,
                                   Icons.group,
                                   isProject ? "Başvuru" : "Katılımcı",
                                   "$count Kişi",
                                   "Şimdiye kadar",
-                                  const Color(0xFF004E89));
+                                  AppColors.kSecondaryColor);
                             },
                           )),
                         ],
@@ -290,13 +294,14 @@ class _EventBodyState extends State<_EventBody> {
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: const Color(0xFF1F2937))),
+                              color: AppColors.kTextColor)),
                       const SizedBox(height: 12),
                       Text(
                         event.description,
                         style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
-                            color: const Color(0xFF6B7280),
+                            color:
+                                Colors.grey.shade600,
                             height: 1.6),
                       ),
                     ],
@@ -351,12 +356,13 @@ class _EventBodyState extends State<_EventBody> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primaryColor,
+                      foregroundColor: AppColors.kPrimaryColor,
                       elevation: 10,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: const BorderSide(
-                            color: AppColors.primaryColor, width: 2),
+                            color: AppColors.kPrimaryColor,
+                            width: 2),
                       ),
                     ),
                     child: Row(
@@ -386,21 +392,25 @@ class _EventBodyState extends State<_EventBody> {
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(
+                        color: Colors.grey.shade300),
                   ),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.event_busy,
-                            color: Colors.grey.shade500, size: 22),
+                        const Icon(Icons.event_busy,
+                            color:
+                                Colors.grey,
+                            size: 22),
                         const SizedBox(width: 10),
                         Text(
                           "Bu etkinliğin süresi doldu",
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade500,
+                            color:
+                                Colors.grey,
                           ),
                         ),
                       ],
@@ -429,16 +439,16 @@ class _EventBodyState extends State<_EventBody> {
               bool isButtonEnabled = applicationStatus != null || !isFull;
 
               // Duruma göre stil belirleme
-              Color buttonColor = AppColors.primaryColor;
+              Color buttonColor = AppColors.kPrimaryColor;
               String buttonText = "Hemen Başvur";
               IconData buttonIcon = Icons.send_rounded;
 
               if (applicationStatus == 'approved') {
-                buttonColor = Colors.redAccent;
+                buttonColor = Colors.red;
                 buttonText = "Etkinlikten Ayrıl";
                 buttonIcon = Icons.exit_to_app_rounded;
               } else if (applicationStatus == 'pending') {
-                buttonColor = Colors.orange.shade700;
+                buttonColor = Colors.orange;
                 buttonText = "Başvuru Bekleniyor (İptal)";
                 buttonIcon = Icons.hourglass_empty_rounded;
               } else if (isFull) {
@@ -466,7 +476,9 @@ class _EventBodyState extends State<_EventBody> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
-                    shadowColor: (isButtonEnabled ? buttonColor : Colors.grey)
+                    shadowColor: (isButtonEnabled
+                            ? buttonColor
+                            : Colors.grey.shade400)
                         .withOpacity(0.4),
                     elevation: 10,
                     shape: RoundedRectangleBorder(
@@ -496,3 +508,4 @@ class _EventBodyState extends State<_EventBody> {
     );
   }
 }
+

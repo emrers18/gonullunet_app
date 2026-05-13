@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 
 /// Firebase ve genel Dart istisnalarını kullanıcı dostu
 /// Türkçe mesajlara çeviren merkezi çeviri servisi.
@@ -11,6 +12,9 @@ class FirebaseErrorTranslator {
   static String translate(Object e) {
     if (e is FirebaseAuthException) {
       return _translateAuthException(e);
+    }
+    if (e is FirebaseFunctionsException) {
+      return _translateFunctionsException(e);
     }
     if (e is FirebaseException) {
       return _translateFirebaseException(e);
@@ -76,7 +80,13 @@ class FirebaseErrorTranslator {
       case 'already-exists':
         return 'Bu kayıt zaten mevcut.';
       case 'resource-exhausted':
-        return 'Sunucu yoğunluğu yüksek, lütfen daha sonra tekrar deneyin.';
+        // Cloud Function'dan gelen özel mesajı temizle ve döndür
+        final cleanMsg = _getCleanMessage(e.message);
+        if (cleanMsg.isNotEmpty &&
+            !cleanMsg.toLowerCase().contains('resource-exhausted')) {
+          return cleanMsg;
+        }
+        return 'Limitinize ulaştınız veya sunucu şu an çok yoğun.';
       case 'cancelled':
         return 'İşlem iptal edildi.';
       case 'deadline-exceeded':
@@ -88,7 +98,27 @@ class FirebaseErrorTranslator {
       case 'quota-exceeded':
         return 'Depolama kotası aşıldı.';
       default:
-        return 'Sunucu hatası oluştu. Lütfen tekrar deneyin.';
+        return 'Sunucu hatası oluştu (${e.code}). Lütfen tekrar deneyin.';
     }
+  }
+
+  // --- Cloud Functions Hataları ---
+  static String _translateFunctionsException(FirebaseFunctionsException e) {
+    // resource-exhausted durumunda mesajı direkt döndürmeye çalış
+    if (e.code == 'resource-exhausted') {
+      final cleanMsg = _getCleanMessage(e.message);
+      if (cleanMsg.isNotEmpty) return cleanMsg;
+    }
+
+    return _translateFirebaseException(e);
+  }
+
+  static String _getCleanMessage(String? message) {
+    if (message == null || message.isEmpty) return '';
+
+    if (message.contains(']')) {
+      return message.split(']').last.trim();
+    }
+    return message.trim();
   }
 }

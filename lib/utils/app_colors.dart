@@ -20,4 +20,6 @@ class AppColors {
   static const Color kSurfaceColor = Color(0xFFFFFFFF);
   static const Color kSecondaryColor = Color(0xFF004E89);
   static const Color kTextMain = Color(0xFF1F2937);
+  static const Color headerStart = Color(0xFF1565C0);
+  static const Color headerEnd = Color(0xFF1E88E5);
 }

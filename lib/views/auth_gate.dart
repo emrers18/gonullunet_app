@@ -20,7 +20,7 @@ class AuthGate extends StatelessWidget {
         }
 
         // 2. Durum: Kullanıcı Giriş Yapmış -> Ana Sayfa
-        if (snapshot.hasData && snapshot.data != null) {
+        if (snapshot.hasData) {
           return const MainPage();
         }
 

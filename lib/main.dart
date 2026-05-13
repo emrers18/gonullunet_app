@@ -17,6 +17,7 @@ import 'repo/post_repository.dart';
 import 'views/auth_gate.dart';
 import 'views/onboarding_page.dart';
 import 'services/notification_service.dart';
+import 'utils/app_colors.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,9 +80,10 @@ class MyApp extends StatelessWidget {
           title: 'GönüllüNet',
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
-            colorScheme:
-                ColorScheme.fromSeed(seedColor: const Color(0xFF03A9F4)),
+            primaryColor: AppColors.kPrimaryColor,
+            scaffoldBackgroundColor: AppColors.kBackgroundColor,
             useMaterial3: true,
+            fontFamily: 'Inter',
           ),
           home: showOnboarding ? const OnboardingPage() : const AuthGate(),
         ),

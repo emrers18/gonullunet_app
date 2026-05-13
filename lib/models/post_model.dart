@@ -10,6 +10,7 @@ class Post {
   final int likeCount;
   final int commentCount;
   final String publisherId;
+  final String publisherType;
   final bool isLiked;
 
   Post({
@@ -21,6 +22,7 @@ class Post {
     required this.likeCount,
     required this.commentCount,
     required this.publisherId,
+    required this.publisherType,
     this.isLiked = false,
   });
 
@@ -38,6 +40,7 @@ class Post {
       likeCount: likeCount ?? this.likeCount,
       commentCount: commentCount ?? this.commentCount,
       publisherId: publisherId,
+      publisherType: publisherType,
       isLiked: isLiked ?? this.isLiked,
     );
   }
@@ -58,6 +61,7 @@ class Post {
         createdAt: data['createdAt'] ?? Timestamp.now(),
         likeCount: data['likeCount'] ?? 0,
         commentCount: data['commentCount'] ?? 0,
-        publisherId: data['publisherId'] ?? 'Bilinmiyor');
+        publisherId: data['publisherId'] ?? 'Bilinmiyor',
+        publisherType: data['publisherType'] ?? 'volunteer');
   }
 }

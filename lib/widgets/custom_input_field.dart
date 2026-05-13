@@ -33,7 +33,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
 
   void _toggleObscure() {
     setState(() {
-      _obscureText = !_obscureText; //şifreyi gizleme gösterme
+      _obscureText = !_obscureText;
     });
   }
 
@@ -43,30 +43,34 @@ class _CustomInputFieldState extends State<CustomInputField> {
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: _obscureText,
+      style: const TextStyle(color: AppColors.kTextColor, fontSize: 16),
       decoration: InputDecoration(
         hintText: widget.hintText,
-        hintStyle: TextStyle(color: Colors.grey[500]),
+        hintStyle: TextStyle(color: Colors.grey.shade500),
         filled: true,
-        fillColor: AppColors.textColor,
+        fillColor: Colors.white,
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
                   _obscureText ? Icons.visibility_off : Icons.visibility,
-                  color: AppColors.accentColor,
+                  color: AppColors.kPrimaryColor,
                 ),
                 onPressed: _toggleObscure,
               )
             : null,
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
-          borderSide: BorderSide(color: Colors.grey[300]!, width: 1.0),
+          borderSide: BorderSide(color: Colors.grey.shade200, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.0),
-          borderSide:
-              const BorderSide(color: AppColors.kPrimaryColor, width: 2.0),
+          borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2.0),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.0),
+          borderSide: const BorderSide(color: Colors.red, width: 1.0),
         ),
       ),
     );

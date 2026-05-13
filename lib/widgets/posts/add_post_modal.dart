@@ -6,9 +6,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
-import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/logic/user_cubit.dart';
 import 'package:gonullunet_app/logic/user_state.dart';
+import 'package:gonullunet_app/repo/post_repository.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 
 class AddPostModal extends StatefulWidget {
   const AddPostModal({super.key});
@@ -26,6 +27,9 @@ class _AddPostModalState extends State<AddPostModal> {
   final Auth _auth = Auth();
   bool _isSaving = false;
   String? _errorMessage;
+
+  bool _isResponsibilityAccepted = false;
+  bool _isCommunityRulesAccepted = false;
 
   @override
   void dispose() {
@@ -72,21 +76,30 @@ class _AddPostModalState extends State<AddPostModal> {
       return;
     }
 
+    if (!_isResponsibilityAccepted || !_isCommunityRulesAccepted) {
+      setState(() => _errorMessage = 'Lütfen tüm onay kutucuklarını işaretleyin.');
+      return;
+    }
+
     setState(() {
       _isSaving = true;
     });
 
     try {
-      await context.read<PostCubit>().addPostWithImage(
-            title,
-            description,
-            _selectedImage,
-            user.uid,
-          );
+      final repo = context.read<PostRepository>();
+
+      String imageUrl = '';
+      if (_selectedImage != null) {
+        imageUrl = await repo.uploadImage(_selectedImage!);
+        if (imageUrl.isEmpty) {
+          throw Exception('Resim yüklenemedi, URL boş döndü.');
+        }
+      }
+
+      await repo.addPost(title, description, imageUrl, user.uid);
 
       if (mounted) {
         Navigator.pop(context, true);
-        // Başarı durumunda anasayfada snackbar gösterilebilir çünkü modal kapandı.
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("Gönderi başarıyla paylaşıldı."),
@@ -100,7 +113,7 @@ class _AddPostModalState extends State<AddPostModal> {
       if (mounted) {
         setState(() {
           _isSaving = false;
-          _errorMessage = "Bir hata oluştu: $e";
+          _errorMessage = FirebaseErrorTranslator.translate(e);
         });
       }
     }
@@ -334,6 +347,40 @@ class _AddPostModalState extends State<AddPostModal> {
                             ),
                     ),
                   ),
+                  
+                  const SizedBox(height: 24),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  
+                  // Responsibility Checkbox
+                  CheckboxListTile(
+                    value: _isResponsibilityAccepted,
+                    onChanged: (val) => setState(() => _isResponsibilityAccepted = val ?? false),
+                    title: Text(
+                      'Paylaştığım içeriğin doğruluğundan sorumluyum.',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppColors.primaryColor,
+                    dense: true,
+                  ),
+                  
+                  // Community Rules Checkbox
+                  CheckboxListTile(
+                    value: _isCommunityRulesAccepted,
+                    onChanged: (val) => setState(() => _isCommunityRulesAccepted = val ?? false),
+                    title: Text(
+                      'Topluluk kurallarına uygun hareket edeceğimi taahhüt ederim.',
+                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                    activeColor: AppColors.primaryColor,
+                    dense: true,
+                  ),
+                  
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

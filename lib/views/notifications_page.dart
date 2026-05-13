@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:gonullunet_app/utils/app_colors.dart';
 
 import '../logic/notidication_state.dart';
@@ -26,18 +25,19 @@ class NotificationsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
         title: const Text(
           "Bildirimler",
           style: TextStyle(
-              color: AppColors.primaryText, fontWeight: FontWeight.bold),
+              color: AppColors.kTextColor,
+              fontWeight: FontWeight.bold),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.kBackgroundColor,
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          icon: const Icon(Icons.arrow_back, color: AppColors.kTextColor),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -61,8 +61,8 @@ class NotificationsView extends StatelessWidget {
         builder: (context, state) {
           if (state is NotificationLoading) {
             return const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.primaryColor));
+                child: CircularProgressIndicator(
+                    color: AppColors.kPrimaryColor));
           }
 
           if (state is NotificationError) {
@@ -71,16 +71,17 @@ class NotificationsView extends StatelessWidget {
 
           if (state is NotificationLoaded) {
             if (state.notifications.isEmpty) {
-              return Center(
+              return const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(Icons.notifications_off_outlined,
-                        size: 80, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
+                        size: 80, color: Colors.grey),
+                    SizedBox(height: 16),
                     Text(
                       "Henüz bildiriminiz yok.",
-                      style: TextStyle(color: Colors.grey[500], fontSize: 16),
+                      style: TextStyle(
+                          color: Colors.grey, fontSize: 16),
                     ),
                   ],
                 ),
@@ -131,14 +132,15 @@ class NotificationsView extends StatelessWidget {
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                     tileColor: notification.isRead
                         ? Colors.white
-                        : AppColors.lightPrimaryColor.withOpacity(0.2),
+                        : AppColors.kPrimaryColor.withOpacity(0.1),
                     leading: CircleAvatar(
-                      backgroundColor: AppColors.lightPrimaryColor,
+                      backgroundColor:
+                          AppColors.kPrimaryColor.withOpacity(0.2),
                       child: Icon(
                         notification.type == 'event'
                             ? Icons.event
                             : Icons.notifications,
-                        color: AppColors.primaryColor,
+                        color: AppColors.kPrimaryColor,
                       ),
                     ),
                     title: Text(
@@ -147,7 +149,7 @@ class NotificationsView extends StatelessWidget {
                         fontWeight: notification.isRead
                             ? FontWeight.normal
                             : FontWeight.bold,
-                        color: Colors.black87,
+                        color: AppColors.kTextColor,
                       ),
                     ),
                     subtitle: Column(
@@ -158,8 +160,8 @@ class NotificationsView extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           notification.timeAgo,
-                          style:
-                              TextStyle(color: Colors.grey[500], fontSize: 12),
+                          style: const TextStyle(
+                              color: Colors.grey, fontSize: 12),
                         ),
                       ],
                     ),
@@ -168,9 +170,9 @@ class NotificationsView extends StatelessWidget {
                           .read<NotificationCubit>()
                           .markAsRead(notification.id);
                     },
-                    trailing: const Icon(
+                    trailing: Icon(
                       Icons.chevron_left,
-                      color: Colors.black12,
+                      color: Colors.grey.withOpacity(0.3),
                       size: 20,
                     ),
                   ),
@@ -212,3 +214,4 @@ class NotificationsView extends StatelessWidget {
     );
   }
 }
+

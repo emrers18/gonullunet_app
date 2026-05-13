@@ -13,4 +13,11 @@ class NgoRepository {
       return snapshot.docs.map((doc) => Ngo.fromFirestore(doc)).toList();
     });
   }
+  Future<int> getNgoEventCount(String ngoId) async {
+    final snapshot = await _firestore
+        .collection('events')
+        .where('organizerId', isEqualTo: ngoId)
+        .get();
+    return snapshot.docs.length;
+  }
 }

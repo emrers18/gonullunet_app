@@ -36,7 +36,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
       lastDate: DateTime(2100),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme:
                 const ColorScheme.light(primary: AppColors.primaryColor),
           ),

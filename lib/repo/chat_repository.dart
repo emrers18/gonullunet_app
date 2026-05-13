@@ -1,61 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_ai/firebase_ai.dart' hide ChatSession;
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_remote_config/firebase_remote_config.dart';
+
 import 'package:gonullunet_app/models/chat_message_model.dart';
 import 'package:gonullunet_app/models/chat_session_model.dart';
 
 class ChatRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseRemoteConfig _remoteConfig = FirebaseRemoteConfig.instance;
-
-  // Remote Config varsayılan değerleri (ilk fetch başarısız olursa kullanılır)
-  static const String _defaultModelName = 'gemini-2.5-flash';
-  static const String _defaultSystemInstruction =
-      'Sen GönüllüNet dijital gençlik çalışanı asistanısın. '
-      'Sadece Avrupa Birliği projeleri, gönüllülük, sivil toplum kuruluşları (STK), '
-      'sosyal sorumluluk projeleri ve Erasmus+ hakkında bilgi verirsin. '
-      'Bu konular dışındaki sorulara nazikçe cevap veremeyeceğini belirtirsin '
-      've kullanıcıyı Türkiye Ulusal Ajansı\'nın resmi web sitesine (www.ua.gov.tr) yönlendirirsin. '
-      'Kullanıcılardan TC Kimlik No, pasaport numarası gibi kişisel veriler talep etme. '
-      'Her zaman nazik, profesyonel ve teşvik edici ol. '
-      'Cevaplarını kısa ve öz tut. En fazla 3-4 paragraf ile yanıt ver.';
-
-  GenerativeModel? _model;
-
-  /// Remote Config'i fetch edip modeli başlatır.
-  /// Uygulama başlatılırken veya chat ekranı açılırken çağrılmalıdır.
-  Future<void> initialize() async {
-    try {
-      // Remote Config varsayılanlarını ayarla (ilk çalışmada cache yoksa bunlar kullanılır)
-      await _remoteConfig.setDefaults({
-        'ai_model_name': _defaultModelName,
-        'ai_system_instruction': _defaultSystemInstruction,
-      });
-
-      // Minimum fetch aralığı: 1 saat (üretimde). Geliştirme için 0 yapılabilir.
-      await _remoteConfig.setConfigSettings(RemoteConfigSettings(
-        fetchTimeout: const Duration(seconds: 10),
-        minimumFetchInterval: Duration.zero,
-      ));
-
-      await _remoteConfig.fetchAndActivate();
-    } catch (e) {
-      // Fetch başarısız olsa da varsayılan değerlerle devam edilir
-      // ignore: avoid_print
-      print('Remote Config fetch hatası (varsayılanlar kullanılacak): $e');
-    }
-
-    final modelName = _remoteConfig.getString('ai_model_name');
-    final systemInstruction = _remoteConfig.getString('ai_system_instruction');
-
-    _model = FirebaseAI.vertexAI().generativeModel(
-      model: modelName.isEmpty ? _defaultModelName : modelName,
-      systemInstruction: Content.system(systemInstruction),
-      generationConfig: GenerationConfig(maxOutputTokens: 2500),
-    );
-  }
+  final FirebaseFunctions _functions = FirebaseFunctions.instance;
 
   String? get _userId => _auth.currentUser?.uid;
 
@@ -129,56 +82,114 @@ class ChatRepository {
     return snapshot.docs.map((doc) => ChatMessage.fromFirestore(doc)).toList();
   }
 
-  Future<ChatMessage> sendMessage(String sessionId, String content) async {
-    // Model henüz initialize edilmediyse başlat
-    if (_model == null) await initialize();
-
+  Future<SendMessageResponse> sendMessage(
+      String? sessionId, String content) async {
     final now = Timestamp.now();
 
-    await _messagesRef(sessionId).add({
-      'content': content,
-      'role': 'user',
-      'createdAt': now,
-    });
-
-    await _sessionsRef().doc(sessionId).update({
-      'lastMessageAt': FieldValue.serverTimestamp(),
-    });
-
-    final messagesSnapshot = await _messagesRef(sessionId).get();
-    if (messagesSnapshot.docs.length <= 1) {
-      await _updateSessionTitle(sessionId, content);
+    // 1. Sohbet geçmişini hazırla
+    List<Map<String, dynamic>> chatHistory = [];
+    if (sessionId != null && !sessionId.startsWith('_new_')) {
+      final history = await getMessages(sessionId);
+      chatHistory = history.map((msg) {
+        return {
+          'role': msg.role == 'user' ? 'user' : 'model',
+          'content': msg.content,
+        };
+      }).toList();
     }
 
-    // Sohbet geçmişini Firebase AI'a uygun formata çevir
-    final history = await getMessages(sessionId);
-    final chatHistory = history.map((msg) {
-      return Content(
-        msg.isUser ? 'user' : 'model',
-        [TextPart(msg.content)],
+    try {
+      // 2. AI Yanıtını Al (Veritabanına dokunmadan önce)
+      final aiText = await getAiResponse(content, chatHistory);
+      final aiTimestamp = Timestamp.now();
+
+      // 3. Eğer sessionId yoksa veya geçiciyse, gerçek oturumu şimdi oluştur
+      if (sessionId == null || sessionId.startsWith('_new_')) {
+        final session = await createSession();
+        sessionId = session.id;
+      }
+
+      // 4. Kullanıcı mesajını kaydet
+      await _messagesRef(sessionId).add({
+        'content': content,
+        'role': 'user',
+        'createdAt': now,
+      });
+
+      await _sessionsRef().doc(sessionId).update({
+        'lastMessageAt': FieldValue.serverTimestamp(),
+      });
+
+      // İlk mesaj ise başlığı güncelle
+      if (chatHistory.isEmpty) {
+        await _updateSessionTitle(sessionId, content);
+      }
+
+      // 5. AI yanıtını kaydet
+      final aiDocRef = await _messagesRef(sessionId).add({
+        'content': aiText,
+        'role': 'ai',
+        'createdAt': aiTimestamp,
+      });
+
+      return SendMessageResponse(
+        message: ChatMessage(
+          id: aiDocRef.id,
+          content: aiText,
+          role: 'ai',
+          createdAt: aiTimestamp,
+        ),
+        sessionId: sessionId,
       );
-    }).toList();
+    } catch (e) {
+      String errorMessage = 'Mesaj gönderilirken bir hata oluştu.';
 
-    if (chatHistory.isNotEmpty) {
-      chatHistory.removeLast();
+      if (e is FirebaseFunctionsException) {
+        switch (e.code) {
+          case 'resource-exhausted':
+            // Günlük limit veya kota aşımı
+            if (e.message != null && e.message!.contains('Günlük')) {
+              errorMessage =
+                  'Bugünlük soru limitine ulaştın. Yarın tekrar görüşmek üzere! 🚀';
+            } else {
+              errorMessage =
+                  'Şu an çok yoğunum, lütfen bir dakika sonra tekrar dener misin? ☕';
+            }
+            break;
+          case 'deadline-exceeded':
+            errorMessage =
+                'Yanıt vermem biraz uzun sürdü, internetini kontrol edip tekrar dener misin? ⏳';
+            break;
+          case 'unavailable':
+            errorMessage =
+                'Sunucuya şu an ulaşılamıyor, lütfen daha sonra tekrar dene. 🛠️';
+            break;
+          default:
+            errorMessage = e.message ?? errorMessage;
+        }
+      } else if (e.toString().toUpperCase().contains('TIMEOUT')) {
+        errorMessage = 'İşlem zaman aşımına uğradı, lütfen tekrar dene. ⏳';
+      }
+
+      throw Exception(errorMessage);
     }
-
-    final chat = _model!.startChat(history: chatHistory);
-    final response = await chat.sendMessage(Content.text(content));
-    final aiText = response.text ?? 'Üzgünüm, bir yanıt oluşturamadım.';
-
-    final aiTimestamp = Timestamp.now();
-    final aiDocRef = await _messagesRef(sessionId).add({
-      'content': aiText,
-      'role': 'ai',
-      'createdAt': aiTimestamp,
-    });
-
-    return ChatMessage(
-      id: aiDocRef.id,
-      content: aiText,
-      role: 'ai',
-      createdAt: aiTimestamp,
-    );
   }
+
+  /// Sadece AI yanıtını döndürür, veritabanına kayıt yapmaz.
+  Future<String> getAiResponse(
+      String content, List<Map<String, dynamic>> chatHistory) async {
+    final result = await _functions.httpsCallable('getChatResponse').call({
+      'content': content,
+      'history': chatHistory,
+    }).timeout(const Duration(seconds: 30)); // Düzeltilen kısım
+
+    return result.data['response'] as String;
+  }
+}
+
+class SendMessageResponse {
+  final ChatMessage message;
+  final String sessionId;
+
+  SendMessageResponse({required this.message, required this.sessionId});
 }

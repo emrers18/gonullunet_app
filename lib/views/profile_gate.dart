@@ -1,0 +1,84 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/logic/user_cubit.dart';
+import 'package:gonullunet_app/logic/user_state.dart';
+import 'package:gonullunet_app/views/main_page.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class ProfileGate extends StatefulWidget {
+  const ProfileGate({super.key});
+
+  @override
+  State<ProfileGate> createState() => _ProfileGateState();
+}
+
+class _ProfileGateState extends State<ProfileGate> {
+  @override
+  void initState() {
+    super.initState();
+    // Profil verisini yüklemeyi başlat
+    context.read<UserCubit>().loadUser();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<UserCubit, UserState>(
+      builder: (context, state) {
+        if (state is UserLoaded) {
+          return const MainPage();
+        }
+
+        if (state is UserError) {
+          return Scaffold(
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        color: Colors.red, size: 64),
+                    const SizedBox(height: 24),
+                    Text(
+                      "Bir Hata Oluştu",
+                      style: GoogleFonts.dmSans(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.message,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.dmSans(color: Colors.grey),
+                    ),
+                    const SizedBox(height: 24),
+                    ElevatedButton(
+                      onPressed: () => context.read<UserCubit>().loadUser(),
+                      child: const Text("Tekrar Dene"),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
+        // UserLoading veya UserInitial
+        return const Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                SizedBox(height: 16),
+                Text("Profil Bilgileri Kontrol Ediliyor..."),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

@@ -1,13 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:gonullunet_app/services/auth.dart';
-import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:gonullunet_app/services/functions_service.dart';
 import 'signup_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
-  final Auth _auth = Auth();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FunctionsService _functionsService = FunctionsService();
 
   SignUpCubit() : super(SignUpInitial());
 
@@ -22,38 +19,22 @@ class SignUpCubit extends Cubit<SignUpState> {
     emit(SignUpLoading());
 
     try {
-      UserCredential userCredential = await _auth.createUser(
+      await _functionsService.registerUser(
         email: email,
         password: password,
+        userType: userType,
+        name: name,
+        surname: surname,
+        stkName: stkName,
       );
 
-      String uid = userCredential.user!.uid;
-
-      Map<String, dynamic> userData = {
-        'uid': uid,
-        'email': email,
-        'userType': userType,
-        'createdAt': FieldValue.serverTimestamp(),
-        'imageUrl': '',
-      };
-
-      if (userType == 'ngo') {
-        userData['stkName'] = stkName;
-        userData['description'] = '';
-        userData['location'] = '';
-      } else {
-        userData['name'] = name;
-        userData['surname'] = surname;
-      }
-
-      await _firestore.collection('users').doc(uid).set(userData);
-
-      // Kayıt başarılı — doğrulama e-postası gönder
-      await userCredential.user?.sendEmailVerification();
-
       emit(SignUpSuccess(email: email));
+    } on FirebaseFunctionsException catch (e) {
+      // Cloud Function'dan dönen anlamlı hata mesajlarını direkt kullan
+      emit(SignUpError(e.message ?? 'Kayıt sırasında bir hata oluştu.'));
     } catch (e) {
-      emit(SignUpError(FirebaseErrorTranslator.translate(e)));
+      emit(const SignUpError(
+          'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'));
     }
   }
 }

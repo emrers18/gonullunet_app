@@ -62,7 +62,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
     }
 
     if (_selectedCategory != 'Tümü') {
-      result = result.where((e) => e.category == _selectedCategory).toList();
+      result = result.where((e) => e.type == _selectedCategory).toList();
     }
 
     setState(() {
@@ -204,8 +204,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
             children: [
               TileLayer(
                 urlTemplate:
-                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-                subdomains: const ['a', 'b', 'c', 'd'],
+                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                subdomains: const ['a', 'b', 'c'],
                 userAgentPackageName: 'com.gonullunet.gonullunet_app',
               ),
               MarkerLayer(
@@ -307,34 +307,38 @@ class _EventsMapPageState extends State<EventsMapPage> {
             ),
           ),
 
-          // 3. KATMAN: LİSTE GÖRÜNÜM BUTONU (Sağ Üst)
+          // 3. KATMAN: KÜÇÜLT BUTONU (Sağ Üst)
           Positioned(
             top: 140,
             right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(30),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4)),
-                ],
-              ),
-              child: const Row(
-                children: [
-                  Icon(Icons.format_list_bulleted,
-                      color: AppColors.kPrimaryColor, size: 20),
-                  SizedBox(width: 8),
-                  Text(
-                    "Liste",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryText),
-                  ),
-                ],
+            child: GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.close_fullscreen_rounded,
+                        color: AppColors.kPrimaryColor, size: 20),
+                    SizedBox(width: 8),
+                    Text(
+                      "Küçült",
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primaryText),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

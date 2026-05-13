@@ -23,6 +23,11 @@
   "storage": {
     "rules": "storage.rules"
   },
+  "firestore": {
+    "indexes": "firestore.indexes.json"
+  },
+
+
   "functions": [
     {
       "source": "functions",

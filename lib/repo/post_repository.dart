@@ -5,26 +5,39 @@ import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gonullunet_app/services/image_compress_service.dart';
+import 'package:gonullunet_app/services/functions_service.dart';
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FunctionsService _functionsService = FunctionsService();
 
   static const int limit = 5;
 
-  Future<List<Post>> fetchPosts({DocumentSnapshot? lastDocument}) async {
-    Query query = _firestore
-        .collection('posts')
-        .orderBy('createdAt', descending: true)
-        .limit(limit);
+  /// Postları çeker. [publisherType] filtresi varsa sadece o türdeki postlar gelir.
+  /// Dönen tuple: (postlar listesi, son DocumentSnapshot veya null)
+  Future<({List<Post> posts, DocumentSnapshot? lastDocument})> fetchPosts({
+    DocumentSnapshot? lastDocument,
+    String? publisherType,
+  }) async {
+    Query query = _firestore.collection('posts');
+
+    if (publisherType != null) {
+      query = query.where('publisherType', isEqualTo: publisherType);
+    }
+
+    query = query.orderBy('createdAt', descending: true).limit(limit);
 
     if (lastDocument != null) {
       query = query.startAfterDocument(lastDocument);
     }
 
     final snapshot = await query.get();
-    return snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+    final posts = snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
+    final lastDoc = snapshot.docs.isNotEmpty ? snapshot.docs.last : null;
+
+    return (posts: posts, lastDocument: lastDoc);
   }
 
   /// Görseli 1080x1080'e sıkıştırarak Firebase Storage'a yükler.
@@ -62,43 +75,12 @@ class PostRepository {
 
   Future<void> addPost(String title, String description, String imageUrl,
       String publisherId) async {
-    final batch = _firestore.batch();
-    
-    final postRef = _firestore.collection('posts').doc();
-    batch.set(postRef, {
-      'title': title,
-      'description': description,
-      'imageUrl': imageUrl,
-      'publisherId': publisherId,
-      'createdAt': FieldValue.serverTimestamp(),
-      'likeCount': 0,
-      'commentCount': 0,
-    });
-
-    // Paylaşım için 10 XP ödülü
-    final userRef = _firestore.collection('users').doc(publisherId);
-    batch.update(userRef, {
-      'xp': FieldValue.increment(10),
-    });
-
-    await batch.commit();
-  }
-
-  Future<DocumentSnapshot?> getLastDocumentFromQuery(
-      {DocumentSnapshot? lastDocument}) async {
-    Query query = _firestore
-        .collection('posts')
-        .orderBy('createdAt', descending: true)
-        .limit(limit);
-
-    if (lastDocument != null) {
-      query = query.startAfterDocument(lastDocument);
-    }
-    final snapshot = await query.get();
-    if (snapshot.docs.isNotEmpty) {
-      return snapshot.docs.last;
-    }
-    return null;
+    // Post oluşturma işlemini Cloud Functions üzerinden yapıyoruz (limit kontrolü için)
+    await _functionsService.createPost(
+      title: title,
+      description: description,
+      imageUrl: imageUrl,
+    );
   }
 
   Future<void> toggleLikePost(String postId) async {

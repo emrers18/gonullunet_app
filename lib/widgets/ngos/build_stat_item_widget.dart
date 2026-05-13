@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Widget buildStatItem(String value, String label) {
+import 'package:gonullunet_app/utils/app_colors.dart';
+
+Widget buildStatItem(BuildContext context, String value, String label) {
   return Column(
     children: [
       Text(
@@ -9,7 +11,7 @@ Widget buildStatItem(String value, String label) {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 18,
           fontWeight: FontWeight.bold,
-          color: const Color(0xFF181210),
+          color: AppColors.kTextColor,
         ),
       ),
       Text(

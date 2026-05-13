@@ -1,22 +1,26 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/ngos/ngos_card.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/logic/ngo_cubit.dart';
 import 'package:gonullunet_app/logic/ngo_state.dart';
 import 'package:gonullunet_app/repo/ngo_repository.dart';
-import 'package:gonullunet_app/utils/app_colors.dart';
 
 class NgosPage extends StatelessWidget {
   const NgosPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => NgoCubit(NgoRepository())..loadNgos(),
-      child: const NgosView(),
+    return RepositoryProvider(
+      create: (context) => NgoRepository(),
+      child: BlocProvider(
+        create: (context) =>
+            NgoCubit(context.read<NgoRepository>())..loadNgos(),
+        child: const NgosView(),
+      ),
     );
   }
 }
@@ -49,7 +53,8 @@ class _NgosViewState extends State<NgosView> {
 
   void _openCityFilterSheet() {
     final cubit = context.read<NgoCubit>();
-    final cities = cubit.availableCities;
+    final allCities = cubit.availableCities;
+    String citySearchQuery = '';
 
     showModalBottomSheet(
       context: context,
@@ -58,12 +63,22 @@ class _NgosViewState extends State<NgosView> {
       builder: (sheetContext) {
         return StatefulBuilder(
           builder: (ctx, setSheetState) {
+            final filteredCities = allCities
+                .where((city) =>
+                    city.toLowerCase().contains(citySearchQuery.toLowerCase()))
+                .toList();
+
             return Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              padding: EdgeInsets.only(
+                left: 24,
+                right: 24,
+                top: 16,
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 32,
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -88,7 +103,7 @@ class _NgosViewState extends State<NgosView> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primaryText,
+                          color: AppColors.kTextColor,
                         ),
                       ),
                       if (_activeCity != null)
@@ -109,7 +124,32 @@ class _NgosViewState extends State<NgosView> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  if (cities.isEmpty)
+                  // City Search Bar
+                  Container(
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TextField(
+                      onChanged: (value) {
+                        setSheetState(() {
+                          citySearchQuery = value;
+                        });
+                      },
+                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                      decoration: const InputDecoration(
+                        hintText: "Şehir ara...",
+                        hintStyle: TextStyle(color: Colors.grey),
+                        prefixIcon:
+                            Icon(Icons.search, size: 20, color: Colors.grey),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 15),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  if (allCities.isEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
@@ -122,13 +162,29 @@ class _NgosViewState extends State<NgosView> {
                         ),
                       ),
                     )
+                  else if (filteredCities.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Center(
+                        child: Text(
+                          'Eşleşen şehir bulunamadı.',
+                          style: GoogleFonts.plusJakartaSans(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    )
                   else
-                    Flexible(
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.4,
+                      ),
                       child: SingleChildScrollView(
                         child: Wrap(
                           spacing: 10,
                           runSpacing: 10,
-                          children: cities.map((city) {
+                          children: filteredCities.map((city) {
                             final isSelected = _activeCity == city;
                             return ChoiceChip(
                               label: Text(city),
@@ -136,7 +192,6 @@ class _NgosViewState extends State<NgosView> {
                               onSelected: (selected) {
                                 final selectedCity = selected ? city : null;
                                 setState(() => _activeCity = selectedCity);
-                                setSheetState(() {});
                                 cubit.filterByCity(selectedCity);
                                 Navigator.pop(sheetContext);
                               },
@@ -145,7 +200,7 @@ class _NgosViewState extends State<NgosView> {
                               labelStyle: GoogleFonts.plusJakartaSans(
                                 color: isSelected
                                     ? Colors.white
-                                    : AppColors.primaryText,
+                                    : AppColors.kTextColor,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
                               ),
@@ -178,199 +233,263 @@ class _NgosViewState extends State<NgosView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: AppColors.kBackgroundColor,
+        backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Kurumlar',
-          style: GoogleFonts.plusJakartaSans(
-            color: AppColors.kTextColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
       ),
-      body: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-            color: AppColors.kBackgroundColor,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.04),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _onSearchChanged,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: AppColors.kTextMain,
-                          ),
-                          decoration: InputDecoration(
-                            hintText: "STK veya kategori ara...",
-                            hintStyle: TextStyle(color: Colors.grey.shade400),
-                            prefixIcon:
-                                Icon(Icons.search, color: Colors.grey.shade400),
-                            border: InputBorder.none,
-                            contentPadding:
-                                const EdgeInsets.symmetric(vertical: 16),
-                          ),
+      body: BlocBuilder<NgoCubit, NgoState>(
+        builder: (context, state) {
+          return CustomScrollView(
+            slivers: [
+              // ── Blue Hero Header ──
+              SliverToBoxAdapter(
+                child: _buildHeader(context, state),
+              ),
+
+              // ── Active Filter Badge & Counter ──
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Tüm Kurumlar',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.kTextColor,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(
-                      height: 56,
-                      width: 56,
+                      const SizedBox(width: 8),
+                      if (state is NgoLoaded)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1565C0).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${state.ngos.length}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1565C0),
+                            ),
+                          ),
+                        ),
+                      const Spacer(),
+                      if (_activeCity != null) _buildCityBadge(),
+                    ],
+                  ),
+                ),
+              ),
+
+              // ── Grid Content ──
+              _buildContent(context, state),
+
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, NgoState state) {
+    const Color headerStart = Color(0xFF1565C0);
+    const Color headerEnd = Color(0xFF42A5F5);
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [headerStart, headerEnd],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32),
+          bottomRight: Radius.circular(32),
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Kurumlar',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Sivil toplum kuruluşlarını keşfet ve destek ol',
+                style: GoogleFonts.plusJakartaSans(
+                  color: Colors.white.withOpacity(0.8),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Search & Filter Row
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      height: 54,
                       decoration: BoxDecoration(
-                        color: _activeCity != null
-                            ? AppColors.kPrimaryColor
-                            : AppColors.kSecondaryColor,
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
                           BoxShadow(
-                            color: (_activeCity != null
-                                    ? AppColors.kPrimaryColor
-                                    : AppColors.kSecondaryColor)
-                                .withOpacity(0.2),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 20,
+                            offset: const Offset(0, 10),
                           ),
                         ],
                       ),
-                      child: IconButton(
-                        icon: Icon(
-                          _activeCity != null ? Icons.filter_alt : Icons.tune,
-                          color: Colors.white,
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _onSearchChanged,
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.kTextColor,
                         ),
-                        onPressed: _openCityFilterSheet,
+                        decoration: const InputDecoration(
+                          hintText: "STK veya kategori ara...",
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 14),
+                          prefixIcon:
+                              Icon(Icons.search_rounded, color: Colors.grey),
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.symmetric(vertical: 16),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                // Aktif filtre etiketi
-                if (_activeCity != null) ...[
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      const Icon(Icons.location_on,
-                          size: 15, color: AppColors.kPrimaryColor),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Filtre: ',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
-                          color: Colors.grey.shade600,
-                        ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: _openCityFilterSheet,
+                    child: Container(
+                      height: 54,
+                      width: 54,
+                      decoration: BoxDecoration(
+                        color: _activeCity != null
+                            ? Colors.white
+                            : Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                        border: _activeCity == null
+                            ? Border.all(color: Colors.white.withOpacity(0.3))
+                            : null,
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.kPrimaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              _activeCity!,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
-                                color: AppColors.kPrimaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            GestureDetector(
-                              onTap: () {
-                                setState(() => _activeCity = null);
-                                context.read<NgoCubit>().filterByCity(null);
-                              },
-                              child: const Icon(Icons.close,
-                                  size: 14, color: AppColors.kPrimaryColor),
-                            ),
-                          ],
-                        ),
+                      child: Icon(
+                        _activeCity != null
+                            ? Icons.location_on_rounded
+                            : Icons.tune_rounded,
+                        color: _activeCity != null ? headerStart : Colors.white,
                       ),
-                    ],
+                    ),
                   ),
                 ],
-                const SizedBox(height: 20),
-              ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCityBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1565C0).withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.location_on, size: 13, color: Colors.orange),
+          const SizedBox(width: 5),
+          Text(
+            _activeCity!,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              color: const Color(0xFF1565C0),
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 4),
-          Expanded(
-            child: BlocBuilder<NgoCubit, NgoState>(
-              builder: (context, state) {
-                if (state is NgoLoading) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.kPrimaryColor));
-                }
-
-                if (state is NgoError) {
-                  return Center(child: Text(state.message));
-                }
-
-                if (state is NgoLoaded) {
-                  if (state.ngos.isEmpty) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.search_off,
-                              size: 64, color: Colors.grey[300]),
-                          const SizedBox(height: 16),
-                          Text('Sonuç bulunamadı.',
-                              style: TextStyle(color: Colors.grey[500])),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return GridView.builder(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.75,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: state.ngos.length,
-                    itemBuilder: (context, index) {
-                      final ngo = state.ngos[index];
-                      return NgoCard(ngo: ngo);
-                    },
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
+          const SizedBox(width: 6),
+          GestureDetector(
+            onTap: () {
+              setState(() => _activeCity = null);
+              context.read<NgoCubit>().filterByCity(null);
+            },
+            child: const Icon(Icons.close, size: 14, color: Color(0xFF1565C0)),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildContent(BuildContext context, NgoState state) {
+    if (state is NgoLoading) {
+      return const SliverFillRemaining(
+        child:
+            Center(child: CircularProgressIndicator(color: Color(0xFF1565C0))),
+      );
+    }
+
+    if (state is NgoError) {
+      return SliverFillRemaining(
+        child: Center(child: Text(state.message)),
+      );
+    }
+
+    if (state is NgoLoaded) {
+      if (state.ngos.isEmpty) {
+        return SliverFillRemaining(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.search_off_rounded,
+                    size: 64, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Text('Sonuç bulunamadı.',
+                    style: TextStyle(color: Colors.grey.shade500)),
+              ],
+            ),
+          ),
+        );
+      }
+
+      return SliverPadding(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        sliver: SliverGrid(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.72,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (context, index) => NgoCard(ngo: state.ngos[index]),
+            childCount: state.ngos.length,
+          ),
+        ),
+      );
+    }
+
+    return const SliverToBoxAdapter(child: SizedBox.shrink());
   }
 }

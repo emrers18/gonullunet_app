@@ -28,9 +28,9 @@ class _MyPostsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.kBackgroundColor,
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: AppColors.kBackgroundColor,
+        backgroundColor: Colors.white,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
@@ -65,19 +65,19 @@ class _MyPostsView extends StatelessWidget {
         builder: (context, state) {
           if (state is PostLoading && state.isFirstFetch) {
             return const Center(
-              child: CircularProgressIndicator(color: AppColors.primaryColor),
+              child: CircularProgressIndicator(color: AppColors.kPrimaryColor),
             );
           }
 
           if (state is PostLoaded) {
             if (state.posts.isEmpty) {
-              return _buildEmptyState();
+              return _buildEmptyState(context);
             }
             return RefreshIndicator(
               onRefresh: () => context
                   .read<PostCubit>()
                   .loadMyPosts(FirebaseAuth.instance.currentUser?.uid ?? ''),
-              color: AppColors.primaryColor,
+              color: AppColors.kPrimaryColor,
               child: ListView.builder(
                 padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
                 itemCount: state.posts.length,
@@ -114,7 +114,7 @@ class _MyPostsView extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -146,7 +146,7 @@ class _MyPostsView extends StatelessWidget {
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
-              color: Colors.grey.shade500,
+              color: Colors.grey,
               height: 1.6,
             ),
           ),
@@ -187,12 +187,12 @@ class _MyPostCard extends StatelessWidget {
                 decoration: InputDecoration(
                   labelText: 'Başlık',
                   labelStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.secondaryText),
+                      color: Colors.grey),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primaryColor),
+                    borderSide: const BorderSide(color: AppColors.kPrimaryColor),
                   ),
                 ),
                 style: GoogleFonts.plusJakartaSans(),
@@ -208,12 +208,12 @@ class _MyPostCard extends StatelessWidget {
                   labelText: 'Açıklama',
                   alignLabelWithHint: true,
                   labelStyle: GoogleFonts.plusJakartaSans(
-                      color: AppColors.secondaryText),
+                      color: Colors.grey),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12)),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(color: AppColors.primaryColor),
+                    borderSide: const BorderSide(color: AppColors.kPrimaryColor),
                   ),
                 ),
                 style: GoogleFonts.plusJakartaSans(),
@@ -239,7 +239,7 @@ class _MyPostCard extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
+              backgroundColor: AppColors.kPrimaryColor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
@@ -267,7 +267,7 @@ class _MyPostCard extends StatelessWidget {
         ),
         content: Text(
           'Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-          style: GoogleFonts.plusJakartaSans(color: AppColors.secondaryText),
+          style: GoogleFonts.plusJakartaSans(color: Colors.grey),
         ),
         actions: [
           TextButton(
@@ -361,7 +361,7 @@ class _MyPostCard extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.edit_outlined,
-                              size: 18, color: AppColors.primaryColor),
+                               size: 18, color: Colors.blue),
                           const SizedBox(width: 10),
                           Text('Düzenle',
                               style: GoogleFonts.plusJakartaSans(
@@ -397,7 +397,7 @@ class _MyPostCard extends StatelessWidget {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.plusJakartaSans(
-                  color: Colors.grey.shade700,
+                  color: AppColors.kTextColor.withOpacity(0.7),
                   fontSize: 13.5,
                   height: 1.5,
                 ),
@@ -420,7 +420,7 @@ class _MyPostCard extends StatelessWidget {
                   color: Colors.grey.shade100,
                   child: const Center(
                     child: CircularProgressIndicator(
-                        color: AppColors.primaryColor),
+                        color: AppColors.kPrimaryColor),
                   ),
                 ),
                 errorWidget: (_, __, ___) => Container(
@@ -496,3 +496,4 @@ class _MyPostCard extends StatelessWidget {
     );
   }
 }
+

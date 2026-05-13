@@ -57,34 +57,34 @@ class UserModel {
     this.xp = 0,
   });
 
-  factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
+    final data = (doc.data() as Map<String, dynamic>?) ?? {};
 
     return UserModel(
-      uid: data['uid'],
-      email: data['email'],
-      userType: data['userType'],
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-      name: data['name'],
-      surname: data['surname'],
-      stkName: data['stkName'],
-      imageUrl: data['imageUrl'],
-      description: data['description'],
-      location: data['location'],
-      vision: data['vision'],
-      mission: data['mission'],
-      phone: data['phone'],
+      uid: data['uid'] as String? ?? doc.id,
+      email: data['email'] as String? ?? '',
+      userType: data['userType'] as String? ?? 'volunteer',
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      name: data['name'] as String?,
+      surname: data['surname'] as String?,
+      stkName: data['stkName'] as String?,
+      imageUrl: data['imageUrl'] as String?,
+      description: data['description'] as String?,
+      location: data['location'] as String?,
+      vision: data['vision'] as String?,
+      mission: data['mission'] as String?,
+      phone: data['phone'] as String?,
       following: List<String>.from(data['following'] ?? []),
       followers: List<String>.from(data['followers'] ?? []),
-      followersCount: data['followersCount'] ?? 0,
-      fcmToken: data['fcmToken'],
-      bio: data['bio'],
+      followersCount: (data['followersCount'] as num?)?.toInt() ?? 0,
+      fcmToken: data['fcmToken'] as String?,
+      bio: data['bio'] as String?,
       interests: List<String>.from(data['interests'] ?? []),
       skills: List<String>.from(data['skills'] ?? []),
-      birthDate: data['birthDate'],
-      education: data['education'],
-      city: data['city'],
-      xp: data['xp'] ?? 0,
+      birthDate: data['birthDate'] as Timestamp?,
+      education: data['education'] as String?,
+      city: data['city'] as String?,
+      xp: (data['xp'] as num?)?.toInt() ?? 0,
     );
   }
 

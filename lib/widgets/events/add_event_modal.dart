@@ -100,7 +100,7 @@ class _AddEventViewState extends State<AddEventView> {
       lastDate: DateTime(2101),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme:
                 const ColorScheme.light(primary: AppColors.kPrimaryColor),
           ),
@@ -117,7 +117,7 @@ class _AddEventViewState extends State<AddEventView> {
       initialTime: TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
             colorScheme:
                 const ColorScheme.light(primary: AppColors.kPrimaryColor),
           ),

@@ -12,7 +12,12 @@
           "package_name": "com.example.gonullunet_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "2020470675-qvhhchd225n8hf30q53n15gf89umvu9r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyADKysj5TkdOzmu4DIekG6Ps8gANZnVopU"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "2020470675-qvhhchd225n8hf30q53n15gf89umvu9r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "2020470675-q96dcbnvma0bt50j06392ppiiq72quk8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gonullunetApp"
+              }
+            }
+          ]
         }
       }
     }

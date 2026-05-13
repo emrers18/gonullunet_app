@@ -7,10 +7,7 @@ import 'chat_state.dart';
 class ChatCubit extends Cubit<ChatState> {
   final ChatRepository repository;
 
-  ChatCubit(this.repository) : super(ChatInitial()) {
-    // Remote Config'i fetch et ve Firebase AI modelini hazırla
-    repository.initialize();
-  }
+  ChatCubit(this.repository) : super(ChatInitial());
 
   // ── Sessions ──────────────────────────────────────────────
 
@@ -25,7 +22,6 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> startNewSession() async {
-    // Don't create Firestore doc yet — only when first message is sent
     final tempId = '_new_${DateTime.now().millisecondsSinceEpoch}';
     emit(ChatMessagesLoaded(
       sessionId: tempId,
@@ -60,9 +56,11 @@ class ChatCubit extends Cubit<ChatState> {
     final currentState = state;
     if (currentState is! ChatMessagesLoaded) return;
 
+    // AI yazarken yeni mesaj gönderilmesini engelle
+    if (currentState.isAiTyping) return;
+
     var sessionId = currentState.sessionId;
 
-    // Add user message locally for immediate UI feedback
     final userMessage = ChatMessage(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       content: content,
@@ -73,31 +71,42 @@ class ChatCubit extends Cubit<ChatState> {
     emit(currentState.copyWith(
       messages: [...currentState.messages, userMessage],
       isAiTyping: true,
+      clearError: true,
     ));
 
     try {
-      // Create the Firestore session on first message
-      if (sessionId.startsWith('_new_')) {
-        final session = await repository.createSession();
-        sessionId = session.id;
-      }
+      final response = await repository.sendMessage(sessionId, content);
 
-      await repository.sendMessage(sessionId, content);
-
-      // Reload messages from Firestore to get the correct message IDs
-      final updatedMessages = await repository.getMessages(sessionId);
-      emit(ChatMessagesLoaded(
-        sessionId: sessionId,
-        messages: updatedMessages,
-        isAiTyping: false,
-      ));
-    } catch (e) {
-      // Keep user message, remove typing indicator, show error state briefly
       final stateNow = state;
       if (stateNow is ChatMessagesLoaded) {
-        emit(stateNow.copyWith(isAiTyping: false));
+        emit(stateNow.copyWith(
+          sessionId: response.sessionId,
+          messages: [...stateNow.messages, response.message],
+          isAiTyping: false,
+          clearError: true,
+        ));
       }
-      emit(ChatError('Mesaj gönderilemedi: $e'));
+    } catch (e) {
+      final stateNow = state;
+      // Hata mesajındaki teknik 'Exception:' kısmını temizle
+      final cleanMessage =
+          e.toString().replaceFirst(RegExp(r'Exception:?\s*'), '');
+
+      if (stateNow is ChatMessagesLoaded) {
+        emit(stateNow.copyWith(
+          isAiTyping: false,
+          errorMessage: cleanMessage,
+        ));
+      } else {
+        emit(ChatError(cleanMessage));
+      }
+    }
+  }
+
+  void clearError() {
+    final currentState = state;
+    if (currentState is ChatMessagesLoaded) {
+      emit(currentState.copyWith(clearError: true));
     }
   }
 }

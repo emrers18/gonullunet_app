@@ -24,26 +24,32 @@ class ChatMessagesLoaded extends ChatState {
   final String sessionId;
   final List<ChatMessage> messages;
   final bool isAiTyping;
+  final String? errorMessage; // Yeni eklenen alan
 
   const ChatMessagesLoaded({
     required this.sessionId,
     required this.messages,
     this.isAiTyping = false,
+    this.errorMessage,
   });
 
   ChatMessagesLoaded copyWith({
+    String? sessionId,
     List<ChatMessage>? messages,
     bool? isAiTyping,
+    String? errorMessage,
+    bool clearError = false, // Hata mesajını temizlemek için yardımcı bayrak
   }) {
     return ChatMessagesLoaded(
-      sessionId: sessionId,
+      sessionId: sessionId ?? this.sessionId,
       messages: messages ?? this.messages,
       isAiTyping: isAiTyping ?? this.isAiTyping,
+      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
     );
   }
 
   @override
-  List<Object?> get props => [sessionId, messages, isAiTyping];
+  List<Object?> get props => [sessionId, messages, isAiTyping, errorMessage];
 }
 
 class ChatError extends ChatState {

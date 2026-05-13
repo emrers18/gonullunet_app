@@ -4,11 +4,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/services/auth.dart';
-import 'package:gonullunet_app/utils/app_colors.dart'; // Mevcut renkleriniz
+import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/models/user_model.dart';
 import '../logic/user_cubit.dart';
 import '../logic/user_state.dart';
 import '../utils/gamification_utils.dart';
+import '../widgets/gamification/level_badge.dart';
 
 // Sayfa yönlendirmeleri
 import 'edit_ngo_profile_page.dart';
@@ -40,16 +41,17 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Text('Çıkış Yap',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
           content: Text('Çıkış yapmak istediğinizden emin misiniz?',
-              style: GoogleFonts.plusJakartaSans()),
+              style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           actions: <Widget>[
             TextButton(
               child: Text('İptal',
-                  style: GoogleFonts.plusJakartaSans(color: Colors.grey)),
+                  style: GoogleFonts.plusJakartaSans(color: Colors.grey.shade600)),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
@@ -57,10 +59,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: GoogleFonts.plusJakartaSans(
                       color: Colors.red, fontWeight: FontWeight.bold)),
               onPressed: () async {
-                // Dialog'u kapat
                 Navigator.of(dialogContext).pop();
-                // Firebase'den çıkış yap; AuthGate'deki StreamBuilder
-                // authStateChanges'i dinleyerek otomatik LoginPage'e yönlendirir.
                 await _auth.signOut();
               },
             ),
@@ -120,8 +119,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       _buildSettingsItem(
                         icon: Icons.edit_outlined,
-                        iconColor: Colors.blue.shade600,
-                        iconBg: Colors.blue.shade50,
+                        iconColor: Colors.blue,
+                        iconBg: Colors.blue.withOpacity(0.1),
                         title: 'Hesap Ayarları',
                         onTap: () {},
                       ),
@@ -141,8 +140,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildDivider(),
                       _buildSettingsItem(
                         icon: Icons.notifications_none_rounded,
-                        iconColor: Colors.orange.shade600,
-                        iconBg: Colors.orange.shade50,
+                        iconColor: Colors.orange,
+                        iconBg: Colors.orange.withOpacity(0.1),
                         title: 'Bildirimler',
                         onTap: () {
                           Navigator.push(
@@ -165,8 +164,8 @@ class _ProfilePageState extends State<ProfilePage> {
                         if (user.isNgo)
                           _buildSettingsItem(
                             icon: Icons.event_available_rounded,
-                            iconColor: Colors.indigo.shade600,
-                            iconBg: Colors.indigo.shade50,
+                            iconColor: Colors.indigo,
+                            iconBg: Colors.indigo.withOpacity(0.1),
                             title: 'Yayınladığım Etkinlikler',
                             onTap: () {
                               Navigator.push(
@@ -200,8 +199,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       _buildSettingsItem(
                         icon: Icons.settings_outlined,
-                        iconColor: Colors.purple.shade600,
-                        iconBg: Colors.purple.shade50,
+                        iconColor: Colors.purple,
+                        iconBg: Colors.purple.withOpacity(0.1),
                         title: 'Genel Ayarlar',
                         onTap: () {
                           Navigator.push(
@@ -213,8 +212,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       _buildDivider(),
                       _buildSettingsItem(
                         icon: Icons.language_rounded,
-                        iconColor: Colors.green.shade600,
-                        iconBg: Colors.green.shade50,
+                        iconColor: Colors.green,
+                        iconBg: Colors.green.withOpacity(0.1),
                         title: 'Dil Seçeneği',
                         onTap: () {
                           // Dil ayarları sayfasına git
@@ -222,8 +221,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       _buildSettingsItem(
                         icon: Icons.info_outline_rounded,
-                        iconColor: Colors.amber.shade600,
-                        iconBg: Colors.amber.shade50,
+                        iconColor: Colors.amber,
+                        iconBg: Colors.amber.withOpacity(0.1),
                         title: 'Hakkında',
                         onTap: () {
                           // Hakkında sayfasına git
@@ -240,13 +239,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: ElevatedButton(
                       onPressed: _showSignOutDialog,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kSurfaceColor,
+                        backgroundColor: Colors.white,
                         foregroundColor: Colors.red.shade600,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(16)),
-                        // Tailwind 'shadow-soft' karşılığı
                         shadowColor: Colors.black.withOpacity(0.05),
                       ),
                       child: Row(
@@ -273,7 +271,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Text(
                       "Versiyon 1.0.4",
                       style: GoogleFonts.plusJakartaSans(
-                        color: Colors.grey.shade400,
+                        color: Colors.grey.shade600,
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                       ),
@@ -313,7 +311,7 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.kSurfaceColor,
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -348,7 +346,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                     CachedNetworkImageProvider(user.imageUrl!),
                                 fit: BoxFit.cover)
                             : null,
-                        color: Colors.grey.shade200,
+                        color: Colors.grey.shade100,
                       ),
                       child: (user.imageUrl == null || user.imageUrl!.isEmpty)
                           ? Center(
@@ -398,41 +396,26 @@ class _ProfilePageState extends State<ProfilePage> {
                         user.isNgo ? "Kurumsal Üye" : "Gönüllü Üye",
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
-                          color: Colors.grey.shade500,
+                          color: Colors.grey.shade600,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     ],
                   ),
                 ),
-                Icon(Icons.chevron_right_rounded, color: Colors.grey.shade300),
+                Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
               ],
             ),
             if (user.isVolunteer) ...[
               const SizedBox(height: 16),
-              const Divider(height: 1),
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: levelInfo.color.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          levelInfo.title,
-                          style: GoogleFonts.plusJakartaSans(
-                            color: levelInfo.color,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
+                        LevelBadge(xp: user.xp),
                       const SizedBox(width: 8),
                       Text(
                         "${user.xp} XP",
@@ -448,7 +431,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     Text(
                       "Sonraki Seviye: ${levelInfo.maxXp} XP",
                       style: GoogleFonts.plusJakartaSans(
-                        color: Colors.grey.shade400,
+                        color: Colors.grey.shade500,
                         fontSize: 10,
                         fontWeight: FontWeight.w500,
                       ),
@@ -461,8 +444,18 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: LinearProgressIndicator(
                   value: progress,
                   minHeight: 8,
-                  backgroundColor: Colors.grey.shade100,
+                  backgroundColor: Colors.grey.shade200,
                   valueColor: AlwaysStoppedAnimation<Color>(levelInfo.color),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "Etkinliklere katılarak, paylaşım yaparak ve etkileşim kurarak XP kazanabilirsin.\nRozetler: Gözlemci (0+), Aktif (100+), Öncü (500+), Usta (1500+), Efsane (5000+)",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 10,
+                  color: Colors.grey.shade500,
+                  height: 1.4,
                 ),
               ),
             ],
@@ -480,7 +473,7 @@ class _ProfilePageState extends State<ProfilePage> {
         style: GoogleFonts.plusJakartaSans(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
+          color: Colors.grey.shade600,
           letterSpacing: 1.0,
         ),
       ),
@@ -490,7 +483,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildSettingsContainer({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.kSurfaceColor,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -551,7 +544,7 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildDivider() {
-    return Divider(
-        height: 1, thickness: 1, color: Colors.grey.shade50, indent: 70);
+    return const Divider(
+        height: 1, thickness: 1, color: Color(0xFFEEEEEE), indent: 70);
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Widget buildContactTile(IconData icon, String title, String content) {
+import 'package:gonullunet_app/utils/app_colors.dart';
+
+Widget buildContactTile(BuildContext context, IconData icon, String title, String content) {
   return Container(
     padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
@@ -32,11 +34,11 @@ Widget buildContactTile(IconData icon, String title, String content) {
                   style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF181210))),
+                      color: AppColors.kTextColor)),
             ],
           ),
         ),
-        const Icon(Icons.chevron_right, color: Colors.grey),
+        Icon(Icons.chevron_right, color: Colors.grey.withOpacity(0.5)),
       ],
     ),
   );

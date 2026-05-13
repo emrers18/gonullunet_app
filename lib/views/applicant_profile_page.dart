@@ -8,6 +8,7 @@ import '../models/user_model.dart';
 import '../repo/user_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/gamification_utils.dart';
+import '../widgets/gamification/level_badge.dart';
 
 /// STK'ların başvuran gönüllünün profilini inceleyeceği sayfa.
 class ApplicantProfilePage extends StatefulWidget {
@@ -133,7 +134,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      _buildLevelBadge(_user!.xp),
+                      LevelBadge(xp: _user!.xp),
                       const SizedBox(height: 16),
                       _buildXpProgressBar(_user!.xp),
                       const SizedBox(height: 24),
@@ -337,32 +338,6 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
     );
   }
 
-  Widget _buildLevelBadge(int xp) {
-    final level = GamificationUtils.getLevelInfo(xp);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-      decoration: BoxDecoration(
-        color: level.color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: level.color.withOpacity(0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.stars, size: 16, color: level.color),
-          const SizedBox(width: 6),
-          Text(
-            level.title,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: level.color,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildXpProgressBar(int xp) {
     final level = GamificationUtils.getLevelInfo(xp);
@@ -428,20 +403,16 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
             ),
           ],
         ),
-        if (level.title != 'Efsane') ...[
-          const SizedBox(height: 6),
-          Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'Sonraki Seviye: ${level.maxXp} XP',
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
-                color: Colors.grey,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+        const SizedBox(height: 12),
+        Text(
+          "Etkinliklere katılarak, paylaşım yaparak ve etkileşim kurarak XP kazanabilirsin.\nRozetler: Gözlemci (0+), Aktif (100+), Öncü (500+), Usta (1500+), Efsane (5000+)",
+          textAlign: TextAlign.center,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 10,
+            color: Colors.grey.shade500,
+            height: 1.4,
           ),
-        ],
+        ),
       ],
     );
   }

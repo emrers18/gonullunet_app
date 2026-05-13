@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 
+
 import '../constants/app_constants.dart';
 import '../logic/profile_cubit.dart';
 import '../logic/profile_state.dart';
@@ -91,12 +92,13 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
       lastDate: DateTime.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
+          data: ThemeData.light().copyWith(
+            primaryColor: AppColors.kPrimaryColor,
             colorScheme: const ColorScheme.light(
               primary: AppColors.kPrimaryColor,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: Color(0xFF181210),
+              onSurface: AppColors.kTextColor,
             ),
           ),
           child: child!,
@@ -126,21 +128,21 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F5),
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Profilini Düzenle',
           style: GoogleFonts.plusJakartaSans(
-            color: const Color(0xFF181210),
+            color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFF8F6F5).withOpacity(0.95),
+        backgroundColor: Colors.white.withOpacity(0.95),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF181210)),
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.kTextColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -210,10 +212,10 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     Container(
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3E0),
+                        color: Colors.orange.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                         border:
-                            Border.all(color: Colors.orange.shade200, width: 1),
+                            Border.all(color: Colors.orange.withOpacity(0.2), width: 1),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,7 +281,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                                   color: AppColors.kPrimaryColor,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                      color: const Color(0xFFF8F6F5), width: 2),
+                                      color: AppColors.kBackgroundColor, width: 2),
                                 ),
                                 child: const Icon(Icons.camera_alt,
                                     color: Colors.white, size: 16),
@@ -296,7 +298,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF181210),
+                          color: AppColors.kTextColor,
                         ),
                       ),
                     ),
@@ -305,7 +307,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         _email,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 13,
-                          color: const Color(0xFF8D6A5E),
+                          color: Colors.grey,
                         ),
                       ),
                     ),
@@ -351,24 +353,24 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE7DEDA)),
+                          border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.calendar_today,
-                                color: Color(0xFF8D6A5E), size: 20),
+                             const Icon(Icons.calendar_today,
+                                color: Colors.grey, size: 20),
                             const SizedBox(width: 12),
                             Text(
                               _birthDate != null
                                   ? DateFormat('d MMMM yyyy', 'tr_TR')
                                       .format(_birthDate!)
                                   : 'Doğum tarihinizi seçin',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16,
-                                color: _birthDate != null
-                                    ? const Color(0xFF181210)
-                                    : const Color(0xFF8D6A5E),
-                              ),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 16,
+                                  color: _birthDate != null
+                                      ? AppColors.kTextColor
+                                      : Colors.grey,
+                                ),
                             ),
                           ],
                         ),
@@ -408,15 +410,15 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     // --- Kaydet Butonu ---
                     ElevatedButton(
                       onPressed: () => _onSavePressed(context),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.kPrimaryColor,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        elevation: 4,
-                        shadowColor: AppColors.kPrimaryColor.withOpacity(0.3),
-                      ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.kPrimaryColor,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 4,
+                          shadowColor: AppColors.kPrimaryColor.withOpacity(0.3),
+                        ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -432,9 +434,9 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     ),
                     const SizedBox(height: 12),
                     TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF8D6A5E),
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.grey,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
@@ -464,7 +466,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
       child: Text(
         text,
         style: GoogleFonts.plusJakartaSans(
-          color: const Color(0xFF181210),
+          color: AppColors.kTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
@@ -483,23 +485,26 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7DEDA)),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         readOnly: readOnly,
         keyboardType: inputType,
         style: GoogleFonts.plusJakartaSans(
-            fontSize: 16, color: const Color(0xFF181210)),
+          fontSize: 16,
+          color: AppColors.kTextColor,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.plusJakartaSans(color: const Color(0xFF8D6A5E)),
+          hintStyle: GoogleFonts.plusJakartaSans(
+            color: Colors.grey,
+          ),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           prefixIcon: icon != null
-              ? Icon(icon, color: const Color(0xFF8D6A5E), size: 20)
+              ? Icon(icon, color: Colors.grey, size: 20)
               : null,
         ),
       ),
@@ -515,17 +520,20 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7DEDA)),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         style: GoogleFonts.plusJakartaSans(
-            fontSize: 16, color: const Color(0xFF181210)),
+          fontSize: 16,
+          color: AppColors.kTextColor,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.plusJakartaSans(color: const Color(0xFF8D6A5E)),
+          hintStyle: GoogleFonts.plusJakartaSans(
+            color: Colors.grey,
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),
@@ -549,7 +557,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : const Color(0xFF181210),
+              color: isSelected ? Colors.white : AppColors.kTextColor,
             ),
           ),
           selected: isSelected,
@@ -570,7 +578,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
             side: BorderSide(
               color: isSelected
                   ? AppColors.kPrimaryColor
-                  : const Color(0xFFE7DEDA),
+                  : Colors.grey.shade200,
             ),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),

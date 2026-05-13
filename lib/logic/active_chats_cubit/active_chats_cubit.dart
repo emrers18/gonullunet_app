@@ -17,6 +17,7 @@ class ActiveChatsCubit extends Cubit<ActiveChatsState> {
 
   void _loadActiveChats() {
     emit(ActiveChatsLoading());
+    _subscription?.cancel();
     _subscription = _repository.getActiveChatsStream().listen(
       (activeChats) {
         if (!isClosed) {
@@ -32,6 +33,8 @@ class ActiveChatsCubit extends Cubit<ActiveChatsState> {
       },
     );
   }
+
+  void reload() => _loadActiveChats();
 
   @override
   Future<void> close() {

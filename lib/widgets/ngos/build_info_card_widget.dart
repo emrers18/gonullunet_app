@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-Widget buildInfoCard(String title, String content, IconData icon,
+import 'package:gonullunet_app/utils/app_colors.dart';
+
+Widget buildInfoCard(BuildContext context, String title, String content, IconData icon,
     Color iconColor, Color bgColor) {
   return Container(
     padding: const EdgeInsets.all(20),
@@ -33,7 +35,7 @@ Widget buildInfoCard(String title, String content, IconData icon,
             style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
-                color: const Color(0xFF181210))),
+                color: AppColors.kTextColor)),
         const SizedBox(height: 4),
         Text(
           content,

@@ -30,10 +30,7 @@ class _OnboardingViewState extends State<OnboardingView>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
 
-  static const Color kPrimaryColor = Color(0xFFFF6B35);
-  static const Color kSecondaryColor = Color(0xFF004E89);
-  static const Color kTealColor = Color(0xFF1A659E);
-  static const Color kBackgroundColor = Color(0xFFF7F9FC);
+
 
   late final AnimationController _floatController1;
   late final AnimationController _floatController2;
@@ -87,7 +84,7 @@ class _OnboardingViewState extends State<OnboardingView>
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       body: BlocListener<OnboardingCubit, OnboardingState>(
         listener: (context, state) {
           if (state.isCompleted) {
@@ -126,7 +123,7 @@ class _OnboardingViewState extends State<OnboardingView>
                 height: 250,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: kPrimaryColor.withOpacity(0.1),
+                  color: AppColors.kPrimaryColor.withOpacity(0.1),
                 ),
               ),
             ),
@@ -138,7 +135,7 @@ class _OnboardingViewState extends State<OnboardingView>
                 height: 200,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: kTealColor.withOpacity(0.1),
+                  color: AppColors.kTealColor.withOpacity(0.1),
                 ),
               ),
             ),
@@ -219,7 +216,7 @@ class _OnboardingViewState extends State<OnboardingView>
                                             (context, error, stackTrace) =>
                                                 const Icon(Icons.image,
                                                     size: 80,
-                                                    color: kSecondaryColor),
+                                                    color: AppColors.kSecondaryColor),
                                       ),
                                     ),
 
@@ -235,7 +232,7 @@ class _OnboardingViewState extends State<OnboardingView>
                                         );
                                       },
                                       child: _buildFloatingIcon(
-                                          Icons.favorite, kPrimaryColor),
+                                          Icons.favorite, AppColors.kPrimaryColor),
                                     ),
 
                                     // Yüzen İkon 2 (Konum - Sadece ilk sayfada veya hepsinde olabilir)
@@ -250,7 +247,7 @@ class _OnboardingViewState extends State<OnboardingView>
                                         );
                                       },
                                       child: _buildFloatingIcon(
-                                          Icons.location_on, kSecondaryColor),
+                                          Icons.location_on, AppColors.kSecondaryColor),
                                     ),
                                   ],
                                 ),
@@ -319,10 +316,10 @@ class _OnboardingViewState extends State<OnboardingView>
                                   }
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: kPrimaryColor,
+                                  backgroundColor: AppColors.kPrimaryColor,
                                   foregroundColor: Colors.white,
                                   elevation: 10,
-                                  shadowColor: kPrimaryColor
+                                  shadowColor: AppColors.kPrimaryColor
                                       .withOpacity(0.4), // Glow efekti
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(16),
@@ -388,7 +385,7 @@ class _OnboardingViewState extends State<OnboardingView>
       width: isActive ? 32 : 8, // Aktifse geniş, pasifse kare
       margin: const EdgeInsets.only(right: 6),
       decoration: BoxDecoration(
-        color: isActive ? kPrimaryColor : Colors.grey.shade300,
+        color: isActive ? AppColors.kPrimaryColor : Colors.grey.shade300,
         borderRadius: BorderRadius.circular(4),
       ),
     );

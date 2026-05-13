@@ -1,11 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
-import 'package:gonullunet_app/utils/app_colors.dart';
+
 
 import '../logic/profile_cubit.dart';
 import '../logic/profile_state.dart';
@@ -98,26 +99,27 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F6F5),
+      backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
         title: Text(
           'STK Profilini Düzenle',
           style: GoogleFonts.plusJakartaSans(
-            color: const Color(0xFF181210),
+            color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         centerTitle: true,
-        backgroundColor: const Color(0xFFF8F6F5).withOpacity(0.95),
+        backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Color(0xFF181210)),
+          icon: const Icon(Icons.arrow_back_ios_new,
+              color: AppColors.kTextColor),
           onPressed: () => Navigator.of(context).pop(),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: Colors.transparent, height: 1.0),
+          child: Container(color: Colors.grey.shade200, height: 1.0),
         ),
       ),
       body: BlocListener<EditProfileCubit, EditProfileState>(
@@ -141,8 +143,8 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
           builder: (context, state) {
             if (state is EditProfileLoading) {
               return const Center(
-                  child:
-                      CircularProgressIndicator(color: AppColors.primaryColor));
+                  child: CircularProgressIndicator(
+                      color: AppColors.kPrimaryColor));
             }
 
             if (state is EditProfileLoaded) {
@@ -159,13 +161,14 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
             }
 
             if (state is EditProfileUpdating) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: AppColors.primaryColor),
-                    SizedBox(height: 16),
-                    Text("Profil güncelleniyor..."),
+                    const CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                    const SizedBox(height: 16),
+                    Text("Profil güncelleniyor...",
+                        style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
                   ],
                 ),
               );
@@ -219,10 +222,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                                   child: Container(
                                     padding: const EdgeInsets.all(8),
                                     decoration: BoxDecoration(
-                                      color: AppColors.primaryColor,
+                                      color: AppColors.kPrimaryColor,
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                          color: const Color(0xFFF8F6F5),
+                                          color: Colors.white,
                                           width: 2),
                                     ),
                                     child: const Icon(Icons.edit,
@@ -236,7 +239,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           Text(
                             'Logoyu değiştirmek için dokunun',
                             style: GoogleFonts.plusJakartaSans(
-                              color: const Color(0xFF8D6A5E), // text-muted
+                              color: Colors.grey,
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -285,7 +288,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                         icon: Icons.location_on_outlined),
 
                     const SizedBox(height: 24),
-                    const Divider(color: Color(0xFFE7DEDA)), // border-light
+                    const Divider(), // default divider uses dividerColor
                     const SizedBox(height: 24),
 
                     _buildLabel("Hakkımızda"),
@@ -313,13 +316,14 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                     ElevatedButton(
                       onPressed: () => _onSavePressed(context),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryColor,
+                        backgroundColor: AppColors.kPrimaryColor,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
                         elevation: 4,
-                        shadowColor: AppColors.primaryColor.withOpacity(0.3),
+                        shadowColor:
+                            AppColors.kPrimaryColor.withOpacity(0.3),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -338,7 +342,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                     TextButton(
                       onPressed: () => Navigator.pop(context),
                       style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF8D6A5E), // text-muted
+                        foregroundColor: Colors.grey,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(30)),
@@ -366,7 +370,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
       child: Text(
         text,
         style: GoogleFonts.plusJakartaSans(
-          color: const Color(0xFF181210),
+          color: AppColors.kTextColor,
           fontSize: 14,
           fontWeight: FontWeight.w600,
         ),
@@ -383,25 +387,28 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white, // surface-light
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7DEDA)), // border-light
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         readOnly: readOnly,
         keyboardType: inputType,
         style: GoogleFonts.plusJakartaSans(
-            fontSize: 16, color: const Color(0xFF181210)),
+          fontSize: 16,
+          color: AppColors.kTextColor,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.plusJakartaSans(color: const Color(0xFF8D6A5E)),
+          hintStyle: GoogleFonts.plusJakartaSans(
+            color: Colors.grey,
+          ),
           border: InputBorder.none,
           contentPadding:
               const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           prefixIcon: icon != null
-              ? Icon(icon, color: const Color(0xFF8D6A5E), size: 20)
+              ? Icon(icon, color: Colors.grey, size: 20)
               : null,
         ),
       ),
@@ -417,17 +424,20 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE7DEDA)),
+        border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         style: GoogleFonts.plusJakartaSans(
-            fontSize: 16, color: const Color(0xFF181210)),
+          fontSize: 16,
+          color: AppColors.kTextColor,
+        ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle:
-              GoogleFonts.plusJakartaSans(color: const Color(0xFF8D6A5E)),
+          hintStyle: GoogleFonts.plusJakartaSans(
+            color: Colors.grey,
+          ),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.all(16),
         ),

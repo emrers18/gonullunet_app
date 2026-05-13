@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../services/auth.dart';
 import '../services/firebase_error_translator.dart';
 import '../utils/app_colors.dart';
+
 import '../utils/validators/validators.dart';
 import 'signUp_page.dart';
 
@@ -19,13 +21,8 @@ class _LoginPageState extends State<LoginPage> {
   final Auth _auth = Auth();
 
   bool _isLoading = false;
-  bool _isObscure = true; // Şifre görünürlüğü için
-
-  static const Color kPrimaryColor = Color(0xFFFF6B35);
-  static const Color kSecondaryColor = Color(0xFF004E89);
-  static const Color kBackgroundColor = Color(0xFFF7F9FC);
-  static const Color kInputFillColor = Colors.white;
-  static const Color kBorderColor = Color(0xFFE5E7EB);
+  bool _isSocialLoading = false;
+  bool _isObscure = true;
 
   @override
   void dispose() {
@@ -51,7 +48,6 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    // Validasyonlar
     if (email.isEmpty) {
       _showError('E-posta boş bırakılamaz.');
       return;
@@ -69,7 +65,6 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       await _auth.signIn(email: email, password: password);
-      // Başarılı giriş sonrası yönlendirme main.dart'taki AuthGate ile otomatik olacak
     } catch (e) {
       _showError(FirebaseErrorTranslator.translate(e));
     }
@@ -77,10 +72,177 @@ class _LoginPageState extends State<LoginPage> {
     if (mounted) setState(() => _isLoading = false);
   }
 
+  Future<void> _onGoogleSignInPressed() async {
+    if (_isSocialLoading || _isLoading) return;
+
+    setState(() => _isSocialLoading = true);
+
+    try {
+      final userCredential = await _auth.signInWithGoogle();
+      if (userCredential == null) {
+        if (mounted) setState(() => _isSocialLoading = false);
+        return;
+      }
+
+      final user = userCredential.user;
+      if (user != null) {
+        // Kullanıcı dökümanı var mı kontrol et
+        final exists = await _auth.userExists(user.uid);
+        if (!exists) {
+          // Yeni kullanıcı ise rol seçtir
+          if (mounted) {
+            await _showRoleSelectionSheet(user);
+          }
+        }
+      }
+    } catch (e) {
+      _showError(FirebaseErrorTranslator.translate(e));
+    }
+
+    if (mounted) setState(() => _isSocialLoading = false);
+  }
+
+  Future<void> _showRoleSelectionSheet(User user) async {
+    return showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      enableDrag: false,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(32),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              "Neredeyse Hazır!",
+              style: GoogleFonts.dmSans(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppColors.kSecondaryColor,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Lütfen kullanıcı türünüzü seçerek devam edin.",
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                fontSize: 16,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              children: [
+                Expanded(
+                  child: _roleOptionCard(
+                    title: "Gönüllü",
+                    subtitle: "Etkinlik ara ve katıl",
+                    icon: Icons.person_outline,
+                    color: AppColors.kPrimaryColor,
+                    onTap: () async {
+                      await _auth.createProfile(
+                        user: user,
+                        userType: 'volunteer',
+                        displayName: user.displayName,
+                        photoUrl: user.photoURL,
+                      );
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _roleOptionCard(
+                    title: "STK",
+                    subtitle: "Kurum profili oluştur",
+                    icon: Icons.business_outlined,
+                    color: AppColors.kSecondaryColor,
+                    onTap: () async {
+                      await _auth.createProfile(
+                        user: user,
+                        userType: 'ngo',
+                        displayName: user.displayName,
+                        photoUrl: user.photoURL,
+                      );
+                      if (!context.mounted) return;
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _roleOptionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          border: Border.all(color: color.withOpacity(0.2), width: 2),
+          borderRadius: BorderRadius.circular(20),
+          color: color.withOpacity(0.05),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 40, color: color),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: GoogleFonts.dmSans(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.dmSans(
+                fontSize: 12,
+                color: color.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: AppColors.kBackgroundColor,
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
@@ -96,21 +258,20 @@ class _LoginPageState extends State<LoginPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: MediaQuery.of(context).padding.top + 20),
-
                       Container(
                         width: 175,
                         height: 175,
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: kPrimaryColor.withOpacity(0.1),
+                          color: AppColors.kPrimaryColor.withOpacity(0.1),
                         ),
                         child: Image.asset(
                           'lib/assets/images/logo.png',
                           fit: BoxFit.contain,
                           errorBuilder: (c, o, s) => const Icon(
                               Icons.volunteer_activism,
-                              color: kPrimaryColor,
+                              color: AppColors.kPrimaryColor,
                               size: 40),
                         ),
                       ),
@@ -132,12 +293,10 @@ class _LoginPageState extends State<LoginPage> {
                         style: GoogleFonts.dmSans(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
-                          color: const Color(0xFF1F2937).withOpacity(0.7),
+                          color: AppColors.kTextMain.withOpacity(0.7),
                         ),
                       ),
-
                       const SizedBox(height: 40),
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -148,7 +307,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.dmSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1F2937),
+                                color: AppColors.kTextMain,
                               ),
                             ),
                           ),
@@ -173,7 +332,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: GoogleFonts.dmSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1F2937),
+                                color: AppColors.kTextMain,
                               ),
                             ),
                           ),
@@ -203,37 +362,32 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ],
                       ),
-
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            // Şifre sıfırlama işlemi
-                          },
+                          onPressed: () {},
                           child: Text(
                             "Şifremi Unuttum?",
                             style: GoogleFonts.dmSans(
-                              color: const Color(0xFF1F2937).withOpacity(0.7),
+                              color: AppColors.kTextMain.withOpacity(0.7),
                               fontWeight: FontWeight.w600,
                               fontSize: 14,
                             ),
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 8),
-
-                      // --- 3. GİRİŞ BUTONU ---
                       SizedBox(
                         width: double.infinity,
                         height: 56,
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _onLoginPressed,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: kPrimaryColor,
+                            backgroundColor: AppColors.kPrimaryColor,
                             foregroundColor: Colors.white,
                             elevation: 8,
-                            shadowColor: kPrimaryColor.withOpacity(0.3),
+                            shadowColor:
+                                AppColors.kPrimaryColor.withOpacity(0.3),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
@@ -254,14 +408,10 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                         ),
                       ),
-
                       const SizedBox(height: 32),
-
-                      // --- 4. DIVIDER ---
                       Row(
                         children: [
-                          const Expanded(
-                              child: Divider(color: Color(0xFFE5E7EB))),
+                          const Expanded(child: Divider()),
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
@@ -273,31 +423,37 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                             ),
                           ),
-                          const Expanded(
-                              child: Divider(color: Color(0xFFE5E7EB))),
+                          const Expanded(child: Divider()),
                         ],
                       ),
-
                       const SizedBox(height: 24),
-
-                      // --- 5. SOSYAL BUTONLAR ---
                       Row(
                         children: [
                           Expanded(
-                              child: _socialButton(
-                                  label: "Google",
-                                  icon: Icons.g_mobiledata,
-                                  color: Colors.red)),
+                            child: _socialButton(
+                              label: "Google",
+                              icon: Icons.g_mobiledata,
+                              color: const Color(0xFFEA4335),
+                              isLoading: _isSocialLoading,
+                              onTap: _onGoogleSignInPressed,
+                            ),
+                          ),
                           const SizedBox(width: 16),
                           Expanded(
-                              child: _socialButton(
-                                  label: "Apple",
-                                  icon: Icons.apple,
-                                  color: Colors.black)),
+                            child: _socialButton(
+                              label: "Apple",
+                              icon: Icons.apple,
+                              color: Colors.black,
+                              isLoading: false,
+                              onTap: () {
+                                _showError(
+                                    "Apple ile giriş şu an aktif değil.");
+                              },
+                            ),
+                          ),
                         ],
                       ),
                       const Spacer(),
-
                       Padding(
                         padding: const EdgeInsets.only(top: 24, bottom: 16),
                         child: Row(
@@ -318,10 +474,10 @@ class _LoginPageState extends State<LoginPage> {
                                       builder: (context) => const SignUpPage()),
                                 );
                               },
-                              child: Text(
+                              child: const Text(
                                 "Kayıt Ol",
-                                style: GoogleFonts.dmSans(
-                                  color: kPrimaryColor,
+                                style: TextStyle(
+                                  color: AppColors.kPrimaryColor,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -343,56 +499,72 @@ class _LoginPageState extends State<LoginPage> {
   InputDecoration _inputDecoration({required String hint, Widget? suffixIcon}) {
     return InputDecoration(
       hintText: hint,
-      hintStyle: GoogleFonts.dmSans(color: Colors.grey.shade400),
+      hintStyle: GoogleFonts.dmSans(color: Colors.grey),
       filled: true,
-      fillColor: kInputFillColor,
+      fillColor: Colors.white,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: kBorderColor),
+        borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide:
-            const BorderSide(color: kPrimaryColor, width: 2), // Focus ring
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+        borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2),
       ),
     );
   }
 
-  Widget _socialButton(
-      {required String label, required IconData icon, required Color color}) {
-    return InkWell(
-      onTap: () {},
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        height: 50,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: kBorderColor),
-          borderRadius: BorderRadius.circular(12),
+  Widget _socialButton({
+    required String label,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+    bool isLoading = false,
+  }) {
+    final isDisabled = _isLoading || _isSocialLoading;
+
+    return Container(
+      height: 56,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.grey.shade200,
+          width: 1.5,
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: GoogleFonts.dmSans(
-                fontWeight: FontWeight.bold,
-                color: kSecondaryColor,
-              ),
-            ),
-          ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: (isDisabled || isLoading) ? null : onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Center(
+            child: isLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      color: color,
+                      strokeWidth: 2,
+                    ),
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(icon, color: color, size: 28),
+                      const SizedBox(width: 10),
+                      Text(
+                        label,
+                        style: GoogleFonts.dmSans(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.kSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
       ),
     );

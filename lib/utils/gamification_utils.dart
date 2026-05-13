@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class LevelInfo {
   final String title;
   final Color color;
+  final IconData icon;
   final int minXp;
   final int maxXp;
 
   LevelInfo({
     required this.title,
     required this.color,
+    required this.icon,
     required this.minXp,
     required this.maxXp,
   });
@@ -19,30 +21,35 @@ class GamificationUtils {
     LevelInfo(
       title: 'Gözlemci',
       color: Colors.blueGrey, // Metalik Gri
+      icon: Icons.visibility_outlined,
       minXp: 0,
       maxXp: 100,
     ),
     LevelInfo(
       title: 'Aktif Üye',
       color: Colors.green, // Canlı Yeşil
+      icon: Icons.bolt_rounded,
       minXp: 100,
       maxXp: 500,
     ),
     LevelInfo(
       title: 'Öncü',
       color: Colors.deepPurple, // Derin Mor
+      icon: Icons.auto_awesome_rounded,
       minXp: 500,
       maxXp: 1500,
     ),
     LevelInfo(
       title: 'Usta',
       color: Colors.orange.shade700, // Parlak Bronz/Turuncu
+      icon: Icons.workspace_premium_rounded,
       minXp: 1500,
       maxXp: 5000,
     ),
     LevelInfo(
       title: 'Efsane',
       color: const Color(0xFFFFD700), // Altın (Efsane)
+      icon: Icons.military_tech_rounded,
       minXp: 5000,
       maxXp: 1000000, // Very high for max
     ),

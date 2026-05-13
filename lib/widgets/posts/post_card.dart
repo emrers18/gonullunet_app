@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 
-import 'package:gonullunet_app/utils/gamification_utils.dart';
+import 'package:gonullunet_app/widgets/gamification/level_badge.dart';
 import '../../models/post_model.dart';
 import 'comment_modal.dart';
 
@@ -17,47 +17,6 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.0),
-        border: Border.all(color: Colors.grey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            spreadRadius: 0,
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeader(),
-          if (post.description.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-              child: Text(
-                post.description,
-                style: GoogleFonts.poppins(
-                  color: Colors.grey.shade800,
-                  fontSize: 14,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          if (post.imageUrl.isNotEmpty) _buildPostImage(),
-          _buildStats(),
-          Divider(height: 1, thickness: 1, color: Colors.grey.shade50),
-          _buildActionButtons(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
     return FutureBuilder<DocumentSnapshot>(
       future: FirebaseFirestore.instance
           .collection('users')
@@ -84,94 +43,59 @@ class PostCard extends StatelessWidget {
           xp = data['xp'] ?? 0;
         }
 
-        final levelInfo = GamificationUtils.getLevelInfo(xp);
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Avatar
-              Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey.shade200,
-                  image: (avatarUrl != null && avatarUrl.isNotEmpty)
-                      ? DecorationImage(
-                          image: CachedNetworkImageProvider(avatarUrl),
-                          fit: BoxFit.cover)
-                      : null,
-                ),
-                child: (avatarUrl == null || avatarUrl.isEmpty)
-                    ? Center(
-                        child: Text(
-                          displayName.isNotEmpty
-                              ? displayName[0].toUpperCase()
-                              : '?',
-                          style: GoogleFonts.poppins(
-                              color: AppColors.kPrimaryColor,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      )
-                    : null,
+        return Container(
+          margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16.0),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                spreadRadius: 0,
+                blurRadius: 10,
+                offset: const Offset(0, 2),
               ),
-              const SizedBox(width: 12),
-
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Flexible(
-                          child: Text(
-                            displayName,
-                            style: GoogleFonts.poppins(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: Colors.grey.shade900,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+            ],
+          ),
+          child: Stack(
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeader(
+                      context, displayName, avatarUrl, isVolunteer, xp),
+                  if (post.description.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: Text(
+                        post.description,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.kTextColor,
+                          fontSize: 14,
+                          height: 1.5,
                         ),
-                        if (isVolunteer) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: levelInfo.color.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                  color: levelInfo.color.withOpacity(0.3),
-                                  width: 0.5),
-                            ),
-                            child: Text(
-                              levelInfo.title,
-                              style: GoogleFonts.poppins(
-                                color: levelInfo.color,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    Text(
-                      post.timeAgo,
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey.shade500,
-                        fontSize: 12,
                       ),
                     ),
-                  ],
-                ),
+                  if (post.imageUrl.isNotEmpty) _buildPostImage(context),
+                  _buildStats(context),
+                  const Divider(
+                      height: 1, thickness: 1, color: Color(0xFFEEEEEE)),
+                  _buildActionButtons(context),
+                ],
               ),
-              Icon(Icons.more_horiz, color: Colors.grey.shade400),
+              if (isVolunteer && snapshot.hasData)
+                Positioned(
+                  top: 16,
+                  right: 16,
+                  child: LevelBadge(
+                    xp: xp,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    fontSize: 10,
+                    iconSize: 12,
+                  ),
+                ),
             ],
           ),
         );
@@ -179,28 +103,92 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPostImage() {
+  Widget _buildHeader(BuildContext context, String displayName,
+      String? avatarUrl, bool isVolunteer, int xp) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Avatar
+          Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey.shade100,
+              image: (avatarUrl != null && avatarUrl.isNotEmpty)
+                  ? DecorationImage(
+                      image: CachedNetworkImageProvider(avatarUrl),
+                      fit: BoxFit.cover)
+                  : null,
+            ),
+            child: (avatarUrl == null || avatarUrl.isEmpty)
+                ? Center(
+                    child: Text(
+                      displayName.isNotEmpty
+                          ? displayName[0].toUpperCase()
+                          : '?',
+                      style: GoogleFonts.poppins(
+                          color: AppColors.kPrimaryColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  )
+                : null,
+          ),
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName,
+                  style: GoogleFonts.poppins(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
+                    color: AppColors.kTextColor,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  post.timeAgo,
+                  style: GoogleFonts.poppins(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostImage(BuildContext context) {
     return AspectRatio(
       aspectRatio: 1 / 1,
       child: Container(
         width: double.infinity,
-        color: Colors.grey.shade100,
+        color: Colors.grey.shade50,
         child: CachedNetworkImage(
           imageUrl: post.imageUrl,
           fit: BoxFit.cover,
           placeholder: (context, url) => Center(
             child: CircularProgressIndicator(
-              color: AppColors.kPrimaryColor.withOpacity(0.5),
+              color: AppColors.kPrimaryColor.withOpacity(0.3),
             ),
           ),
-          errorWidget: (context, url, error) =>
-              const Center(child: Icon(Icons.broken_image, color: Colors.grey)),
+          errorWidget: (context, url, error) => Center(
+              child: Icon(Icons.broken_image, color: Colors.grey.shade400)),
         ),
       ),
     );
   }
 
-  Widget _buildStats() {
+  Widget _buildStats(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
       child: Row(
@@ -210,14 +198,14 @@ class PostCard extends StatelessWidget {
             "${post.likeCount} Beğeni",
             style: GoogleFonts.poppins(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: Colors.grey.shade600,
             ),
           ),
           Text(
             "${post.commentCount} Yorum",
             style: GoogleFonts.poppins(
               fontSize: 12,
-              color: Colors.grey.shade500,
+              color: Colors.grey.shade600,
             ),
           ),
         ],
@@ -225,40 +213,37 @@ class PostCard extends StatelessWidget {
     );
   }
 
-  Widget _buildActionButtons() {
-    return Builder(
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-          child: Row(
-            children: [
-              // Beğen Butonu
-              _buildSingleActionButton(
-                icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
-                label: "Beğen",
-                color: post.isLiked ? Colors.red : Colors.grey.shade600,
-                onTap: () {
-                  context.read<PostCubit>().toggleLike(post.id);
-                },
-              ),
-              // Yorum Butonu
-              _buildSingleActionButton(
-                icon: Icons.chat_bubble_outline,
-                label: "Yorum",
-                color: Colors.grey.shade600,
-                onTap: () {
-                  _showCommentModal(context);
-                },
-              )
-            ],
+  Widget _buildActionButtons(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Row(
+        children: [
+          // Beğen Butonu
+          _buildSingleActionButton(
+            context: context,
+            icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
+            label: "Beğen",
+            color: post.isLiked ? Colors.red : Colors.grey.shade600,
+            onTap: () {
+              context.read<PostCubit>().toggleLike(post.id);
+            },
           ),
-        );
-      },
+          // Yorum Butonu
+          _buildSingleActionButton(
+            context: context,
+            icon: Icons.chat_bubble_outline,
+            label: "Yorum",
+            color: Colors.grey.shade600,
+            onTap: () {
+              _showCommentModal(context);
+            },
+          )
+        ],
+      ),
     );
   }
 
   void _showCommentModal(BuildContext context) {
-    // CommentModal henüz oluşturulmadı, birazdan ekleyeceğiz.
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -268,6 +253,7 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildSingleActionButton({
+    required BuildContext context,
     required IconData icon,
     required String label,
     required Color color,

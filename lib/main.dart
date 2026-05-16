@@ -5,6 +5,7 @@ import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/profile_cubit.dart';
 import 'package:gonullunet_app/repo/chat_repository.dart';
 import 'package:gonullunet_app/repo/user_repository.dart';
+import 'package:gonullunet_app/services/cache_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'firebase_options.dart';
@@ -22,15 +23,15 @@ import 'utils/app_colors.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-  //     overlays: [SystemUiOverlay.top]);
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
   await initializeDateFormatting('tr_TR', null);
   await NotificationService().initialize();
+
+  // SharedPreferences ile cache servisini baslatiyoruz
+  await CacheService.init();
 
   final prefs = await SharedPreferences.getInstance();
   final bool showOnboarding = prefs.getBool('showOnboarding') ?? true;

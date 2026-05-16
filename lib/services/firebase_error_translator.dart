@@ -98,7 +98,7 @@ class FirebaseErrorTranslator {
       case 'quota-exceeded':
         return 'Depolama kotası aşıldı.';
       default:
-        return 'Sunucu hatası oluştu (${e.code}). Lütfen tekrar deneyin.';
+        return 'Sunucu hatası oluştu (${e.plugin}/${e.code}). Lütfen tekrar deneyin.';
     }
   }
 

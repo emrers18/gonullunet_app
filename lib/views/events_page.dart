@@ -82,8 +82,7 @@ class _EventsPageState extends State<EventsPage> {
   // ---------- MİNİ HARİTA ----------
 
   Widget _buildMiniMap(List<Event> events) {
-    final eventsWithLocation =
-        events.where((e) => e.geoPoint != null).toList();
+    final eventsWithLocation = events.where((e) => e.geoPoint != null).toList();
 
     final center = eventsWithLocation.isNotEmpty
         ? LatLng(
@@ -337,8 +336,8 @@ class _EventsPageState extends State<EventsPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 ),
                 icon: const Icon(Icons.refresh_rounded, size: 18),
                 label: const Text("Tekrar Dene"),
@@ -392,8 +391,8 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1565C0).withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -428,7 +427,8 @@ class _EventsPageState extends State<EventsPage> {
                       style: TextStyle(color: Colors.grey[500], fontSize: 15),
                     ),
                     TextButton(
-                      onPressed: () => context.read<EventCubit>().clearFilters(),
+                      onPressed: () =>
+                          context.read<EventCubit>().clearFilters(),
                       child: const Text('Filtreleri Temizle',
                           style: TextStyle(color: AppColors.primaryColor)),
                     ),
@@ -477,8 +477,7 @@ class _EventsPageState extends State<EventsPage> {
 
   // ---------- HERO HEADER ----------
 
-  Widget _buildHeroHeader(
-      BuildContext context, List<Event> typedEvents) {
+  Widget _buildHeroHeader(BuildContext context, List<Event> typedEvents) {
     final upcoming =
         typedEvents.where((e) => e.date.isAfter(DateTime.now())).length;
     final onMap = typedEvents.where((e) => e.geoPoint != null).length;

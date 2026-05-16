@@ -19,14 +19,18 @@ class PostLoading extends PostState {
 
 class PostLoaded extends PostState {
   final List<Post> posts;
-  final bool hasMore;                   
+  final bool hasMore;
   final DocumentSnapshot? lastDocument;
+  final bool fromCache; // true ise veri cache'den geldi, Firebase bekleniyor
 
   const PostLoaded(
-      {required this.posts, this.hasMore = true, this.lastDocument});
+      {required this.posts,
+      this.hasMore = true,
+      this.lastDocument,
+      this.fromCache = false});
 
   @override
-  List<Object?> get props => [posts, hasMore, lastDocument];
+  List<Object?> get props => [posts, hasMore, lastDocument, fromCache];
 }
 
 class PostError extends PostState {

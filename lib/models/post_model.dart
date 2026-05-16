@@ -12,6 +12,7 @@ class Post {
   final String publisherId;
   final String publisherType;
   final bool isLiked;
+  final bool fromCache; // true ise bu nesne cache'den yuklendi
 
   Post({
     required this.id,
@@ -24,12 +25,14 @@ class Post {
     required this.publisherId,
     required this.publisherType,
     this.isLiked = false,
+    this.fromCache = false,
   });
 
   Post copyWith({
     int? likeCount,
     int? commentCount,
     bool? isLiked,
+    bool? fromCache,
   }) {
     return Post(
       id: id,
@@ -42,6 +45,7 @@ class Post {
       publisherId: publisherId,
       publisherType: publisherType,
       isLiked: isLiked ?? this.isLiked,
+      fromCache: fromCache ?? this.fromCache,
     );
   }
 
@@ -63,5 +67,34 @@ class Post {
         commentCount: data['commentCount'] ?? 0,
         publisherId: data['publisherId'] ?? 'Bilinmiyor',
         publisherType: data['publisherType'] ?? 'volunteer');
+  }
+
+  /// Cache (SharedPreferences) için JSON'a çevirir.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'imageUrl': imageUrl,
+        'createdAtMs': createdAt.millisecondsSinceEpoch,
+        'likeCount': likeCount,
+        'commentCount': commentCount,
+        'publisherId': publisherId,
+        'publisherType': publisherType,
+      };
+
+  /// Cache'den Post nesnesi oluşturur.
+  factory Post.fromJson(Map<String, dynamic> j) {
+    return Post(
+      id: j['id'] as String,
+      title: j['title'] as String,
+      description: j['description'] as String,
+      imageUrl: j['imageUrl'] as String,
+      createdAt: Timestamp.fromMillisecondsSinceEpoch(j['createdAtMs'] as int),
+      likeCount: j['likeCount'] as int,
+      commentCount: j['commentCount'] as int,
+      publisherId: j['publisherId'] as String,
+      publisherType: j['publisherType'] as String,
+      fromCache: true, // cache'den geldi
+    );
   }
 }

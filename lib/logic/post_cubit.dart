@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/post_model.dart';
+import 'package:gonullunet_app/services/cache_service.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../repo/post_repository.dart';
 import 'post_state.dart';
@@ -12,6 +13,13 @@ class PostCubit extends Cubit<PostState> {
 
   PostCubit(this.repository, {this.publisherType}) : super(PostInitial());
 
+  // Cache anahtarini publisherType'a gore sec
+  String get _cacheKey {
+    if (publisherType == 'ngo') return CacheKeys.postsNgo;
+    if (publisherType == 'volunteer') return CacheKeys.postsVolunteer;
+    return 'posts_all';
+  }
+
   Future<List<Post>> _hydrateLikeStatus(List<Post> posts) async {
     final results = <Post>[];
     for (final post in posts) {
@@ -21,6 +29,7 @@ class PostCubit extends Cubit<PostState> {
     return results;
   }
 
+  /// Ilk sayfa: once cache'den yukle (aninda), sonra Firebase'den getir.
   Future<void> loadPosts({bool rethrowError = false}) async {
     if (state is PostLoading) return;
 
@@ -31,8 +40,20 @@ class PostCubit extends Cubit<PostState> {
     if (currentState is PostLoaded) {
       oldPosts = currentState.posts;
       lastDoc = currentState.lastDocument;
-
       if (!currentState.hasMore) return;
+    }
+
+    // Ilk fetch ise once cache'i goster (anlik acilis)
+    if (oldPosts.isEmpty) {
+      final cached = _loadFromCache();
+      if (cached.isNotEmpty) {
+        emit(PostLoaded(
+          posts: cached,
+          hasMore: true, // Firebase'den daha fazlasi gelebilir
+          fromCache: true,
+        ));
+        oldPosts = cached;
+      }
     }
 
     emit(PostLoading(oldPosts, isFirstFetch: oldPosts.isEmpty));
@@ -42,7 +63,7 @@ class PostCubit extends Cubit<PostState> {
           lastDocument: lastDoc, publisherType: publisherType);
 
       final hydratedNewPosts = await _hydrateLikeStatus(result.posts);
-      final totalPosts = [...oldPosts, ...hydratedNewPosts];
+      final totalPosts = [...oldPosts.where((p) => !p.fromCache), ...hydratedNewPosts];
 
       final hasMoreData =
           result.posts.isNotEmpty && result.posts.length >= PostRepository.limit;
@@ -51,6 +72,11 @@ class PostCubit extends Cubit<PostState> {
           posts: totalPosts,
           hasMore: hasMoreData,
           lastDocument: result.lastDocument));
+
+      // Ilk sayfayi cache'e yaz (sadece ilk batch)
+      if (lastDoc == null && hydratedNewPosts.isNotEmpty) {
+        _saveToCache(hydratedNewPosts);
+      }
     } catch (e) {
       emit(PostError(
         message: FirebaseErrorTranslator.translate(e),
@@ -76,13 +102,11 @@ class PostCubit extends Cubit<PostState> {
       if (imageFile != null) {
         imageUrl = await repository.uploadImage(imageFile);
         if (imageUrl.isEmpty) {
-          throw Exception("Resim yüklenemedi, URL boş döndü.");
+          throw Exception("Resim yuklenemedi, URL bos dondu.");
         }
       }
 
       await repository.addPost(title, desc, imageUrl, uid);
-      // Post eklendikten sonra mutlaka yenilemeyi bekle ve hata varsa fırlat.
-      // Bu sayede modal "başarılı" diyerek kapanmaz, hata modalda kalır.
       await refresh(rethrowError: true);
     } catch (e) {
       emit(PostError(
@@ -101,7 +125,6 @@ class PostCubit extends Cubit<PostState> {
     await loadPosts(rethrowError: rethrowError);
   }
 
-  /// STK detay sayfası gibi tek post'u bağımsız olarak yönetmek için.
   Future<void> loadSinglePost(Post post) async {
     final liked = await repository.isPostLiked(post.id);
     final hydrated = post.copyWith(isLiked: liked);
@@ -130,11 +153,10 @@ class PostCubit extends Cubit<PostState> {
       lastDocument: currentState.lastDocument,
     ));
 
-    // Fire-and-forget Firestore write
     try {
       await repository.toggleLikePost(postId);
     } catch (e) {
-      // Rollback on error
+      // Rollback
       final rolledBack = updatedPosts.map((post) {
         if (post.id == postId) {
           final wasLiked = !post.isLiked;
@@ -158,7 +180,6 @@ class PostCubit extends Cubit<PostState> {
     try {
       await repository.addComment(postId, content);
 
-      // Local update for comment count
       final currentState = state;
       if (currentState is PostLoaded) {
         final updatedPosts = currentState.posts.map((post) {
@@ -185,7 +206,6 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  /// Kullanıcının kendi gönderilerini yükler
   Future<void> loadMyPosts(String userId) async {
     emit(const PostLoading([], isFirstFetch: true));
     try {
@@ -201,7 +221,6 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  /// Kendi gönderisini günceller
   Future<void> updatePost(
       String postId, String title, String description) async {
     try {
@@ -244,12 +263,10 @@ class PostCubit extends Cubit<PostState> {
     }
   }
 
-  /// Kendi gönderisini siler (optimistik güncelleme)
   Future<void> deletePost(String postId, String imageUrl) async {
     final currentState = state;
     if (currentState is! PostLoaded) return;
 
-    // Optimistik: listeden çıkar
     final updatedPosts =
         currentState.posts.where((p) => p.id != postId).toList();
     emit(PostLoaded(
@@ -261,7 +278,6 @@ class PostCubit extends Cubit<PostState> {
     try {
       await repository.deletePost(postId, imageUrl);
     } catch (e) {
-      // Rollback already happened above if state was PostLoaded
       final currentState = state;
       emit(PostError(
         message: FirebaseErrorTranslator.translate(e),
@@ -271,5 +287,24 @@ class PostCubit extends Cubit<PostState> {
             currentState is PostLoaded ? currentState.lastDocument : null,
       ));
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Cache yardimci metodlari
+  // -------------------------------------------------------------------------
+
+  List<Post> _loadFromCache() {
+    try {
+      final raw = CacheService.readList(_cacheKey);
+      return raw.map((j) => Post.fromJson(j)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  void _saveToCache(List<Post> posts) {
+    try {
+      CacheService.writeList(_cacheKey, posts.map((p) => p.toJson()).toList());
+    } catch (_) {}
   }
 }

@@ -392,8 +392,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         ),
                         child: Column(
                           children: [
-                            buildContactTile(context, Icons.location_on_outlined,
-                                "Adres", location),
+                            buildContactTile(context,
+                                Icons.location_on_outlined, "Adres", location),
                             if (phone != null)
                               buildContactTile(context, Icons.call_outlined,
                                   "Telefon", phone),

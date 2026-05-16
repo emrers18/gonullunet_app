@@ -66,4 +66,52 @@ class Event {
           List<String>.from(data['approved_volunteers'] ?? []),
     );
   }
+
+  /// Cache (SharedPreferences) için JSON'a çevirir.
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'location': location,
+        'geoLat': geoPoint?.latitude,
+        'geoLng': geoPoint?.longitude,
+        'date': date.millisecondsSinceEpoch,
+        'endDate': endDate?.millisecondsSinceEpoch,
+        'imageUrl': imageUrl,
+        'organizerId': organizerId,
+        'participants': participants,
+        'category': category,
+        'type': type,
+        'quota': quota,
+        'approvedVolunteers': approvedVolunteers,
+      };
+
+  /// Cache'den Event nesnesi oluşturur.
+  factory Event.fromJson(Map<String, dynamic> j) {
+    GeoPoint? geoPoint;
+    if (j['geoLat'] != null && j['geoLng'] != null) {
+      geoPoint = GeoPoint(
+        (j['geoLat'] as num).toDouble(),
+        (j['geoLng'] as num).toDouble(),
+      );
+    }
+    return Event(
+      id: j['id'] as String,
+      title: j['title'] as String,
+      description: j['description'] as String,
+      location: j['location'] as String,
+      geoPoint: geoPoint,
+      date: DateTime.fromMillisecondsSinceEpoch(j['date'] as int),
+      endDate: j['endDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(j['endDate'] as int)
+          : null,
+      imageUrl: j['imageUrl'] as String,
+      organizerId: j['organizerId'] as String,
+      participants: List<String>.from(j['participants'] ?? []),
+      category: j['category'] as String,
+      type: j['type'] as String,
+      quota: j['quota'] as int?,
+      approvedVolunteers: List<String>.from(j['approvedVolunteers'] ?? []),
+    );
+  }
 }

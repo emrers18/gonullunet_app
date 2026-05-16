@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/services/cache_service.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import '../models/event_model.dart';
 import '../repo/event_repository.dart';
@@ -29,12 +30,23 @@ class EventCubit extends Cubit<EventState> {
     _isFetching = true;
 
     try {
-      // If first fetch, show full loading
       if (_allEvents.isEmpty) {
-        emit(const EventLoading(isFirstFetch: true));
+        // Ilk yüklemede once cache'i goster
+        final cached = _loadFromCache();
+        if (cached.isNotEmpty) {
+          emit(EventLoaded(
+            events: cached,
+            isNgo: _isNgo,
+            hasMore: true,
+            fromCache: true,
+          ));
+        } else {
+          emit(const EventLoading(isFirstFetch: true));
+        }
+
         _isNgo = await _repository.isUserNgo();
       } else {
-        // Subsequent fetches: show loading indicator at bottom
+        // Sonraki sayfalar: altta spinner
         emit(EventLoading(
           isFirstFetch: false,
           oldEvents: _getFilteredEvents(),
@@ -65,6 +77,11 @@ class EventCubit extends Cubit<EventState> {
         isNgo: _isNgo,
         hasMore: _hasMore,
       ));
+
+      // Ilk sayfayi cache'e kaydet
+      if (_lastDocument == result.lastDoc && _allEvents.isNotEmpty) {
+        _saveToCache(_allEvents.take(_pageSize).toList());
+      }
     } catch (e) {
       emit(EventError(FirebaseErrorTranslator.translate(e)));
     } finally {
@@ -72,7 +89,6 @@ class EventCubit extends Cubit<EventState> {
     }
   }
 
-  /// Pull-to-refresh: reset pagination and reload from scratch
   Future<void> refresh() async {
     _filterCity = null;
     _filterCategory = null;
@@ -125,7 +141,7 @@ class EventCubit extends Cubit<EventState> {
 
     if (_filterCategory != null &&
         _filterCategory!.isNotEmpty &&
-        _filterCategory != 'Tümü') {
+        _filterCategory != 'Tumu') {
       filteredList = filteredList.where((event) {
         return event.category == _filterCategory;
       }).toList();
@@ -143,5 +159,23 @@ class EventCubit extends Cubit<EventState> {
     return filteredList;
   }
 
+  // -------------------------------------------------------------------------
+  // Cache yardimci metodlari
+  // -------------------------------------------------------------------------
 
+  List<Event> _loadFromCache() {
+    try {
+      final raw = CacheService.readList(CacheKeys.events);
+      return raw.map((j) => Event.fromJson(j)).toList();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  void _saveToCache(List<Event> events) {
+    try {
+      CacheService.writeList(
+          CacheKeys.events, events.map((e) => e.toJson()).toList());
+    } catch (_) {}
+  }
 }

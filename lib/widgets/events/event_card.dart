@@ -229,6 +229,80 @@ class EventCard extends StatelessWidget {
   }
 
   Widget _buildImage(BuildContext context) {
+    // Kategoriye göre placeholder renk paleti
+    final Color placeholderColor = _categoryColor(event.category);
+    final IconData placeholderIcon = _categoryIcon(event.category);
+
+    Widget placeholder = Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            placeholderColor.withOpacity(0.85),
+            placeholderColor.withOpacity(0.55),
+          ],
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(placeholderIcon, color: Colors.white.withOpacity(0.9), size: 36),
+          const SizedBox(height: 6),
+          Text(
+            event.category,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.85),
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+
+    Widget imageWidget;
+    if (event.imageUrl.isNotEmpty) {
+      // ignore: avoid_print
+      debugPrint('[EventCard] imageUrl: ${event.imageUrl}');
+      imageWidget = Image.network(
+        event.imageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  placeholderColor.withOpacity(0.4),
+                  placeholderColor.withOpacity(0.2),
+                ],
+              ),
+            ),
+            child: Center(
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                        loadingProgress.expectedTotalBytes!
+                    : null,
+                color: Colors.white,
+              ),
+            ),
+          );
+        },
+        errorBuilder: (c, e, s) {
+          debugPrint('[EventCard] Resim yüklenemedi: $e | URL: ${event.imageUrl}');
+          return placeholder;
+        },
+      );
+    } else {
+      imageWidget = placeholder;
+    }
+
     return ClipRRect(
       borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
       child: SizedBox(
@@ -237,45 +311,15 @@ class EventCard extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            event.imageUrl.isNotEmpty
-                ? Image.network(
-                    event.imageUrl,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Colors.grey.shade50,
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes!
-                                : null,
-                            color: AppColors.kPrimaryColor,
-                          ),
-                        ),
-                      );
-                    },
-                    errorBuilder: (c, e, s) => Container(
-                      color: Colors.grey.shade50,
-                      child: Icon(Icons.image_not_supported_outlined,
-                          color: Colors.grey.shade200, size: 28),
-                    ),
-                  )
-                : Container(
-                    color: Colors.grey.shade50,
-                    child: Icon(Icons.event_rounded,
-                        color: Colors.grey.shade200, size: 32),
-                  ),
-            // Subtle gradient overlay
+            imageWidget,
+            // Subtle right-edge gradient overlay
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.centerRight,
                   end: Alignment.centerLeft,
                   colors: [
-                    Colors.black.withOpacity(0.08),
+                    Colors.black.withOpacity(0.1),
                     Colors.transparent,
                   ],
                 ),
@@ -285,6 +329,58 @@ class EventCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Kategoriye göre renk
+  Color _categoryColor(String category) {
+    switch (category.toLowerCase()) {
+      case 'çevre':
+        return const Color(0xFF2E7D32);
+      case 'eğitim':
+        return const Color(0xFF1565C0);
+      case 'sağlık':
+        return const Color(0xFFC62828);
+      case 'hayvan':
+      case 'hayvanlar':
+        return const Color(0xFF6A1B9A);
+      case 'sosyal':
+        return const Color(0xFF00838F);
+      case 'spor':
+        return const Color(0xFFE65100);
+      case 'kültür':
+      case 'sanat':
+        return const Color(0xFF4527A0);
+      case 'teknoloji':
+        return const Color(0xFF0277BD);
+      default:
+        return const Color(0xFF455A64);
+    }
+  }
+
+  /// Kategoriye göre ikon
+  IconData _categoryIcon(String category) {
+    switch (category.toLowerCase()) {
+      case 'çevre':
+        return Icons.eco_rounded;
+      case 'eğitim':
+        return Icons.school_rounded;
+      case 'sağlık':
+        return Icons.favorite_rounded;
+      case 'hayvan':
+      case 'hayvanlar':
+        return Icons.pets_rounded;
+      case 'sosyal':
+        return Icons.people_rounded;
+      case 'spor':
+        return Icons.sports_soccer_rounded;
+      case 'kültür':
+      case 'sanat':
+        return Icons.palette_rounded;
+      case 'teknoloji':
+        return Icons.computer_rounded;
+      default:
+        return Icons.volunteer_activism_rounded;
+    }
   }
 
   Widget _buildParticipantsRow(

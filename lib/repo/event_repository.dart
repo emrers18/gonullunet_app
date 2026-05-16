@@ -1,19 +1,21 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../models/application_model.dart';
+import '../services/functions_service.dart';
 import '../services/image_compress_service.dart';
 
 class EventRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FunctionsService _functionsService = FunctionsService();
 
   Stream<List<Event>> getEventsStream() {
     final now = DateTime.now();
@@ -79,27 +81,37 @@ class EventRepository {
     }
   }
 
-  Future<String> uploadEventImage(File imageFile) async {
-    // Görseli sıkıştır (max 1080px, %80 kalite)
-    final Uint8List? compressed =
-        await ImageCompressService.compressFile(imageFile);
+  /// Etkinlik gorselini Storage'a yukler.
+  /// Storage erisimi yoksa (Spark plani) null doner — etkinlik resimsiz olusturulur.
+  Future<String?> uploadEventImage(File imageFile) async {
+    try {
+      final Uint8List? compressed =
+          await ImageCompressService.compressFile(imageFile);
 
-    final String fileName =
-        'event_${DateTime.now().millisecondsSinceEpoch}.jpg';
-    final Reference ref = _storage.ref().child('event_images/$fileName');
+      final String fileName =
+          'event_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final Reference ref = _storage.ref().child('event_images/$fileName');
 
-    // Sıkıştırılmış baytları yükle; başarısız olursa orijinal dosyayı kullan
-    final UploadTask uploadTask = compressed != null
-        ? ref.putData(
-            compressed,
-            SettableMetadata(contentType: 'image/jpeg'),
-          )
-        : ref.putFile(imageFile);
+      final UploadTask uploadTask = compressed != null
+          ? ref.putData(
+              compressed,
+              SettableMetadata(contentType: 'image/jpeg'),
+            )
+          : ref.putFile(imageFile);
 
-    final TaskSnapshot snapshot = await uploadTask;
-    return await snapshot.ref.getDownloadURL();
+      final TaskSnapshot snapshot = await uploadTask;
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      // Storage erisimi yoksa (orn: Spark plani) sessizce null don
+      if (kDebugMode) {
+        debugPrint('[EventRepository] Gorsel yuklenemedi (atlanıyor): $e');
+      }
+      return null;
+    }
   }
 
+  /// Etkinlik olusturur. Gorsel yukleme basarisiz olursa resimsiz devam eder.
+  /// Tum is mantigi (NGO kontrolu, Firestore yazma) Cloud Function uzerinden yapilir.
   Future<void> addEvent({
     required String title,
     required String description,
@@ -108,70 +120,29 @@ class EventRepository {
     required DateTime startDate,
     required DateTime endDate,
     required String category,
-    required String type, // 'Etkinlik' veya 'Proje'
+    required String type,
     String? imageUrl,
+    int? quota,
   }) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
-
-    await _firestore.collection('events').add({
-      'title': title,
-      'description': description,
-      'location': location,
-      'geoPoint': GeoPoint(coordinates.latitude, coordinates.longitude),
-      'startDate': Timestamp.fromDate(startDate),
-      'endDate': Timestamp.fromDate(endDate),
-      'imageUrl': imageUrl ?? '',
-      'category': category,
-      'type': type,
-      'organizerId': user.uid,
-      'createdAt': FieldValue.serverTimestamp(),
-      'participants': [],
-      'approved_volunteers': [user.uid],
-      'active': true,
-      'isProject': type == 'Proje',
-    });
+    await _functionsService.createEvent(
+      title: title,
+      description: description,
+      location: location,
+      lat: coordinates.latitude,
+      lng: coordinates.longitude,
+      startDate: startDate,
+      endDate: endDate,
+      category: category,
+      type: type,
+      imageUrl: imageUrl,
+      quota: quota,
+    );
   }
 
+  /// Etkinlige katilma/ayrilma islemini Cloud Function uzerinden yapar.
+  /// XP odulu/cezasi sunucu tarafinda guvenle uygulanir.
   Future<void> toggleJoinEvent(String eventId, String userId) async {
-    final eventRef = _firestore.collection('events').doc(eventId);
-    final appRef = eventRef.collection('applications').doc(userId);
-
-    final eventDoc = await eventRef.get();
-    if (eventDoc.exists) {
-      List<String> participants =
-          List<String>.from(eventDoc.data()?['participants'] ?? []);
-      final appDoc = await appRef.get();
-      final batch = _firestore.batch();
-
-      if (participants.contains(userId)) {
-        // Zaten onaylı katılımcı, ayrılma işlemi
-        participants.remove(userId);
-        batch.delete(appRef);
-        batch.update(eventRef, {
-          'participants': participants,
-          'approved_volunteers': FieldValue.arrayRemove([userId])
-        });
-        // Katılım iptal edildiğinde XP geri çekilir.
-        batch.update(_firestore.collection('users').doc(userId), {
-          'xp': FieldValue.increment(-50),
-        });
-      } else if (appDoc.exists) {
-        // Başvurusu var ama onaylanmamış (pending), iptal et
-        batch.delete(appRef);
-      } else {
-        // Yeni başvuru oluştur (pending)
-        batch.set(appRef, {
-          'userId': userId,
-          'eventId': eventId,
-          'status': 'pending',
-          'appliedAt': FieldValue.serverTimestamp(),
-        });
-        // NOT: Pending aşamasında XP verilmez ve participants listesine eklenmez.
-      }
-
-      await batch.commit();
-    }
+    await _functionsService.toggleJoinEvent(eventId: eventId);
   }
 
   Future<String> getOrganizerName(String organizerId) async {
@@ -179,12 +150,11 @@ class EventRepository {
       final doc = await _firestore.collection('users').doc(organizerId).get();
       if (doc.exists) {
         final data = doc.data() as Map<String, dynamic>;
-        // Öncelik stkName, yoksa name, yoksa varsayılan metin
-        return data['stkName'] ?? data['name'] ?? 'İsimsiz Organizasyon';
+        return data['stkName'] ?? data['name'] ?? 'Isimsiz Organizasyon';
       }
       return 'Bilinmeyen Kurum';
     } catch (e) {
-      return 'Hata: Kurum Bulunamadı';
+      return 'Hata: Kurum Bulunamadi';
     }
   }
 
@@ -203,7 +173,7 @@ class EventRepository {
     });
   }
 
-  /// Kullanıcının bu etkinliğe daha önce başvurup başvurmadığını kontrol eder.
+  /// Kullanicinin bu etkinlige daha once basvurup basvurmadigini kontrol eder.
   Future<bool> hasUserApplied(String eventId, String userId) async {
     final doc = await _firestore
         .collection('events')
@@ -246,17 +216,17 @@ class EventRepository {
       applications.add(app);
     }
 
-    // Olan participants(katılımcılar) listesinde olup applications koleksiyonunda olmayanlar (eski veriler için)
-    for (String userId in participants) {
-      if (!processedUserIds.contains(userId)) {
-        var userDoc = await _firestore.collection('users').doc(userId).get();
+    // Katilimcilar listesinde olup applications koleksiyonunda olmayanlar (eski veriler icin)
+    for (String uid in participants) {
+      if (!processedUserIds.contains(uid)) {
+        var userDoc = await _firestore.collection('users').doc(uid).get();
         if (userDoc.exists) {
           var userData = userDoc.data();
           applications.add(ApplicationModel(
-            id: userId,
-            userId: userId,
+            id: uid,
+            userId: uid,
             eventId: eventId,
-            status: 'approved', // Katılımcıysa zaten onaylı gibidir
+            status: 'approved',
             appliedAt: (eventDoc.data()?['createdAt'] as Timestamp?) ??
                 Timestamp.now(),
             userName: userData?['name'],
@@ -270,47 +240,15 @@ class EventRepository {
     return applications;
   }
 
-  //Stk tarafı
+  /// Basvuru durumunu gunceller. Organizator kontrolu ve XP hesabi
+  /// Cloud Function tarafinda guvenle yapilir.
   Future<void> updateApplicationStatus(
       String eventId, String userId, String newStatus) async {
-    final batch = _firestore.batch();
-
-    // Mevcut durumu kontrol et (XP çiftlenmesini önlemek için)
-    final appRef = _firestore
-        .collection('events')
-        .doc(eventId)
-        .collection('applications')
-        .doc(userId);
-
-    final appDoc = await appRef.get();
-    final oldStatus = appDoc.data()?['status'];
-
-    // basvuru durumunu guncelleme
-    batch.update(appRef, {'status': newStatus});
-
-    var eventRef = _firestore.collection('events').doc(eventId);
-
-    if (newStatus == 'approved' && oldStatus != 'approved') {
-      batch.update(eventRef, {
-        'participants': FieldValue.arrayUnion([userId]),
-        'approved_volunteers': FieldValue.arrayUnion([userId])
-      });
-      // Onay için 50 XP ödülü
-      batch.update(_firestore.collection('users').doc(userId), {
-        'xp': FieldValue.increment(50),
-      });
-    } else if (newStatus != 'approved' && oldStatus == 'approved') {
-      batch.update(eventRef, {
-        'participants': FieldValue.arrayRemove([userId]),
-        'approved_volunteers': FieldValue.arrayRemove([userId])
-      });
-      // Onay geri çekildiğinde XP azaltımı (isteğe bağlı)
-      batch.update(_firestore.collection('users').doc(userId), {
-        'xp': FieldValue.increment(-50),
-      });
-    }
-
-    await batch.commit();
+    await _functionsService.updateApplicationStatus(
+      eventId: eventId,
+      targetUserId: userId,
+      newStatus: newStatus,
+    );
   }
 
   Future<String?> getUserApplicationStatus(

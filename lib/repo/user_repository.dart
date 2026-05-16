@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import '../services/functions_service.dart';
 import '../services/image_compress_service.dart';
 import '../models/user_model.dart';
 
@@ -10,6 +11,7 @@ class UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FunctionsService _functionsService = FunctionsService();
 
   Stream<UserModel?> getUserStream() {
     final user = _auth.currentUser;
@@ -87,45 +89,10 @@ class UserRepository {
     await _firestore.collection('users').doc(user.uid).update(data);
   }
 
+  /// NGO takip/takipten cikma islemini Cloud Function uzerinden yapar.
+  /// followersCount sayaci ve following listesi sunucu tarafinda atomik guncellenir.
   Future<void> toggleFollowNgo(String ngoId) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
-
-    final userRef = _firestore.collection('users').doc(user.uid);
-    final ngoRef = _firestore.collection('users').doc(ngoId);
-
-    return _firestore.runTransaction((transaction) async {
-      final userSnapshot = await transaction.get(userRef);
-      final ngoSnapshot = await transaction.get(ngoRef);
-
-      if (!userSnapshot.exists || !ngoSnapshot.exists) {
-        throw Exception("Kullanıcı veya Kurum verisi bulunamadı.");
-      }
-
-      final List<String> following =
-          List<String>.from(userSnapshot.data()?['following'] ?? []);
-      final bool isFollowing = following.contains(ngoId);
-
-      if (isFollowing) {
-        // Takibi bırak
-        transaction.update(userRef, {
-          'following': FieldValue.arrayRemove([ngoId])
-        });
-        transaction.update(ngoRef, {
-          'followersCount': FieldValue.increment(-1),
-          'followers': FieldValue.arrayRemove([user.uid]),
-        });
-      } else {
-        // Takip et
-        transaction.update(userRef, {
-          'following': FieldValue.arrayUnion([ngoId])
-        });
-        transaction.update(ngoRef, {
-          'followersCount': FieldValue.increment(1),
-          'followers': FieldValue.arrayUnion([user.uid]),
-        });
-      }
-    });
+    await _functionsService.toggleFollowNgo(ngoId: ngoId);
   }
 
   Future<UserModel?> getUserById(String uid) async {

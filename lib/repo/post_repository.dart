@@ -84,30 +84,8 @@ class PostRepository {
   }
 
   Future<void> toggleLikePost(String postId) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception("Oturum açılmamış.");
-
-    final postRef = _firestore.collection('posts').doc(postId);
-    final likeRef =
-        _firestore.collection('post_likes').doc("${postId}_${user.uid}");
-
-    return _firestore.runTransaction((transaction) async {
-      final likeSnapshot = await transaction.get(likeRef);
-
-      if (likeSnapshot.exists) {
-        // Beğeniyi kaldır
-        transaction.delete(likeRef);
-        transaction.update(postRef, {'likeCount': FieldValue.increment(-1)});
-      } else {
-        // Beğen
-        transaction.set(likeRef, {
-          'postId': postId,
-          'userId': user.uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-        transaction.update(postRef, {'likeCount': FieldValue.increment(1)});
-      }
-    });
+    // Cloud Function uzerinden yapilir — cift begeni onlenir, sayac guvende
+    await _functionsService.toggleLikePost(postId: postId);
   }
 
   Future<bool> isPostLiked(String postId) async {
@@ -170,21 +148,9 @@ class PostRepository {
     });
   }
 
-  /// Gönderiyi ve varsa fotoğrafını Storage'dan siler
+  /// Gonderiyi Firestore'dan siler ve Storage gorselini temizler.
+  /// Sahiplik kontrolu ve Storage silme Cloud Function uzerinden yapilir.
   Future<void> deletePost(String postId, String imageUrl) async {
-    final batch = _firestore.batch();
-    final postRef = _firestore.collection('posts').doc(postId);
-    batch.delete(postRef);
-    await batch.commit();
-
-    // Storage'daki resmi de sil (varsa)
-    if (imageUrl.isNotEmpty) {
-      try {
-        final ref = _storage.refFromURL(imageUrl);
-        await ref.delete();
-      } catch (_) {
-        // Görsel silinememişse sessizce geç
-      }
-    }
+    await _functionsService.deletePost(postId: postId);
   }
 }

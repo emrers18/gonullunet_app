@@ -43,7 +43,8 @@ class _ProfilePageState extends State<ProfilePage> {
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Text('Çıkış Yap',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
+              style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
           content: Text('Çıkış yapmak istediğinizden emin misiniz?',
               style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
           shape:
@@ -51,7 +52,8 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: <Widget>[
             TextButton(
               child: Text('İptal',
-                  style: GoogleFonts.plusJakartaSans(color: Colors.grey.shade600)),
+                  style:
+                      GoogleFonts.plusJakartaSans(color: Colors.grey.shade600)),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
@@ -415,7 +417,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 children: [
                   Row(
                     children: [
-                        LevelBadge(xp: user.xp),
+                      LevelBadge(xp: user.xp),
                       const SizedBox(width: 8),
                       Text(
                         "${user.xp} XP",

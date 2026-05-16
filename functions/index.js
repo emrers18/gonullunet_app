@@ -23,6 +23,23 @@
  *
  * onApplicationStatusUpdated: Başvuru durumu (status) değiştiğinde çalışır.
  *                      Gönüllüye başvurusunun onaylandığını veya reddedildiğini bildirir.
+ *
+ * ── Event Functions ──────────────────────────────────────────────────────────
+ * createEvent        : NGO kontrolü + Firestore etkinlik oluşturma.
+ *                      Sadece NGO kullanıcıları etkinlik oluşturabilir.
+ *
+ * updateApplicationStatus: Başvuru durumu güncelleme + XP ödülü.
+ *                      Organizatör kontrolü yapılır; XP sunucu tarafında verilir.
+ *
+ * toggleJoinEvent    : Etkinliğe katılma/ayrılma + XP güvenliği.
+ *                      Pending başvuru, onaylı katılım ve iptal mantığı sunucuda.
+ *
+ * ── Social Functions ─────────────────────────────────────────────────────────
+ * toggleFollowNgo    : NGO takip/takipten çıkma + followersCount sayacı.
+ *
+ * toggleLikePost     : Post beğeni toggle + likeCount sayacı.
+ *
+ * deletePost         : Sahiplik kontrolü + Firestore silme + Storage temizleme.
  */
 
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
@@ -34,6 +51,7 @@ const { getMessaging } = require("firebase-admin/messaging");
 const { getAuth } = require("firebase-admin/auth");
 const { getRemoteConfig } = require("firebase-admin/remote-config");
 const { VertexAI } = require("@google-cloud/vertexai");
+const { getStorage } = require("firebase-admin/storage");
 
 initializeApp();
 
@@ -694,4 +712,404 @@ exports.onUserDeleted = auth.user().onDelete(async (user) => {
     console.error(`[onUserDeleted] Veri temizleme hatası (${uid}):`, err);
     // Trigger'da throw edilmemeli — sadece log yeterli
   }
+});
+
+// =============================================================================
+// ── EVENT FUNCTIONS ───────────────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// createEvent
+// İstemci Gönderir : { title, description, location, geoPoint: {lat, lng},
+//                      startDate (ISO), endDate (ISO), category, type,
+//                      imageUrl?, quota? }
+// Ne Yapar         : Yalnızca NGO kullanıcılarının etkinlik oluşturmasına izin
+//                    verir; Firestore'a etkinliği yazar.
+// Döndürür         : { eventId }
+// ─────────────────────────────────────────────────────────────────────────────
+exports.createEvent = onCall(async (request) => {
+  // 1. Auth Kontrolü
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const {
+    title, description, location, geoPoint,
+    startDate, endDate, category, type, imageUrl, quota
+  } = request.data;
+
+  // 2. Girdi Doğrulama
+  if (!title || !description || !location || !geoPoint || !startDate || !endDate || !category || !type) {
+    throw new HttpsError("invalid-argument", "Zorunlu alanlar eksik.");
+  }
+
+  const db = getFirestore();
+
+  // 3. NGO Kontrolü
+  const userDoc = await db.collection("users").doc(uid).get();
+  if (!userDoc.exists) {
+    throw new HttpsError("not-found", "Kullanıcı profili bulunamadı.");
+  }
+
+  const userData = userDoc.data();
+  if (userData.userType !== "ngo") {
+    throw new HttpsError("permission-denied", "Etkinlik yalnızca STK hesapları tarafından oluşturulabilir.");
+  }
+
+  // 4. Firestore'a Yaz
+  try {
+    const { GeoPoint, Timestamp } = require("firebase-admin/firestore");
+
+    const eventData = {
+      title,
+      description,
+      location,
+      geoPoint: new GeoPoint(geoPoint.lat, geoPoint.lng),
+      startDate: Timestamp.fromDate(new Date(startDate)),
+      endDate: Timestamp.fromDate(new Date(endDate)),
+      imageUrl: imageUrl || "",
+      category,
+      type,
+      organizerId: uid,
+      createdAt: FieldValue.serverTimestamp(),
+      participants: [],
+      approved_volunteers: [uid],
+      active: true,
+      isProject: type === "Proje",
+    };
+
+    if (quota !== undefined && quota !== null) {
+      eventData.quota = quota;
+    }
+
+    const eventRef = await db.collection("events").add(eventData);
+    console.log(`[createEvent] Etkinlik oluşturuldu: ${eventRef.id} (NGO: ${uid})`);
+    return { eventId: eventRef.id };
+  } catch (err) {
+    console.error("[createEvent] Hata:", err);
+    throw new HttpsError("internal", "Etkinlik oluşturulamadı: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updateApplicationStatus
+// İstemci Gönderir : { eventId, targetUserId, newStatus }
+// Ne Yapar         : Organizatör kontrolü yapar; başvuru durumunu günceller
+//                    ve XP ödülü/cezası sunucu tarafında uygular.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.updateApplicationStatus = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { eventId, targetUserId, newStatus } = request.data;
+
+  if (!eventId || !targetUserId || !newStatus) {
+    throw new HttpsError("invalid-argument", "eventId, targetUserId ve newStatus zorunludur.");
+  }
+
+  const validStatuses = ["pending", "approved", "rejected"];
+  if (!validStatuses.includes(newStatus)) {
+    throw new HttpsError("invalid-argument", `Geçersiz durum: ${newStatus}`);
+  }
+
+  const db = getFirestore();
+
+  // 1. Organizatör Kontrolü
+  const eventDoc = await db.collection("events").doc(eventId).get();
+  if (!eventDoc.exists) {
+    throw new HttpsError("not-found", "Etkinlik bulunamadı.");
+  }
+
+  if (eventDoc.data().organizerId !== uid) {
+    throw new HttpsError("permission-denied", "Bu işlem için yetkiniz yok.");
+  }
+
+  // 2. Mevcut Durumu Kontrol Et (XP çiftlenmesini önlemek için)
+  const appRef = db.collection("events").doc(eventId)
+    .collection("applications").doc(targetUserId);
+
+  const appDoc = await appRef.get();
+  if (!appDoc.exists) {
+    throw new HttpsError("not-found", "Başvuru bulunamadı.");
+  }
+
+  const oldStatus = appDoc.data().status;
+
+  // 3. Batch Güncelle
+  const batch = db.batch();
+  const eventRef = db.collection("events").doc(eventId);
+  const userRef = db.collection("users").doc(targetUserId);
+
+  batch.update(appRef, { status: newStatus });
+
+  if (newStatus === "approved" && oldStatus !== "approved") {
+    batch.update(eventRef, {
+      participants: FieldValue.arrayUnion(targetUserId),
+      approved_volunteers: FieldValue.arrayUnion(targetUserId),
+    });
+    batch.update(userRef, { xp: FieldValue.increment(50) });
+  } else if (newStatus !== "approved" && oldStatus === "approved") {
+    batch.update(eventRef, {
+      participants: FieldValue.arrayRemove(targetUserId),
+      approved_volunteers: FieldValue.arrayRemove(targetUserId),
+    });
+    batch.update(userRef, { xp: FieldValue.increment(-50) });
+  }
+
+  try {
+    await batch.commit();
+    console.log(`[updateApplicationStatus] ${eventId}/${targetUserId}: ${oldStatus} -> ${newStatus}`);
+    return { success: true };
+  } catch (err) {
+    console.error("[updateApplicationStatus] Hata:", err);
+    throw new HttpsError("internal", "Durum güncellenemedi: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// toggleJoinEvent
+// İstemci Gönderir : { eventId }
+// Ne Yapar         : Kullanıcının etkinliğe katılma/ayrılma işlemini yönetir.
+//                    XP ödülü/cezası sunucu tarafında güvenle uygulanır.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.toggleJoinEvent = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { eventId } = request.data;
+
+  if (!eventId) {
+    throw new HttpsError("invalid-argument", "eventId zorunludur.");
+  }
+
+  const db = getFirestore();
+  const eventRef = db.collection("events").doc(eventId);
+  const appRef = eventRef.collection("applications").doc(uid);
+
+  // Transaction ile tutarlı okuma/yazma
+  try {
+    await db.runTransaction(async (transaction) => {
+      const eventDoc = await transaction.get(eventRef);
+      const appDoc = await transaction.get(appRef);
+
+      if (!eventDoc.exists) {
+        throw new HttpsError("not-found", "Etkinlik bulunamadı.");
+      }
+
+      const participants = eventDoc.data().participants || [];
+      const isParticipant = participants.includes(uid);
+
+      if (isParticipant) {
+        // Onaylı katılımcı — ayrıl
+        transaction.delete(appRef);
+        transaction.update(eventRef, {
+          participants: FieldValue.arrayRemove(uid),
+          approved_volunteers: FieldValue.arrayRemove(uid),
+        });
+        transaction.update(db.collection("users").doc(uid), {
+          xp: FieldValue.increment(-50),
+        });
+      } else if (appDoc.exists) {
+        // Bekleyen başvuru — iptal et
+        transaction.delete(appRef);
+      } else {
+        // Yeni başvuru oluştur (pending)
+        transaction.set(appRef, {
+          userId: uid,
+          eventId: eventId,
+          status: "pending",
+          appliedAt: FieldValue.serverTimestamp(),
+        });
+      }
+    });
+
+    console.log(`[toggleJoinEvent] User ${uid} toggled event ${eventId}`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    console.error("[toggleJoinEvent] Hata:", err);
+    throw new HttpsError("internal", "İşlem tamamlanamadı: " + err.message);
+  }
+});
+
+// =============================================================================
+// ── SOCIAL FUNCTIONS ──────────────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// toggleFollowNgo
+// İstemci Gönderir : { ngoId }
+// Ne Yapar         : Kullanıcının bir NGO'yu takip/takipten çıkma işlemini
+//                    transaction ile atomik olarak yönetir.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.toggleFollowNgo = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { ngoId } = request.data;
+
+  if (!ngoId) {
+    throw new HttpsError("invalid-argument", "ngoId zorunludur.");
+  }
+
+  if (uid === ngoId) {
+    throw new HttpsError("invalid-argument", "Kendinizi takip edemezsiniz.");
+  }
+
+  const db = getFirestore();
+  const userRef = db.collection("users").doc(uid);
+  const ngoRef = db.collection("users").doc(ngoId);
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const userDoc = await transaction.get(userRef);
+      const ngoDoc = await transaction.get(ngoRef);
+
+      if (!userDoc.exists || !ngoDoc.exists) {
+        throw new HttpsError("not-found", "Kullanıcı veya kurum bulunamadı.");
+      }
+
+      const following = userDoc.data().following || [];
+      const isFollowing = following.includes(ngoId);
+
+      if (isFollowing) {
+        transaction.update(userRef, { following: FieldValue.arrayRemove(ngoId) });
+        transaction.update(ngoRef, {
+          followersCount: FieldValue.increment(-1),
+          followers: FieldValue.arrayRemove(uid),
+        });
+      } else {
+        transaction.update(userRef, { following: FieldValue.arrayUnion(ngoId) });
+        transaction.update(ngoRef, {
+          followersCount: FieldValue.increment(1),
+          followers: FieldValue.arrayUnion(uid),
+        });
+      }
+    });
+
+    console.log(`[toggleFollowNgo] User ${uid} toggled follow on NGO ${ngoId}`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    console.error("[toggleFollowNgo] Hata:", err);
+    throw new HttpsError("internal", "İşlem tamamlanamadı: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// toggleLikePost
+// İstemci Gönderir : { postId }
+// Ne Yapar         : Post beğeni/beğeni kaldırma işlemini transaction ile
+//                    atomik olarak yönetir; çift beğeniyi önler.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.toggleLikePost = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { postId } = request.data;
+
+  if (!postId) {
+    throw new HttpsError("invalid-argument", "postId zorunludur.");
+  }
+
+  const db = getFirestore();
+  const postRef = db.collection("posts").doc(postId);
+  const likeRef = db.collection("post_likes").doc(`${postId}_${uid}`);
+
+  try {
+    await db.runTransaction(async (transaction) => {
+      const likeDoc = await transaction.get(likeRef);
+
+      if (likeDoc.exists) {
+        // Beğeniyi kaldır
+        transaction.delete(likeRef);
+        transaction.update(postRef, { likeCount: FieldValue.increment(-1) });
+      } else {
+        // Beğen
+        transaction.set(likeRef, {
+          postId,
+          userId: uid,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        transaction.update(postRef, { likeCount: FieldValue.increment(1) });
+      }
+    });
+
+    console.log(`[toggleLikePost] User ${uid} toggled like on post ${postId}`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    console.error("[toggleLikePost] Hata:", err);
+    throw new HttpsError("internal", "İşlem tamamlanamadı: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// deletePost
+// İstemci Gönderir : { postId }
+// Ne Yapar         : Sahiplik kontrolü yapar, Firestore'dan postu siler,
+//                    Storage'daki görseli temizler.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deletePost = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { postId } = request.data;
+
+  if (!postId) {
+    throw new HttpsError("invalid-argument", "postId zorunludur.");
+  }
+
+  const db = getFirestore();
+
+  // 1. Postu oku ve sahiplik kontrolü yap
+  const postRef = db.collection("posts").doc(postId);
+  const postDoc = await postRef.get();
+
+  if (!postDoc.exists) {
+    throw new HttpsError("not-found", "Gönderi bulunamadı.");
+  }
+
+  const postData = postDoc.data();
+  if (postData.publisherId !== uid) {
+    throw new HttpsError("permission-denied", "Bu gönderiyi silme yetkiniz yok.");
+  }
+
+  const imageUrl = postData.imageUrl || "";
+
+  // 2. Firestore'dan sil
+  try {
+    await postRef.delete();
+    console.log(`[deletePost] Post silindi: ${postId} (User: ${uid})`);
+  } catch (err) {
+    console.error("[deletePost] Firestore silme hatası:", err);
+    throw new HttpsError("internal", "Gönderi silinemedi: " + err.message);
+  }
+
+  // 3. Storage'daki görseli sil (Blaze planı gerektirdiğinden graceful)
+  if (imageUrl && imageUrl.includes("firebasestorage.googleapis.com")) {
+    try {
+      const storage = getStorage();
+      // URL'den dosya yolunu çıkar
+      const urlPath = decodeURIComponent(imageUrl.split("/o/")[1].split("?")[0]);
+      await storage.bucket().file(urlPath).delete();
+      console.log(`[deletePost] Storage görseli silindi: ${urlPath}`);
+    } catch (storageErr) {
+      // Storage silme başarısız olursa sadece logla — post zaten silindi
+      console.warn(`[deletePost] Storage silme başarısız (göz ardı edildi): ${storageErr.message}`);
+    }
+  }
+
+  return { success: true };
 });

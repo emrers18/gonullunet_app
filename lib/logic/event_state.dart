@@ -27,15 +27,17 @@ class EventLoaded extends EventState {
   final List<Event> events;
   final bool isNgo;
   final bool hasMore;
+  final bool fromCache; // true ise veri cache'den geldi
 
   const EventLoaded({
     required this.events,
     required this.isNgo,
     this.hasMore = true,
+    this.fromCache = false,
   });
 
   @override
-  List<Object?> get props => [events, isNgo, hasMore];
+  List<Object?> get props => [events, isNgo, hasMore, fromCache];
 }
 
 class EventError extends EventState {

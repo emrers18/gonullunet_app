@@ -7,6 +7,7 @@ import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/ai/chat_bubble.dart';
 import 'package:gonullunet_app/widgets/ai/chat_input.dart';
 import 'package:gonullunet_app/widgets/ai/typing_indicator.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class ChatPage extends StatefulWidget {
   final String sessionId;
@@ -186,9 +187,7 @@ class _ChatPageState extends State<ChatPage> {
           }
 
           return const Center(
-            child: CircularProgressIndicator(
-              color: AppColors.darkPrimaryColor,
-            ),
+            child: AppLoadingIndicator(),
           );
         },
       ),

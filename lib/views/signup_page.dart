@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/validators/validators.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
@@ -393,8 +394,7 @@ class _SignUpViewState extends State<SignUpView> {
                             ? const SizedBox(
                                 height: 24,
                                 width: 24,
-                                child: CircularProgressIndicator(
-                                    color: Colors.white, strokeWidth: 3),
+                                child: AppLoadingIndicator(size: 24),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

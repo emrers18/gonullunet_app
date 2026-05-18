@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui' as ui;
 
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import '../logic/location_cubit.dart';
 import '../logic/location_state.dart';
 
@@ -320,11 +321,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                               ? const SizedBox(
                                   height: 20,
                                   width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        AppColors.kPrimaryColor),
-                                  ),
+                                  child: AppLoadingIndicator(size: 20),
                                 )
                               : Text(
                                   "Konumu Onayla",

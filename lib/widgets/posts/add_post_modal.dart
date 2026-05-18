@@ -10,6 +10,7 @@ import 'package:gonullunet_app/logic/user_cubit.dart';
 import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/repo/post_repository.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class AddPostModal extends StatefulWidget {
   const AddPostModal({super.key});
@@ -171,11 +172,7 @@ class _AddPostModalState extends State<AddPostModal> {
                   ),
                 ),
                 _isSaving
-                    ? const SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                    ? const AppLoadingIndicator(size: 28)
                     : ElevatedButton(
                         onPressed: _savePost,
                         style: ElevatedButton.styleFrom(

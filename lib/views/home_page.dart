@@ -13,6 +13,7 @@ import 'package:gonullunet_app/widgets/posts/add_post_modal.dart';
 import '../logic/post_cubit.dart';
 import '../logic/post_state.dart';
 import '../logic/user_cubit.dart';
+import '../widgets/app_loading_indicator.dart';
 import '../logic/user_state.dart';
 import '../repo/post_repository.dart';
 import '../repo/notification_repository.dart';
@@ -297,8 +298,7 @@ class _PostListView extends StatelessWidget {
           // İlk yükleme spinner'ı
           if (state is PostInitial ||
               (state is PostLoading && state.isFirstFetch)) {
-            return const Center(
-                child: CircularProgressIndicator(color: Colors.orange));
+            return const AppLoadingCenter();
           }
 
           // Hata göster
@@ -380,7 +380,7 @@ class _PostListView extends StatelessWidget {
                 return const Center(
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: CircularProgressIndicator(color: Colors.orange),
+                    child: AppLoadingIndicator(size: 28),
                   ),
                 );
               },

@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class CommentModal extends StatefulWidget {
@@ -67,7 +68,7 @@ class _CommentModalState extends State<CommentModal> {
                   .getCommentsStream(widget.postId),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppLoadingIndicator());
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(

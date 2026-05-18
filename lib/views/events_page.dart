@@ -13,6 +13,7 @@ import 'package:gonullunet_app/widgets/events/add_event_modal.dart';
 import '../logic/event_cubit.dart';
 import '../logic/event_state.dart';
 import '../widgets/events/event_filter_modal.dart';
+import '../widgets/app_loading_indicator.dart';
 import 'events_map_page.dart';
 
 class EventsPage extends StatefulWidget {
@@ -309,8 +310,7 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildBody(BuildContext context, EventState state) {
     if (state is EventLoading && state.isFirstFetch) {
-      return const Center(
-          child: CircularProgressIndicator(color: AppColors.primaryColor));
+      return const AppLoadingCenter();
     }
 
     if (state is EventError) {
@@ -452,16 +452,7 @@ class _EventsPageState extends State<EventsPage> {
                     }
                     return const Padding(
                       padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(
-                        child: SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Color(0xFF1565C0),
-                          ),
-                        ),
-                      ),
+                      child: Center(child: AppLoadingIndicator(size: 28)),
                     );
                   },
                   childCount: events.length + (hasMore ? 1 : 0),

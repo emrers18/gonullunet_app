@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/views/login_page.dart';
 import 'package:gonullunet_app/views/main_page.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -15,7 +16,7 @@ class AuthGate extends StatelessWidget {
         // 1. Durum: Bağlantı bekleniyor
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: AppLoadingCenter(),
           );
         }
 

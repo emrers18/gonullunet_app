@@ -5,6 +5,7 @@ import 'package:gonullunet_app/logic/event_chat_cubit/event_chat_cubit.dart';
 import 'package:gonullunet_app/logic/event_chat_cubit/event_chat_state.dart';
 import 'package:gonullunet_app/repo/event_chat_repository.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/event_chat/molecules/chat_input_bar.dart';
 import '../widgets/event_chat/organisms/message_list_view.dart';
@@ -121,8 +122,7 @@ class _EventChatView extends StatelessWidget {
                 builder: (context, state) {
                   if (state is EventChatLoading || state is EventChatInitial) {
                     return const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.primaryColor),
+                      child: AppLoadingIndicator(),
                     );
                   }
 

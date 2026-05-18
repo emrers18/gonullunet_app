@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import 'package:gonullunet_app/widgets/gamification/level_badge.dart';
 import '../../models/post_model.dart';
@@ -176,11 +177,8 @@ class PostCard extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: post.imageUrl,
           fit: BoxFit.cover,
-          placeholder: (context, url) => Center(
-            child: CircularProgressIndicator(
-              color: AppColors.kPrimaryColor.withOpacity(0.3),
-            ),
-          ),
+          placeholder: (context, url) =>
+              const Center(child: AppLoadingIndicator(size: 32)),
           errorWidget: (context, url, error) => Center(
               child: Icon(Icons.broken_image, color: Colors.grey.shade400)),
         ),

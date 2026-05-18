@@ -36,7 +36,7 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
     return RotationTransition(
       turns: _controller,
       child: Image.asset(
-        'assets/images/logo.png',
+        'lib/assets/images/logo.png',
         width: widget.size,
         height: widget.size,
         fit: BoxFit.contain,
@@ -46,7 +46,7 @@ class _AppLoadingIndicatorState extends State<AppLoadingIndicator>
 }
 
 /// [AppLoadingIndicator]'ı merkeze alan yardımcı widget.
-/// Tam sayfa kaplayan loading ekranı için kullanılır.
+/// Scaffold olmadan sadece ortaya hizalar — tam ekranı kaplamaz.
 class AppLoadingCenter extends StatelessWidget {
   final double size;
 
@@ -55,20 +55,5 @@ class AppLoadingCenter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(child: AppLoadingIndicator(size: size));
-  }
-}
-
-/// Scaffold içinde tam sayfa loading ekranı.
-class AppLoadingPage extends StatelessWidget {
-  final double size;
-
-  const AppLoadingPage({super.key, this.size = 64});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(child: AppLoadingIndicator(size: size)),
-    );
   }
 }

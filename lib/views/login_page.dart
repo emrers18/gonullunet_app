@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../services/auth.dart';
 import '../services/firebase_error_translator.dart';
 import '../utils/app_colors.dart';
-
+import '../widgets/app_loading_indicator.dart';
 import '../utils/validators/validators.dart';
 import 'signUp_page.dart';
 
@@ -396,8 +396,7 @@ class _LoginPageState extends State<LoginPage> {
                               ? const SizedBox(
                                   width: 24,
                                   height: 24,
-                                  child: CircularProgressIndicator(
-                                      color: Colors.white, strokeWidth: 2),
+                                  child: AppLoadingIndicator(size: 24),
                                 )
                               : Text(
                                   "Giriş Yap",
@@ -541,13 +540,10 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(16),
           child: Center(
             child: isLoading
-                ? SizedBox(
+                ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      color: color,
-                      strokeWidth: 2,
-                    ),
+                    child: AppLoadingIndicator(size: 20),
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,

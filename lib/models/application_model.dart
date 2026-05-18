@@ -12,6 +12,8 @@ class ApplicationModel {
   final String? userName;
   final String? userSurname;
   final String? userImageUrl;
+  final String? userEmail;
+  final String? userPhone;
 
   final int? xp;
 
@@ -24,6 +26,8 @@ class ApplicationModel {
     this.userName,
     this.userSurname,
     this.userImageUrl,
+    this.userEmail,
+    this.userPhone,
     this.xp,
   });
 
@@ -47,6 +51,8 @@ class ApplicationModel {
     String? name,
     String? surname,
     String? imageUrl,
+    String? email,
+    String? phone,
     int? xp,
   }) {
     return ApplicationModel(
@@ -58,6 +64,8 @@ class ApplicationModel {
       userName: name,
       userSurname: surname,
       userImageUrl: imageUrl,
+      userEmail: email,
+      userPhone: phone,
       xp: xp,
     );
   }

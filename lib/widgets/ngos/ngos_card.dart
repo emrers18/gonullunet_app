@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import 'package:gonullunet_app/repo/ngo_repository.dart';
 import '../../views/ngo_detail_page.dart';
@@ -67,11 +68,7 @@ class NgoCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: Colors.grey.shade50,
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: AppColors.kPrimaryColor),
-                              ),
+                              child: const Center(child: AppLoadingIndicator(size: 28)),
                             ),
                             errorWidget: (context, url, error) => Container(
                               color: Colors.grey.shade100,

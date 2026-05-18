@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 
 import '../logic/profile_cubit.dart';
@@ -142,9 +143,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
         child: BlocBuilder<EditProfileCubit, EditProfileState>(
           builder: (context, state) {
             if (state is EditProfileLoading) {
-              return const Center(
-                  child: CircularProgressIndicator(
-                      color: AppColors.kPrimaryColor));
+              return const Center(child: AppLoadingIndicator());
             }
 
             if (state is EditProfileLoaded) {
@@ -165,7 +164,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                    const AppLoadingIndicator(),
                     const SizedBox(height: 16),
                     Text("Profil güncelleniyor...",
                         style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),

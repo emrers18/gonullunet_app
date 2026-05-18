@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class SendButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -34,13 +35,7 @@ class SendButton extends StatelessWidget {
                 ],
         ),
         child: isLoading
-            ? const Padding(
-                padding: EdgeInsets.all(12),
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
+            ? const AppLoadingIndicator(size: 22)
             : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
       ),
     );

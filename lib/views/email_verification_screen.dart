@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import 'auth_gate.dart';
 
@@ -609,13 +610,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       ),
       child: Row(
         children: [
-          SizedBox(
+          const SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2.5,
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue.shade500),
-            ),
+            child: AppLoadingIndicator(size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -711,10 +709,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                   key: ValueKey('loading'),
                   width: 22,
                   height: 22,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2.5,
-                  ),
+                  child: AppLoadingIndicator(size: 22),
                 )
               : Row(
                   key: ValueKey(label),

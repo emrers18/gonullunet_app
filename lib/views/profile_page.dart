@@ -19,6 +19,7 @@ import 'my_events_page.dart';
 import 'my_posts_page.dart';
 import 'joined_events_page.dart';
 import 'settings_page.dart';
+import '../widgets/app_loading_indicator.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -92,9 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {
           if (state is UserLoading) {
-            return const Center(
-                child:
-                    CircularProgressIndicator(color: AppColors.kPrimaryColor));
+            return const AppLoadingCenter();
           }
 
           if (state is UserError) {

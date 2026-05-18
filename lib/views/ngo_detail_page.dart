@@ -22,6 +22,7 @@ import '../widgets/ngos/build_section_title.dart';
 import '../widgets/ngos/build_social_button_widget.dart';
 import '../widgets/ngos/build_stat_item_widget.dart';
 import '../widgets/ngos/silver_appbar_delegate.dart';
+import '../widgets/app_loading_indicator.dart';
 
 class NgoDetailPage extends StatefulWidget {
   final Ngo ngo;
@@ -439,7 +440,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingCenter();
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Center(child: Text("Henüz etkinlik yok."));
@@ -483,7 +484,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const AppLoadingCenter();
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text("Henüz paylaşım yapılmamış."));

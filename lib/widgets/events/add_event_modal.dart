@@ -19,6 +19,7 @@ import '../../logic/user_cubit.dart';
 import '../../logic/user_state.dart';
 import '../../repo/event_repository.dart';
 import '../../views/location_picker_page.dart';
+import '../app_loading_indicator.dart';
 
 class AddEventModal extends StatelessWidget {
   const AddEventModal({super.key});
@@ -292,11 +293,7 @@ class _AddEventViewState extends State<AddEventView> {
                   BlocBuilder<AddEventCubit, AddEventState>(
                     builder: (context, state) {
                       if (state is AddEventLoading) {
-                        return const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        );
+                        return const AppLoadingIndicator(size: 28);
                       }
                       return ElevatedButton(
                         onPressed: _saveEvent,

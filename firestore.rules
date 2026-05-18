@@ -1,0 +1,74 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Kullanıcılar ─────────────────────────────────────────────────────────
+    // Kimliği doğrulanmış herkes okuyabilir.
+    // Yalnızca kendi profilini güncelleyebilir; userType ve xp dokunulamaz.
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow update: if request.auth.uid == userId
+                    && !('userType' in request.resource.data)
+                    && !('xp' in request.resource.data)
+                    && !('following' in request.resource.data)
+                    && !('followers' in request.resource.data)
+                    && !('followersCount' in request.resource.data);
+      allow create, delete: if false;
+
+      // Bildirimler: sadece kendi bildirimleri
+      match /notifications/{notifId} {
+        allow read, write: if request.auth.uid == userId;
+      }
+
+      // AI kullanım sayacı: sadece kendi
+      match /ai_usage/{day} {
+        allow read: if request.auth.uid == userId;
+        allow write: if false;
+      }
+
+      // AI sohbet oturumları: sadece kendi
+      match /chat_sessions/{sessionId} {
+        allow read, write: if request.auth.uid == userId;
+        match /messages/{messageId} {
+          allow read, write: if request.auth.uid == userId;
+        }
+      }
+    }
+
+    // ── Etkinlikler ───────────────────────────────────────────────────────────
+    // Herkes okuyabilir; yazma sadece Cloud Functions.
+    match /events/{eventId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /applications/{appId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    // ── Postlar ───────────────────────────────────────────────────────────────
+    // Herkes okuyabilir; yazma sadece Cloud Functions.
+    match /posts/{postId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+
+      match /comments/{commentId} {
+        allow read: if request.auth != null;
+        allow write: if false;
+      }
+    }
+
+    // ── Post Beğenileri ───────────────────────────────────────────────────────
+    match /post_likes/{likeId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ── Diğer her şey: erişim yok ─────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

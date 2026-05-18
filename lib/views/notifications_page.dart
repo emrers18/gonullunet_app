@@ -5,6 +5,7 @@ import 'package:gonullunet_app/utils/app_colors.dart';
 import '../logic/notidication_state.dart';
 import '../logic/notifications_cubit.dart';
 import '../repo/notification_repository.dart';
+import '../widgets/app_loading_indicator.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -60,9 +61,7 @@ class NotificationsView extends StatelessWidget {
       body: BlocBuilder<NotificationCubit, NotificationState>(
         builder: (context, state) {
           if (state is NotificationLoading) {
-            return const Center(
-                child: CircularProgressIndicator(
-                    color: AppColors.kPrimaryColor));
+            return const AppLoadingCenter();
           }
 
           if (state is NotificationError) {

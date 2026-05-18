@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import '../../views/event_detail_page.dart';
+import '../app_loading_indicator.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
@@ -282,16 +283,7 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ),
-            child: Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-                color: Colors.white,
-              ),
-            ),
+            child: const Center(child: AppLoadingIndicator(size: 28)),
           );
         },
         errorBuilder: (c, e, s) {

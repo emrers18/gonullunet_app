@@ -8,6 +8,7 @@ import '../models/user_model.dart';
 import '../repo/user_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/gamification_utils.dart';
+import '../widgets/app_loading_indicator.dart';
 import '../widgets/gamification/level_badge.dart';
 
 /// STK'ların başvuran gönüllünün profilini inceleyeceği sayfa.
@@ -73,8 +74,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
         ),
       ),
       body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: AppColors.kPrimaryColor))
+          ? const Center(child: AppLoadingIndicator())
           : _user == null
               ? Center(
                   child: Text(

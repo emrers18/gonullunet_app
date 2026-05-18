@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 
 import '../constants/app_constants.dart';
@@ -166,9 +167,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
         child: BlocBuilder<EditProfileCubit, EditProfileState>(
           builder: (context, state) {
             if (state is EditProfileLoading) {
-              return const Center(
-                  child: CircularProgressIndicator(
-                      color: AppColors.kPrimaryColor));
+              return const Center(child: AppLoadingIndicator());
             }
 
             if (state is EditVolunteerProfileLoaded && !_initialized) {
@@ -193,7 +192,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                    AppLoadingIndicator(),
                     SizedBox(height: 16),
                     Text("Profil güncelleniyor..."),
                   ],

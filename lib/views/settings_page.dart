@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -59,7 +60,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Container(
               color: Colors.black26,
               child: const Center(
-                child: CircularProgressIndicator(),
+                child: AppLoadingIndicator(size: 48),
               ),
             ),
         ],

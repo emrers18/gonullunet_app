@@ -1113,3 +1113,136 @@ exports.deletePost = onCall(async (request) => {
 
   return { success: true };
 });
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updatePost
+// İstemci Gönderir : { postId, title, description }
+// Ne Yapar         : Sahiplik kontrolü yapar; başlık ve açıklamayı günceller.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.updatePost = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { postId, title, description } = request.data;
+
+  if (!postId || !title || !description) {
+    throw new HttpsError("invalid-argument", "postId, başlık ve açıklama zorunludur.");
+  }
+
+  if (title.length > 200) {
+    throw new HttpsError("invalid-argument", "Başlık en fazla 200 karakter olabilir.");
+  }
+
+  if (description.length > 5000) {
+    throw new HttpsError("invalid-argument", "Açıklama en fazla 5000 karakter olabilir.");
+  }
+
+  const db = getFirestore();
+  const postRef = db.collection("posts").doc(postId);
+  const postDoc = await postRef.get();
+
+  if (!postDoc.exists) {
+    throw new HttpsError("not-found", "Gönderi bulunamadı.");
+  }
+
+  // Sahiplik kontrolü
+  if (postDoc.data().publisherId !== uid) {
+    throw new HttpsError("permission-denied", "Bu gönderiyi düzenleme yetkiniz yok.");
+  }
+
+  try {
+    await postRef.update({ title, description });
+    console.log(`[updatePost] Post güncellendi: ${postId} (User: ${uid})`);
+    return { success: true };
+  } catch (err) {
+    console.error("[updatePost] Hata:", err);
+    throw new HttpsError("internal", "Gönderi güncellenemedi: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// addComment
+// İstemci Gönderir : { postId, content }
+// Ne Yapar         : İçerik uzunluğu ve rate limiting kontrolü yapar;
+//                    yorumu Firestore'a yazar ve commentCount'u artırır.
+// ─────────────────────────────────────────────────────────────────────────────
+const COMMENT_MAX_LENGTH = 1000;
+const COMMENT_RATE_LIMIT_PER_MINUTE = 5;
+
+exports.addComment = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { postId, content } = request.data;
+
+  if (!postId || !content) {
+    throw new HttpsError("invalid-argument", "postId ve yorum içeriği zorunludur.");
+  }
+
+  const trimmed = content.trim();
+
+  if (trimmed.length === 0) {
+    throw new HttpsError("invalid-argument", "Yorum boş olamaz.");
+  }
+
+  if (trimmed.length > COMMENT_MAX_LENGTH) {
+    throw new HttpsError(
+      "invalid-argument",
+      `Yorum en fazla ${COMMENT_MAX_LENGTH} karakter olabilir.`
+    );
+  }
+
+  const db = getFirestore();
+
+  // Post varlık kontrolü
+  const postRef = db.collection("posts").doc(postId);
+  const postDoc = await postRef.get();
+  if (!postDoc.exists) {
+    throw new HttpsError("not-found", "Gönderi bulunamadı.");
+  }
+
+  // Rate limiting: son 1 dakikada kaç yorum yapıldı?
+  const oneMinuteAgo = new Date(Date.now() - 60 * 1000);
+  const recentComments = await db
+    .collection("posts")
+    .doc(postId)
+    .collection("comments")
+    .where("userId", "==", uid)
+    .where("createdAt", ">=", oneMinuteAgo)
+    .limit(COMMENT_RATE_LIMIT_PER_MINUTE)
+    .get();
+
+  if (recentComments.size >= COMMENT_RATE_LIMIT_PER_MINUTE) {
+    throw new HttpsError(
+      "resource-exhausted",
+      "Çok fazla yorum yaptınız. Lütfen bir dakika bekleyin."
+    );
+  }
+
+  // Yorum ekle + sayacı artır (batch)
+  const commentRef = db.collection("posts").doc(postId).collection("comments").doc();
+  const batch = db.batch();
+
+  batch.set(commentRef, {
+    postId,
+    userId: uid,
+    content: trimmed,
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  batch.update(postRef, { commentCount: FieldValue.increment(1) });
+
+  try {
+    await batch.commit();
+    console.log(`[addComment] Yorum eklendi: ${commentRef.id} (Post: ${postId}, User: ${uid})`);
+    return { commentId: commentRef.id };
+  } catch (err) {
+    console.error("[addComment] Hata:", err);
+    throw new HttpsError("internal", "Yorum eklenemedi: " + err.message);
+  }
+});
+

@@ -8,6 +8,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/logic/ngo_cubit.dart';
 import 'package:gonullunet_app/logic/ngo_state.dart';
 import 'package:gonullunet_app/repo/ngo_repository.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class NgosPage extends StatelessWidget {
   const NgosPage({super.key});
@@ -444,8 +445,7 @@ class _NgosViewState extends State<NgosView> {
   Widget _buildContent(BuildContext context, NgoState state) {
     if (state is NgoLoading) {
       return const SliverFillRemaining(
-        child:
-            Center(child: CircularProgressIndicator(color: Color(0xFF1565C0))),
+        child: AppLoadingCenter(),
       );
     }
 

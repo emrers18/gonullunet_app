@@ -99,22 +99,8 @@ class PostRepository {
   }
 
   Future<void> addComment(String postId, String content) async {
-    final user = _auth.currentUser;
-    if (user == null) throw Exception("Oturum açılmamış.");
-
-    final postRef = _firestore.collection('posts').doc(postId);
-    final commentRef =
-        _firestore.collection('posts').doc(postId).collection('comments').doc();
-
-    return _firestore.runTransaction((transaction) async {
-      transaction.set(commentRef, {
-        'postId': postId,
-        'userId': user.uid,
-        'content': content,
-        'createdAt': FieldValue.serverTimestamp(),
-      });
-      transaction.update(postRef, {'commentCount': FieldValue.increment(1)});
-    });
+    // Yorum ekleme + rate limiting + uzunluk kontrolu Cloud Function uzerinden yapilir.
+    await _functionsService.addComment(postId: postId, content: content);
   }
 
   Stream<List<Comment>> getCommentsStream(String postId) {
@@ -139,13 +125,15 @@ class PostRepository {
     return snapshot.docs.map((doc) => Post.fromFirestore(doc)).toList();
   }
 
-  /// Gönderi başlığını ve açıklamasını günceller
+  /// Gönderi başlığını ve açıklamasını günceller.
+  /// Sahiplik kontrolü Cloud Function tarafında yapılır.
   Future<void> updatePost(
       String postId, String title, String description) async {
-    await _firestore.collection('posts').doc(postId).update({
-      'title': title,
-      'description': description,
-    });
+    await _functionsService.updatePost(
+      postId: postId,
+      title: title,
+      description: description,
+    );
   }
 
   /// Gonderiyi Firestore'dan siler ve Storage gorselini temizler.

@@ -201,4 +201,36 @@ class FunctionsService {
     final callable = _functions.httpsCallable('deletePost');
     await callable.call({'postId': postId});
   }
+
+  // -------------------------------------------------------------------------
+  // updatePost
+  // Sahiplik kontrolu sunucu tarafinda yapilir.
+  // -------------------------------------------------------------------------
+  Future<void> updatePost({
+    required String postId,
+    required String title,
+    required String description,
+  }) async {
+    final callable = _functions.httpsCallable('updatePost');
+    await callable.call({
+      'postId': postId,
+      'title': title,
+      'description': description,
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // addComment
+  // Icerik uzunlugu ve rate limiting kontrolu sunucu tarafinda.
+  // -------------------------------------------------------------------------
+  Future<void> addComment({
+    required String postId,
+    required String content,
+  }) async {
+    final callable = _functions.httpsCallable('addComment');
+    await callable.call({
+      'postId': postId,
+      'content': content,
+    });
+  }
 }

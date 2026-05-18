@@ -8,6 +8,7 @@ import 'package:gonullunet_app/logic/post_state.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/repo/post_repository.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class MyPostsPage extends StatelessWidget {
   const MyPostsPage({super.key});
@@ -64,9 +65,7 @@ class _MyPostsView extends StatelessWidget {
         },
         builder: (context, state) {
           if (state is PostLoading && state.isFirstFetch) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.kPrimaryColor),
-            );
+            return const AppLoadingCenter();
           }
 
           if (state is PostLoaded) {
@@ -419,8 +418,7 @@ class _MyPostCard extends StatelessWidget {
                   height: 200,
                   color: Colors.grey.shade100,
                   child: const Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.kPrimaryColor),
+                    child: AppLoadingIndicator(size: 32),
                   ),
                 ),
                 errorWidget: (_, __, ___) => Container(

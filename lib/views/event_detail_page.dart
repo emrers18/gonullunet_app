@@ -43,11 +43,18 @@ class _EventBody extends StatefulWidget {
 
 class _EventBodyState extends State<_EventBody> {
   bool _isNgo = false;
+  OverlayEntry? _barrierEntry;
 
   @override
   void initState() {
     super.initState();
     _checkUserRole();
+  }
+
+  @override
+  void dispose() {
+    _dismissBarrier();
+    super.dispose();
   }
 
   Future<void> _checkUserRole() async {
@@ -57,6 +64,56 @@ class _EventBodyState extends State<_EventBody> {
         _isNgo = isNgo;
       });
     }
+  }
+
+  void _dismissBarrier() {
+    _barrierEntry?.remove();
+    _barrierEntry = null;
+  }
+
+  void _showConfirmSnackBar({
+    required BuildContext context,
+    required String message,
+    required Color color,
+    required VoidCallback onConfirm,
+  }) {
+    // Şeffaf bariyer: SnackBar dışına tıklanınca kapatsın
+    _barrierEntry = OverlayEntry(
+      builder: (_) => GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          _dismissBarrier();
+        },
+        child: const SizedBox.expand(),
+      ),
+    );
+    Overlay.of(context).insert(_barrierEntry!);
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            message,
+            style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.w600),
+          ),
+          backgroundColor: color,
+          duration: const Duration(seconds: 5),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          action: SnackBarAction(
+            label: 'Evet',
+            textColor: Colors.white,
+            onPressed: () {
+              _dismissBarrier();
+              onConfirm();
+            },
+          ),
+        ),
+      );
   }
 
   @override
@@ -461,15 +518,43 @@ class _EventBodyState extends State<_EventBody> {
                 child: ElevatedButton(
                   onPressed: isButtonEnabled
                       ? () {
-                          context.read<EventDetailCubit>().toggleJoin();
+                          final bool needsConfirmation =
+                              applicationStatus == 'approved' ||
+                              applicationStatus == 'pending';
 
-                          if (applicationStatus == null && !isFull) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text("Başvurunuz iletildi, onay bekleniyor!"),
-                                backgroundColor: Colors.orange,
-                              ),
+                          if (needsConfirmation) {
+                            final String confirmMessage =
+                                applicationStatus == 'approved'
+                                    ? 'Etkinlikten ayrılmak istediğinize emin misiniz?'
+                                    : 'Başvurunuzu iptal etmek istediğinize emin misiniz?';
+
+                            _showConfirmSnackBar(
+                              context: context,
+                              message: confirmMessage,
+                              color: buttonColor,
+                              onConfirm: () => context
+                                  .read<EventDetailCubit>()
+                                  .toggleJoin(),
                             );
+                          } else {
+                            // İlk başvuru — doğrudan gönder
+                            context.read<EventDetailCubit>().toggleJoin();
+                            if (applicationStatus == null && !isFull) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Başvurunuz iletildi, onay bekleniyor!',
+                                    style: GoogleFonts.plusJakartaSans(
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                  backgroundColor: Colors.orange,
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              );
+                            }
                           }
                         }
                       : null,

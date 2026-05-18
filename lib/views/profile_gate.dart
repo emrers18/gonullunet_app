@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/logic/user_cubit.dart';
 import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/views/main_page.dart';
-import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class ProfileGate extends StatefulWidget {
   const ProfileGate({super.key});
@@ -71,7 +71,7 @@ class _ProfileGateState extends State<ProfileGate> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CircularProgressIndicator(color: AppColors.kPrimaryColor),
+                AppLoadingIndicator(size: 48),
                 SizedBox(height: 16),
                 Text("Profil Bilgileri Kontrol Ediliyor..."),
               ],

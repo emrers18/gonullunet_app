@@ -5,6 +5,7 @@ import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/models/chat_session_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'chat_page.dart';
 
@@ -239,10 +240,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             builder: (context, state) {
               if (state is ChatSessionsLoading) {
                 return const SliverFillRemaining(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.darkPrimaryColor),
-                  ),
+                  child: Center(child: AppLoadingIndicator()),
                 );
               }
 
@@ -306,9 +304,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
               }
 
               return const SliverFillRemaining(
-                child: Center(
-                    child: CircularProgressIndicator(
-                        color: AppColors.darkPrimaryColor)),
+                child: Center(child: AppLoadingIndicator()),
               );
             },
           ),

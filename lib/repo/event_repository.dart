@@ -158,30 +158,21 @@ class EventRepository {
     }
   }
 
-  Future<void> applyToEvent(String eventId, String userId) async {
-    // events/{eventId}/applications/{userId} yolu
-    await _firestore
-        .collection('events')
-        .doc(eventId)
-        .collection('applications')
-        .doc(userId)
-        .set({
-      'userId': userId,
-      'eventId': eventId,
-      'status': 'pending',
-      'appliedAt': FieldValue.serverTimestamp(),
-    });
-  }
-
-  /// Kullanicinin bu etkinlige daha once basvurup basvurmadigini kontrol eder.
-  Future<bool> hasUserApplied(String eventId, String userId) async {
+  /// Kullanicinin bu etkinlige olan basvuru durumunu getirir.
+  /// toggleJoinEvent CF ile basvuru olusturuldugu icin bu okuma guvenlidir.
+  Future<String?> getUserApplicationStatus(
+      String eventId, String userId) async {
     final doc = await _firestore
         .collection('events')
         .doc(eventId)
         .collection('applications')
         .doc(userId)
         .get();
-    return doc.exists;
+
+    if (doc.exists) {
+      return doc.data()?['status'] as String?;
+    }
+    return null;
   }
 
   Future<List<ApplicationModel>> getEventApplications(String eventId) async {
@@ -210,6 +201,8 @@ class EventRepository {
           name: userData?['name'],
           surname: userData?['surname'],
           imageUrl: userData?['imageUrl'],
+          email: userData?['email'],
+          phone: userData?['phone'],
           xp: userData?['xp'],
         );
       }
@@ -232,6 +225,8 @@ class EventRepository {
             userName: userData?['name'],
             userSurname: userData?['surname'],
             userImageUrl: userData?['imageUrl'],
+            userEmail: userData?['email'],
+            userPhone: userData?['phone'],
           ));
         }
       }
@@ -249,20 +244,5 @@ class EventRepository {
       targetUserId: userId,
       newStatus: newStatus,
     );
-  }
-
-  Future<String?> getUserApplicationStatus(
-      String eventId, String userId) async {
-    final doc = await _firestore
-        .collection('events')
-        .doc(eventId)
-        .collection('applications')
-        .doc(userId)
-        .get();
-
-    if (doc.exists) {
-      return doc.data()?['status'] as String?;
-    }
-    return null;
   }
 }

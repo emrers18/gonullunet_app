@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
+import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class JoinedEventsPage extends StatelessWidget {
   const JoinedEventsPage({super.key});
@@ -38,9 +39,7 @@ class JoinedEventsPage extends StatelessWidget {
                   .snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                          color: AppColors.primaryColor));
+                  return const AppLoadingCenter();
                 }
                 if (snapshot.hasError) {
                   return Center(child: Text("Hata: ${snapshot.error}"));

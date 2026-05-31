@@ -187,6 +187,28 @@ class EventRepository {
         .orderBy('appliedAt', descending: true)
         .get();
 
+    // Tum kullanici id'lerini topla (applications + participants)
+    final Set<String> allUserIds = {};
+    for (var doc in querySnapshot.docs) {
+      allUserIds.add(ApplicationModel.fromFirestore(doc).userId);
+    }
+    for (String uid in participants) {
+      allUserIds.add(uid);
+    }
+
+    // Tum kullanici dokumanlarini paralel oku (waterfall yerine)
+    final userDocs = await Future.wait(
+      allUserIds.map((uid) => _firestore.collection('users').doc(uid).get()),
+    );
+
+    // uid -> userData map olustur
+    final Map<String, Map<String, dynamic>?> userDataMap = {};
+    for (var userDoc in userDocs) {
+      if (userDoc.exists) {
+        userDataMap[userDoc.id] = userDoc.data();
+      }
+    }
+
     List<ApplicationModel> applications = [];
     Set<String> processedUserIds = {};
 
@@ -194,16 +216,15 @@ class EventRepository {
       var app = ApplicationModel.fromFirestore(doc);
       processedUserIds.add(app.userId);
 
-      var userDoc = await _firestore.collection('users').doc(app.userId).get();
-      if (userDoc.exists) {
-        var userData = userDoc.data();
+      final userData = userDataMap[app.userId];
+      if (userData != null) {
         app = app.copyWithUser(
-          name: userData?['name'],
-          surname: userData?['surname'],
-          imageUrl: userData?['imageUrl'],
-          email: userData?['email'],
-          phone: userData?['phone'],
-          xp: userData?['xp'],
+          name: userData['name'],
+          surname: userData['surname'],
+          imageUrl: userData['imageUrl'],
+          email: userData['email'],
+          phone: userData['phone'],
+          xp: userData['xp'],
         );
       }
       applications.add(app);
@@ -212,9 +233,8 @@ class EventRepository {
     // Katilimcilar listesinde olup applications koleksiyonunda olmayanlar (eski veriler icin)
     for (String uid in participants) {
       if (!processedUserIds.contains(uid)) {
-        var userDoc = await _firestore.collection('users').doc(uid).get();
-        if (userDoc.exists) {
-          var userData = userDoc.data();
+        final userData = userDataMap[uid];
+        if (userData != null) {
           applications.add(ApplicationModel(
             id: uid,
             userId: uid,
@@ -222,11 +242,11 @@ class EventRepository {
             status: 'approved',
             appliedAt: (eventDoc.data()?['createdAt'] as Timestamp?) ??
                 Timestamp.now(),
-            userName: userData?['name'],
-            userSurname: userData?['surname'],
-            userImageUrl: userData?['imageUrl'],
-            userEmail: userData?['email'],
-            userPhone: userData?['phone'],
+            userName: userData['name'],
+            userSurname: userData['surname'],
+            userImageUrl: userData['imageUrl'],
+            userEmail: userData['email'],
+            userPhone: userData['phone'],
           ));
         }
       }

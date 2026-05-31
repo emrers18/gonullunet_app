@@ -11,7 +11,6 @@ import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
 import 'email_verification_screen.dart';
 
-
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
 
@@ -44,8 +43,6 @@ class _SignUpViewState extends State<SignUpView> {
   final TextEditingController _stkNameController = TextEditingController();
   final TextEditingController _stkEmailController = TextEditingController();
   final TextEditingController _stkPasswordController = TextEditingController();
-
-
 
   @override
   void dispose() {
@@ -123,11 +120,10 @@ class _SignUpViewState extends State<SignUpView> {
       body: BlocListener<SignUpCubit, SignUpState>(
         listener: (context, state) {
           if (state is SignUpSuccess) {
-            // Kayıt + oturum açma başarılı.
-            // AuthGate artık otomatik yönlendirme yapmadığı için manuel yönlendiriyoruz.
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
-                builder: (context) => EmailVerificationScreen(email: state.email),
+                builder: (context) =>
+                    EmailVerificationScreen(email: state.email),
               ),
               (route) => false,
             );
@@ -158,7 +154,8 @@ class _SignUpViewState extends State<SignUpView> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: AppColors.kTextColor),
+                      icon: const Icon(Icons.arrow_back,
+                          color: AppColors.kTextColor),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ),
@@ -193,7 +190,10 @@ class _SignUpViewState extends State<SignUpView> {
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
-                            colors: [AppColors.kPrimaryColor, Colors.orangeAccent],
+                            colors: [
+                              AppColors.kPrimaryColor,
+                              Colors.orangeAccent
+                            ],
                           ),
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
@@ -258,7 +258,7 @@ class _SignUpViewState extends State<SignUpView> {
                           text: "Gönüllü",
                           icon: Icons.person_outline,
                           isSelected: _selectedIndex == 0,
-                          activeColor: AppColors.kPrimaryColor,
+                          activeColor: AppColors.darkPrimaryColor,
                           onTap: () => setState(() => _selectedIndex = 0),
                         ),
                       ),
@@ -267,7 +267,7 @@ class _SignUpViewState extends State<SignUpView> {
                           text: "STK",
                           icon: Icons.business_outlined, // corporate_fare
                           isSelected: _selectedIndex == 1,
-                          activeColor: AppColors.kPrimaryColor,
+                          activeColor: AppColors.darkPrimaryColor,
                           onTap: () => setState(() => _selectedIndex = 1),
                         ),
                       ),
@@ -514,7 +514,8 @@ class _SignUpViewState extends State<SignUpView> {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2),
+            borderSide:
+                const BorderSide(color: AppColors.kPrimaryColor, width: 2),
           ),
         ),
       ),

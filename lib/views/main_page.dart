@@ -39,14 +39,6 @@ class Profile extends StatelessWidget {
   }
 }
 
-class AiChat extends StatelessWidget {
-  const AiChat({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return const ChatHistoryPage();
-  }
-}
-
 class ActiveChatsTab extends StatelessWidget {
   const ActiveChatsTab({super.key});
   @override
@@ -70,7 +62,6 @@ class _MainPageState extends State<MainPage> {
     Events(),
     Ngos(),
     ActiveChatsTab(),
-    AiChat(),
     Profile(),
   ];
 

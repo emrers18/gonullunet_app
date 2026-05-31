@@ -2,10 +2,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gonullunet_app/models/event_chat_message_model.dart';
 import 'package:gonullunet_app/models/event_model.dart';
+import 'package:gonullunet_app/services/functions_service.dart';
 
 class EventChatRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FunctionsService _functionsService = FunctionsService();
 
   String? get _userId => _auth.currentUser?.uid;
 
@@ -39,36 +41,17 @@ class EventChatRepository {
     });
   }
 
-  /// Sends a message inside the event's sub-collection
+  /// Sends a message via Cloud Function (approved volunteer check on server).
+  /// [senderName] and [senderAvatarUrl] are now resolved server-side.
   Future<void> sendMessage({
     required String eventId,
     required String content,
     required String senderName,
     String? senderAvatarUrl,
   }) async {
-    final userId = _userId;
-    if (userId == null) return;
-
-    final docRef = _firestore
-        .collection('events')
-        .doc(eventId)
-        .collection('chat')
-        .doc();
-
-    final message = EventChatMessage(
-      id: docRef.id,
+    await _functionsService.sendEventChatMessage(
       eventId: eventId,
-      senderId: userId,
-      senderName: senderName,
-      senderAvatarUrl: senderAvatarUrl,
       content: content,
-      createdAt: Timestamp.now(), // Fallback for local update
     );
-
-    // Using server timestamp for accuracy on remote
-    final data = message.toMap();
-    data['createdAt'] = FieldValue.serverTimestamp();
-
-    await docRef.set(data);
   }
 }

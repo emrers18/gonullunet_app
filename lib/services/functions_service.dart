@@ -233,4 +233,94 @@ class FunctionsService {
       'content': content,
     });
   }
+
+  // -------------------------------------------------------------------------
+  // sendEventChatMessage
+  // Onayli gonullu kontrolu + mesaj yazma sunucu tarafinda.
+  // -------------------------------------------------------------------------
+  Future<String> sendEventChatMessage({
+    required String eventId,
+    required String content,
+  }) async {
+    final callable = _functions.httpsCallable('sendEventChatMessage');
+    final result = await callable.call({
+      'eventId': eventId,
+      'content': content,
+    });
+    return result.data['messageId'] as String;
+  }
+
+  // -------------------------------------------------------------------------
+  // deleteComment
+  // Sahiplik kontrolu sunucu tarafinda (yorum sahibi veya post sahibi).
+  // -------------------------------------------------------------------------
+  Future<void> deleteComment({
+    required String postId,
+    required String commentId,
+  }) async {
+    final callable = _functions.httpsCallable('deleteComment');
+    await callable.call({
+      'postId': postId,
+      'commentId': commentId,
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // updateEvent
+  // Organizator kontrolu sunucu tarafinda.
+  // -------------------------------------------------------------------------
+  Future<void> updateEvent({
+    required String eventId,
+    String? title,
+    String? description,
+    String? location,
+    Map<String, double>? geoPoint,
+    DateTime? startDate,
+    DateTime? endDate,
+    String? category,
+    String? type,
+    String? imageUrl,
+    int? quota,
+  }) async {
+    final callable = _functions.httpsCallable('updateEvent');
+    final Map<String, dynamic> data = {'eventId': eventId};
+    if (title != null) data['title'] = title;
+    if (description != null) data['description'] = description;
+    if (location != null) data['location'] = location;
+    if (geoPoint != null) data['geoPoint'] = geoPoint;
+    if (startDate != null) data['startDate'] = startDate.toUtc().toIso8601String();
+    if (endDate != null) data['endDate'] = endDate.toUtc().toIso8601String();
+    if (category != null) data['category'] = category;
+    if (type != null) data['type'] = type;
+    if (imageUrl != null) data['imageUrl'] = imageUrl;
+    if (quota != null) data['quota'] = quota;
+    await callable.call(data);
+  }
+
+  // -------------------------------------------------------------------------
+  // deleteEvent
+  // Organizator kontrolu + alt koleksiyon temizleme sunucu tarafinda.
+  // -------------------------------------------------------------------------
+  Future<void> deleteEvent({required String eventId}) async {
+    final callable = _functions.httpsCallable('deleteEvent');
+    await callable.call({'eventId': eventId});
+  }
+
+  // -------------------------------------------------------------------------
+  // saveFcmToken
+  // FCM token'i guvenli sekilde sunucu tarafinda kaydeder.
+  // -------------------------------------------------------------------------
+  Future<void> saveFcmToken({required String token}) async {
+    final callable = _functions.httpsCallable('saveFcmToken');
+    await callable.call({'token': token});
+  }
+
+  // -------------------------------------------------------------------------
+  // clearFcmToken
+  // Cikis yapan kullanicinin FCM token'ini temizler.
+  // -------------------------------------------------------------------------
+  Future<void> clearFcmToken() async {
+    final callable = _functions.httpsCallable('clearFcmToken');
+    await callable.call();
+  }
 }

@@ -276,35 +276,48 @@ exports.onEventCreated = onDocumentCreated(
       `${followerIds.length} takipçiye bildirim gönderiliyor: "${notifTitle}"`
     );
 
-    // 2. Her takipçi için işlem yap
-    const promises = followerIds.map(async (followerId) => {
+    // 2. Tüm takipçi dokümanlarını paralel oku (N+1 yerine tek batch)
+    const followerDocs = await Promise.all(
+      followerIds.map((id) => db.collection("users").doc(id).get())
+    );
+
+    // 3. In-app bildirimlerini paralel yaz
+    const notifPromises = followerIds.map((followerId) =>
+      db
+        .collection("users")
+        .doc(followerId)
+        .collection("notifications")
+        .add({
+          title: notifTitle,
+          body: notifBody,
+          type: "new_event",
+          relatedId: eventId,
+          isRead: false,
+          createdAt: FieldValue.serverTimestamp(),
+        })
+        .catch((err) =>
+          console.error(`In-app bildirim hatası (${followerId}):`, err)
+        )
+    );
+    await Promise.all(notifPromises);
+
+    // 4. FCM token'larını topla ve toplu gönder (sendEachForMulticast)
+    const tokens = followerDocs
+      .filter((doc) => doc.exists && doc.data().fcmToken)
+      .map((doc) => doc.data().fcmToken);
+
+    if (tokens.length === 0) {
+      console.log("FCM token'ı olan takipçi yok, push atlanıyor.");
+      return;
+    }
+
+    // FCM multicast limiti 500 — gruplar halinde gönder
+    const FCM_BATCH_SIZE = 500;
+    for (let i = 0; i < tokens.length; i += FCM_BATCH_SIZE) {
+      const batch = tokens.slice(i, i + FCM_BATCH_SIZE);
       try {
-        // 2a. Firestore in-app bildirim yaz
-        await db
-          .collection("users")
-          .doc(followerId)
-          .collection("notifications")
-          .add({
-            title: notifTitle,
-            body: notifBody,
-            type: "new_event",
-            relatedId: eventId,
-            isRead: false,
-            createdAt: FieldValue.serverTimestamp(),
-          });
-
-        // 2b. FCM push bildirim gönder (token varsa)
-        const followerDoc = await db
-          .collection("users")
-          .doc(followerId)
-          .get();
-        if (!followerDoc.exists) return;
-
-        const fcmToken = followerDoc.data().fcmToken;
-        if (!fcmToken) return;
-
-        await messaging.send({
-          token: fcmToken,
+        const response = await messaging.sendEachForMulticast({
+          tokens: batch,
           notification: {
             title: notifTitle,
             body: notifBody,
@@ -326,12 +339,14 @@ exports.onEventCreated = onDocumentCreated(
             relatedId: eventId,
           },
         });
+        console.log(
+          `FCM batch (${batch.length}): ${response.successCount} başarılı, ${response.failureCount} başarısız`
+        );
       } catch (err) {
-        console.error(`Takipçi ${followerId} için bildirim hatası:`, err);
+        console.error(`FCM batch gönderim hatası:`, err);
       }
-    });
+    }
 
-    await Promise.all(promises);
     console.log("Tüm bildirimler gönderildi.");
   }
 );
@@ -459,6 +474,49 @@ const AI_DAILY_LIMIT = 20;
 const PROJECT_ID = "gonullunet-863c5";
 const vertexAI = new VertexAI({ project: PROJECT_ID, location: "us-central1" });
 
+// Remote Config cache — her istekte getTemplate() çağırmamak için
+let _cachedAiConfig = null;
+let _aiConfigLastFetch = 0;
+const AI_CONFIG_TTL = 5 * 60 * 1000; // 5 dakika
+
+async function getAiConfig() {
+  const now = Date.now();
+  if (_cachedAiConfig && now - _aiConfigLastFetch < AI_CONFIG_TTL) {
+    return _cachedAiConfig;
+  }
+  try {
+    const remoteConfig = getRemoteConfig();
+    const template = await remoteConfig.getTemplate();
+    _cachedAiConfig = {
+      modelName:
+        template.parameters["ai_model_name"]?.defaultValue?.value ||
+        "gemini-1.5-flash",
+      systemInstructionText:
+        template.parameters["ai_system_instruction"]?.defaultValue?.value ||
+        "Sen GönüllüNet dijital gençlik çalışanı asistanısın. " +
+          "Sadece Avrupa Birliği projeleri, gönüllülük, sivil toplum kuruluşları (STK), " +
+          "sosyal sorumluluk projeleri ve Erasmus+ hakkında bilgi verirsin. " +
+          "Bu konular dışındaki sorulara nazikçe cevap veremeyeceğini belirtirsin " +
+          "ve kullanıcıyı Türkiye Ulusal Ajansı'nın resmi web sitesine (www.ua.gov.tr) yönlendirirsin. " +
+          "Kullanıcılardan TC Kimlik No, pasaport numarası gibi kişisel veriler talep etme. " +
+          "Her zaman nazik, profesyonel ve teşvik edici ol. " +
+          "Cevaplarını kısa ve öz tut. En fazla 3-4 paragraf ile yanıt ver.",
+    };
+    _aiConfigLastFetch = now;
+  } catch (err) {
+    console.warn("[getAiConfig] Remote Config çekilemedi, varsayılan kullanılıyor:", err.message);
+    if (!_cachedAiConfig) {
+      _cachedAiConfig = {
+        modelName: "gemini-1.5-flash",
+        systemInstructionText:
+          "Sen GönüllüNet dijital gençlik çalışanı asistanısın. " +
+          "Sadece Avrupa Birliği projeleri, gönüllülük, STK ve Erasmus+ hakkında bilgi verirsin.",
+      };
+    }
+  }
+  return _cachedAiConfig;
+}
+
 exports.getChatResponse = onCall(async (request) => {
   // 1. Auth Kontrolü
   if (!request.auth) {
@@ -492,20 +550,9 @@ exports.getChatResponse = onCall(async (request) => {
 
   // 3. AI İşlemi
   try {
-    // Remote Config'den model ve talimatları çek
-    const remoteConfig = getRemoteConfig();
-    const template = await remoteConfig.getTemplate();
-    
-    const modelName = template.parameters["ai_model_name"]?.defaultValue?.value || "gemini-1.5-flash";
-    const systemInstructionText = template.parameters["ai_system_instruction"]?.defaultValue?.value || 
-      'Sen GönüllüNet dijital gençlik çalışanı asistanısın. '
-      'Sadece Avrupa Birliği projeleri, gönüllülük, sivil toplum kuruluşları (STK), '
-      'sosyal sorumluluk projeleri ve Erasmus+ hakkında bilgi verirsin. '
-      'Bu konular dışındaki sorulara nazikçe cevap veremeyeceğini belirtirsin '
-      've kullanıcıyı Türkiye Ulusal Ajansı\'nın resmi web sitesine (www.ua.gov.tr) yönlendirirsin. '
-      'Kullanıcılardan TC Kimlik No, pasaport numarası gibi kişisel veriler talep etme. '
-      'Her zaman nazik, profesyonel ve teşvik edici ol. '
-      'Cevaplarını kısa ve öz tut. En fazla 3-4 paragraf ile yanıt ver.';
+    // Remote Config'den model ve talimatları çek (cache'li)
+    const aiConfig = await getAiConfig();
+    const { modelName, systemInstructionText } = aiConfig;
 
     console.log(`[AI] Model: ${modelName}, User: ${uid}, Today Count: ${count}`);
 
@@ -649,13 +696,67 @@ exports.deleteUserAccount = onCall(async (request) => {
   const adminAuth = getAuth();
 
   try {
-    // 1. Firestore Profilini Sil
+    // 1. Kullanıcının postlarını sil
+    const postsSnap = await db.collection("posts").where("publisherId", "==", uid).get();
+    for (const postDoc of postsSnap.docs) {
+      // Post beğenilerini sil
+      const postLikesSnap = await db.collection("post_likes")
+        .where("postId", "==", postDoc.id).get();
+      const likeBatch = db.batch();
+      postLikesSnap.docs.forEach((d) => likeBatch.delete(d.ref));
+      await likeBatch.commit();
+
+      // Post yorumlarını sil
+      const commentsSnap = await postDoc.ref.collection("comments").get();
+      const commentBatch = db.batch();
+      commentsSnap.docs.forEach((d) => commentBatch.delete(d.ref));
+      await commentBatch.commit();
+
+      // Storage görselini sil
+      const imageUrl = postDoc.data().imageUrl;
+      if (imageUrl && imageUrl.includes("firebasestorage.googleapis.com")) {
+        try {
+          const storage = getStorage();
+          const urlPath = decodeURIComponent(imageUrl.split("/o/")[1].split("?")[0]);
+          await storage.bucket().file(urlPath).delete();
+        } catch (e) { /* sessiz */ }
+      }
+
+      await postDoc.ref.delete();
+    }
+
+    // 2. Kullanıcının etkinliklerini sil (NGO ise)
+    const eventsSnap = await db.collection("events").where("organizerId", "==", uid).get();
+    for (const eventDoc of eventsSnap.docs) {
+      const appsSnap = await eventDoc.ref.collection("applications").get();
+      const appBatch = db.batch();
+      appsSnap.docs.forEach((d) => appBatch.delete(d.ref));
+      await appBatch.commit();
+
+      const chatSnap = await eventDoc.ref.collection("chat").get();
+      const chatBatch = db.batch();
+      chatSnap.docs.forEach((d) => chatBatch.delete(d.ref));
+      await chatBatch.commit();
+
+      await eventDoc.ref.delete();
+    }
+
+    // 3. Kullanıcının beğenilerini sil
+    const likesSnap = await db.collection("post_likes").where("userId", "==", uid).get();
+    const likesBatch = db.batch();
+    likesSnap.docs.forEach((d) => likesBatch.delete(d.ref));
+    await likesBatch.commit();
+
+    // 4. Subcollection'ları sil (notifications, ai_usage, chat_sessions)
+    await _deleteSubcollections(db, uid);
+
+    // 5. Firestore Profilini Sil
     await db.collection("users").doc(uid).delete();
     
-    // 2. Auth Kaydını Sil
+    // 6. Auth Kaydını Sil
     await adminAuth.deleteUser(uid);
 
-    console.log(`[deleteUserAccount] Kullanıcı başarıyla silindi: ${uid}`);
+    console.log(`[deleteUserAccount] Kullanıcı ve tüm verileri başarıyla silindi: ${uid}`);
     return { success: true };
   } catch (err) {
     console.error("Hesap silme hatası:", err);
@@ -666,6 +767,42 @@ exports.deleteUserAccount = onCall(async (request) => {
 // ─── AUTH SİLME TRIGGER ────────────────────────────────────────────────────
 // Firebase Console, Admin SDK veya herhangi bir yerden kullanıcı silinince
 // Firestore'daki tüm ilgili verileri otomatik olarak temizler.
+// ── Yardımcı: Kullanıcı subcollection'larını sil ──────────────────────────
+async function _deleteSubcollections(db, uid) {
+  // Bildirimleri sil
+  const notifSnap = await db.collection("users").doc(uid).collection("notifications").get();
+  if (notifSnap.size > 0) {
+    const notifBatch = db.batch();
+    notifSnap.docs.forEach((d) => notifBatch.delete(d.ref));
+    await notifBatch.commit();
+    console.log(`[cleanup] ${notifSnap.size} bildirim silindi: ${uid}`);
+  }
+
+  // AI kullanım kayıtlarını sil
+  const aiSnap = await db.collection("users").doc(uid).collection("ai_usage").get();
+  if (aiSnap.size > 0) {
+    const aiBatch = db.batch();
+    aiSnap.docs.forEach((d) => aiBatch.delete(d.ref));
+    await aiBatch.commit();
+    console.log(`[cleanup] ${aiSnap.size} AI kullanım kaydı silindi: ${uid}`);
+  }
+
+  // Chat oturumlarını ve mesajlarını sil
+  const sessionsSnap = await db.collection("users").doc(uid).collection("chat_sessions").get();
+  for (const session of sessionsSnap.docs) {
+    const msgsSnap = await session.ref.collection("messages").get();
+    if (msgsSnap.size > 0) {
+      const msgBatch = db.batch();
+      msgsSnap.docs.forEach((d) => msgBatch.delete(d.ref));
+      await msgBatch.commit();
+    }
+    await session.ref.delete();
+  }
+  if (sessionsSnap.size > 0) {
+    console.log(`[cleanup] ${sessionsSnap.size} chat oturumu silindi: ${uid}`);
+  }
+}
+
 exports.onUserDeleted = auth.user().onDelete(async (user) => {
   const uid = user.uid;
   const db = getFirestore();
@@ -673,11 +810,14 @@ exports.onUserDeleted = auth.user().onDelete(async (user) => {
   console.log(`[onUserDeleted] Kullanıcı silindi, veriler temizleniyor: ${uid}`);
 
   try {
-    // 1. Kullanıcı profilini sil
+    // 1. Subcollection'ları sil (notifications, ai_usage, chat_sessions)
+    await _deleteSubcollections(db, uid);
+
+    // 2. Kullanıcı profilini sil
     await db.collection("users").doc(uid).delete();
     console.log(`[onUserDeleted] Firestore profili silindi: ${uid}`);
 
-    // 2. Kullanıcının postlarını sil
+    // 3. Kullanıcının postlarını sil
     const postsSnap = await db
       .collection("posts")
       .where("publisherId", "==", uid)
@@ -687,7 +827,7 @@ exports.onUserDeleted = auth.user().onDelete(async (user) => {
     await Promise.all(postDeletes);
     console.log(`[onUserDeleted] ${postsSnap.size} post silindi.`);
 
-    // 3. Kullanıcının etkinliklerini sil (NGO ise)
+    // 4. Kullanıcının etkinliklerini sil (NGO ise)
     const eventsSnap = await db
       .collection("events")
       .where("organizerId", "==", uid)
@@ -697,15 +837,18 @@ exports.onUserDeleted = auth.user().onDelete(async (user) => {
     await Promise.all(eventDeletes);
     console.log(`[onUserDeleted] ${eventsSnap.size} etkinlik silindi.`);
 
-    // 4. Kullanıcının başvurularını sil
-    const appsSnap = await db
-      .collection("applications")
-      .where("applicantId", "==", uid)
+    // 5. Kullanıcının beğenilerini sil
+    const likesSnap = await db
+      .collection("post_likes")
+      .where("userId", "==", uid)
       .get();
 
-    const appDeletes = appsSnap.docs.map((doc) => doc.ref.delete());
-    await Promise.all(appDeletes);
-    console.log(`[onUserDeleted] ${appsSnap.size} başvuru silindi.`);
+    if (likesSnap.size > 0) {
+      const likesBatch = db.batch();
+      likesSnap.docs.forEach((d) => likesBatch.delete(d.ref));
+      await likesBatch.commit();
+      console.log(`[onUserDeleted] ${likesSnap.size} beğeni silindi.`);
+    }
 
     console.log(`[onUserDeleted] Tüm veriler başarıyla temizlendi: ${uid}`);
   } catch (err) {
@@ -1246,3 +1389,320 @@ exports.addComment = onCall(async (request) => {
   }
 });
 
+// =============================================================================
+// ── EVENT CHAT FUNCTION ───────────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// sendEventChatMessage
+// İstemci Gönderir : { eventId, content }
+// Ne Yapar         : Kullanıcının onaylı gönüllü olup olmadığını kontrol eder;
+//                    mesajı events/{eventId}/chat koleksiyonuna yazar.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.sendEventChatMessage = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { eventId, content } = request.data;
+
+  if (!eventId || !content || content.trim().length === 0) {
+    throw new HttpsError("invalid-argument", "eventId ve mesaj içeriği zorunludur.");
+  }
+
+  if (content.length > 2000) {
+    throw new HttpsError("invalid-argument", "Mesaj en fazla 2000 karakter olabilir.");
+  }
+
+  const db = getFirestore();
+
+  // 1. Etkinlik var mı ve kullanıcı onaylı mı kontrol et
+  const eventDoc = await db.collection("events").doc(eventId).get();
+  if (!eventDoc.exists) {
+    throw new HttpsError("not-found", "Etkinlik bulunamadı.");
+  }
+
+  const approvedVolunteers = eventDoc.data().approved_volunteers || [];
+  if (!approvedVolunteers.includes(uid)) {
+    throw new HttpsError("permission-denied", "Bu sohbete katılma yetkiniz yok.");
+  }
+
+  // 2. Kullanıcı bilgilerini al
+  const userDoc = await db.collection("users").doc(uid).get();
+  const userData = userDoc.exists ? userDoc.data() : {};
+  const senderName =
+    userData.stkName ||
+    `${userData.name || ""} ${userData.surname || ""}`.trim() ||
+    "Anonim";
+
+  // 3. Mesajı yaz
+  const chatRef = db.collection("events").doc(eventId).collection("chat").doc();
+  await chatRef.set({
+    eventId,
+    senderId: uid,
+    senderName,
+    senderAvatarUrl: userData.imageUrl || "",
+    content: content.trim(),
+    createdAt: FieldValue.serverTimestamp(),
+  });
+
+  console.log(`[sendEventChatMessage] Mesaj gönderildi: ${chatRef.id} (Event: ${eventId}, User: ${uid})`);
+  return { messageId: chatRef.id };
+});
+
+// =============================================================================
+// ── COMMENT FUNCTIONS ─────────────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// deleteComment
+// İstemci Gönderir : { postId, commentId }
+// Ne Yapar         : Sahiplik kontrolü yapar (yorum sahibi veya post sahibi);
+//                    yorumu siler ve commentCount'u azaltır.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deleteComment = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { postId, commentId } = request.data;
+
+  if (!postId || !commentId) {
+    throw new HttpsError("invalid-argument", "postId ve commentId zorunludur.");
+  }
+
+  const db = getFirestore();
+  const commentRef = db.collection("posts").doc(postId).collection("comments").doc(commentId);
+  const commentDoc = await commentRef.get();
+
+  if (!commentDoc.exists) {
+    throw new HttpsError("not-found", "Yorum bulunamadı.");
+  }
+
+  // Sahiplik kontrolü: yorum sahibi veya post sahibi silebilir
+  const commentData = commentDoc.data();
+  const postDoc = await db.collection("posts").doc(postId).get();
+
+  if (!postDoc.exists) {
+    throw new HttpsError("not-found", "Gönderi bulunamadı.");
+  }
+
+  if (commentData.userId !== uid && postDoc.data().publisherId !== uid) {
+    throw new HttpsError("permission-denied", "Bu yorumu silme yetkiniz yok.");
+  }
+
+  const batch = db.batch();
+  batch.delete(commentRef);
+  batch.update(db.collection("posts").doc(postId), {
+    commentCount: FieldValue.increment(-1),
+  });
+
+  try {
+    await batch.commit();
+    console.log(`[deleteComment] Yorum silindi: ${commentId} (Post: ${postId}, User: ${uid})`);
+    return { success: true };
+  } catch (err) {
+    console.error("[deleteComment] Hata:", err);
+    throw new HttpsError("internal", "Yorum silinemedi: " + err.message);
+  }
+});
+
+// =============================================================================
+// ── EVENT MANAGEMENT FUNCTIONS ────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// updateEvent
+// İstemci Gönderir : { eventId, title?, description?, location?, geoPoint?,
+//                      startDate?, endDate?, category?, type?, imageUrl?, quota? }
+// Ne Yapar         : Organizatör kontrolü yapar; etkinliği günceller.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.updateEvent = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { eventId, title, description, location, geoPoint, startDate, endDate, category, type, imageUrl, quota } = request.data;
+
+  if (!eventId) {
+    throw new HttpsError("invalid-argument", "eventId zorunludur.");
+  }
+
+  const db = getFirestore();
+  const eventRef = db.collection("events").doc(eventId);
+  const eventDoc = await eventRef.get();
+
+  if (!eventDoc.exists) {
+    throw new HttpsError("not-found", "Etkinlik bulunamadı.");
+  }
+
+  if (eventDoc.data().organizerId !== uid) {
+    throw new HttpsError("permission-denied", "Bu etkinliği düzenleme yetkiniz yok.");
+  }
+
+  const { GeoPoint, Timestamp } = require("firebase-admin/firestore");
+  const updateData = {};
+
+  if (title !== undefined) updateData.title = title;
+  if (description !== undefined) updateData.description = description;
+  if (location !== undefined) updateData.location = location;
+  if (geoPoint !== undefined) updateData.geoPoint = new GeoPoint(geoPoint.lat, geoPoint.lng);
+  if (startDate !== undefined) updateData.startDate = Timestamp.fromDate(new Date(startDate));
+  if (endDate !== undefined) updateData.endDate = Timestamp.fromDate(new Date(endDate));
+  if (category !== undefined) updateData.category = category;
+  if (type !== undefined) {
+    updateData.type = type;
+    updateData.isProject = type === "Proje";
+  }
+  if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
+  if (quota !== undefined) updateData.quota = quota;
+
+  if (Object.keys(updateData).length === 0) {
+    throw new HttpsError("invalid-argument", "Güncellenecek alan bulunamadı.");
+  }
+
+  try {
+    await eventRef.update(updateData);
+    console.log(`[updateEvent] Etkinlik güncellendi: ${eventId} (NGO: ${uid})`);
+    return { success: true };
+  } catch (err) {
+    console.error("[updateEvent] Hata:", err);
+    throw new HttpsError("internal", "Etkinlik güncellenemedi: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// deleteEvent
+// İstemci Gönderir : { eventId }
+// Ne Yapar         : Organizatör kontrolü yapar; etkinliği ve tüm
+//                    alt koleksiyonlarını (applications, chat) siler.
+//                    Storage'daki görseli de temizler.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.deleteEvent = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const uid = request.auth.uid;
+  const { eventId } = request.data;
+
+  if (!eventId) {
+    throw new HttpsError("invalid-argument", "eventId zorunludur.");
+  }
+
+  const db = getFirestore();
+  const eventRef = db.collection("events").doc(eventId);
+  const eventDoc = await eventRef.get();
+
+  if (!eventDoc.exists) {
+    throw new HttpsError("not-found", "Etkinlik bulunamadı.");
+  }
+
+  if (eventDoc.data().organizerId !== uid) {
+    throw new HttpsError("permission-denied", "Bu etkinliği silme yetkiniz yok.");
+  }
+
+  try {
+    // 1. Alt koleksiyonları sil (applications)
+    const appsSnap = await eventRef.collection("applications").get();
+    if (appsSnap.size > 0) {
+      const appBatch = db.batch();
+      appsSnap.docs.forEach((doc) => appBatch.delete(doc.ref));
+      await appBatch.commit();
+    }
+
+    // 2. Alt koleksiyonları sil (chat)
+    const chatSnap = await eventRef.collection("chat").get();
+    if (chatSnap.size > 0) {
+      const chatBatch = db.batch();
+      chatSnap.docs.forEach((doc) => chatBatch.delete(doc.ref));
+      await chatBatch.commit();
+    }
+
+    // 3. Storage görselini sil
+    const imageUrl = eventDoc.data().imageUrl;
+    if (imageUrl && imageUrl.includes("firebasestorage.googleapis.com")) {
+      try {
+        const storage = getStorage();
+        const urlPath = decodeURIComponent(imageUrl.split("/o/")[1].split("?")[0]);
+        await storage.bucket().file(urlPath).delete();
+        console.log(`[deleteEvent] Storage görseli silindi.`);
+      } catch (storageErr) {
+        console.warn(`[deleteEvent] Storage silme hatası (göz ardı edildi): ${storageErr.message}`);
+      }
+    }
+
+    // 4. Etkinliği sil
+    await eventRef.delete();
+    console.log(`[deleteEvent] Etkinlik silindi: ${eventId} (NGO: ${uid})`);
+    return { success: true };
+  } catch (err) {
+    if (err instanceof HttpsError) throw err;
+    console.error("[deleteEvent] Hata:", err);
+    throw new HttpsError("internal", "Etkinlik silinemedi: " + err.message);
+  }
+});
+
+// =============================================================================
+// ── FCM TOKEN FUNCTION ────────────────────────────────────────────────────────
+// =============================================================================
+
+// ─────────────────────────────────────────────────────────────────────────────
+// saveFcmToken
+// İstemci Gönderir : { token }
+// Ne Yapar         : FCM token'ını güvenli şekilde kullanıcı profiline kaydeder.
+//                    İstemciden doğrudan Firestore yazmak yerine CF tercih edilir.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.saveFcmToken = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const { token } = request.data;
+
+  if (!token || typeof token !== "string" || token.trim().length === 0) {
+    throw new HttpsError("invalid-argument", "Geçerli bir FCM token gereklidir.");
+  }
+
+  const db = getFirestore();
+  const uid = request.auth.uid;
+
+  try {
+    await db.collection("users").doc(uid).update({
+      fcmToken: token.trim(),
+    });
+    console.log(`[saveFcmToken] FCM token kaydedildi: ${uid}`);
+    return { success: true };
+  } catch (err) {
+    console.error("[saveFcmToken] Hata:", err);
+    throw new HttpsError("internal", "FCM token kaydedilemedi: " + err.message);
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// clearFcmToken
+// İstemci Gönderir : {}
+// Ne Yapar         : Çıkış yapan kullanıcının FCM token'ını temizler.
+// ─────────────────────────────────────────────────────────────────────────────
+exports.clearFcmToken = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Bu işlem için giriş yapmalısınız.");
+  }
+
+  const db = getFirestore();
+  const uid = request.auth.uid;
+
+  try {
+    await db.collection("users").doc(uid).update({
+      fcmToken: FieldValue.delete(),
+    });
+    console.log(`[clearFcmToken] FCM token temizlendi: ${uid}`);
+    return { success: true };
+  } catch (err) {
+    console.error("[clearFcmToken] Hata:", err);
+    throw new HttpsError("internal", "FCM token temizlenemedi: " + err.message);
+  }
+});

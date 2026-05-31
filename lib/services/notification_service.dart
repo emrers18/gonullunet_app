@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:gonullunet_app/services/functions_service.dart';
 
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
@@ -12,6 +13,7 @@ class NotificationService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+  final FunctionsService _functionsService = FunctionsService();
 
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission(
@@ -64,31 +66,25 @@ class NotificationService {
     }
   }
 
-  /// FCM token'ı Firestore'daki kullanıcı belgesine yazar.
+  /// FCM token'ı Firestore'daki kullanıcı belgesine Cloud Function ile yazar.
   Future<void> _updateFcmToken(String token) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'fcmToken': token});
+      await _functionsService.saveFcmToken(token: token);
     } catch (e) {
       debugPrint('FCM token güncellenemedi: $e');
     }
   }
 
-  /// Kullanıcı çıkış yaptığında FCM token'ı temizler.
+  /// Kullanıcı çıkış yaptığında FCM token'ı Cloud Function ile temizler.
   Future<void> clearFcmToken() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
     try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .update({'fcmToken': FieldValue.delete()});
+      await _functionsService.clearFcmToken();
       await _firebaseMessaging.deleteToken();
     } catch (e) {
       debugPrint('FCM token temizlenemedi: $e');

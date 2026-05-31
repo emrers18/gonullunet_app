@@ -408,51 +408,51 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       const SizedBox(height: 32),
-                      Row(
-                        children: [
-                          const Expanded(child: Divider()),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Text(
-                              "veya şununla devam et",
-                              style: GoogleFonts.dmSans(
-                                color: Colors.grey.shade500,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          const Expanded(child: Divider()),
-                        ],
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _socialButton(
-                              label: "Google",
-                              icon: Icons.g_mobiledata,
-                              color: const Color(0xFFEA4335),
-                              isLoading: _isSocialLoading,
-                              onTap: _onGoogleSignInPressed,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: _socialButton(
-                              label: "Apple",
-                              icon: Icons.apple,
-                              color: Colors.black,
-                              isLoading: false,
-                              onTap: () {
-                                _showError(
-                                    "Apple ile giriş şu an aktif değil.");
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
+                      // Row(
+                      //   children: [
+                      //     const Expanded(child: Divider()),
+                      //     Padding(
+                      //       padding: const EdgeInsets.symmetric(horizontal: 16),
+                      //       child: Text(
+                      //         "veya şununla devam et",
+                      //         style: GoogleFonts.dmSans(
+                      //           color: Colors.grey.shade500,
+                      //           fontSize: 14,
+                      //           fontWeight: FontWeight.w500,
+                      //         ),
+                      //       ),
+                      //     ),
+                      //     const Expanded(child: Divider()),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 24),
+                      // Row(
+                      //   children: [
+                      //     Expanded(
+                      //       child: _socialButton(
+                      //         label: "Google",
+                      //         icon: Icons.g_mobiledata,
+                      //         color: const Color(0xFFEA4335),
+                      //         isLoading: _isSocialLoading,
+                      //         onTap: _onGoogleSignInPressed,
+                      //       ),
+                      //     ),
+                      //     const SizedBox(width: 16),
+                      //     Expanded(
+                      //       child: _socialButton(
+                      //         label: "Apple",
+                      //         icon: Icons.apple,
+                      //         color: Colors.black,
+                      //         isLoading: false,
+                      //         onTap: () {
+                      //           _showError(
+                      //               "Apple ile giriş şu an aktif değil.");
+                      //         },
+                      //       ),
+                      //     ),
+                      //   ],
+                      // ),
+                      // const Spacer(),
                       Padding(
                         padding: const EdgeInsets.only(top: 24, bottom: 16),
                         child: Row(

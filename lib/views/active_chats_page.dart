@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/logic/active_chats_cubit/active_chats_cubit.dart';
 import 'package:gonullunet_app/logic/active_chats_cubit/active_chats_state.dart';
@@ -232,8 +233,7 @@ class _ActiveChatsView extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () =>
-              context.read<ActiveChatsCubit>().reload(),
+              onPressed: () => context.read<ActiveChatsCubit>().reload(),
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: const Text('Tekrar Dene'),
               style: ElevatedButton.styleFrom(
@@ -388,7 +388,7 @@ class _ChatCard extends StatelessWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     color: isProject
-                        ? const Color(0xFF7B1FA2)
+                        ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(18),
@@ -406,7 +406,7 @@ class _ChatCard extends StatelessWidget {
                     width: 56,
                     height: 56,
                     color: isProject
-                        ? const Color(0xFF7B1FA2).withOpacity(0.08)
+                        ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0).withOpacity(0.08),
                     child: event.imageUrl != null && event.imageUrl.isNotEmpty
                         ? Image.network(
@@ -417,7 +417,7 @@ class _ChatCard extends StatelessWidget {
                                   ? Icons.work_rounded
                                   : Icons.event_rounded,
                               color: isProject
-                                  ? const Color(0xFF7B1FA2)
+                                  ? AppColors.kPrimaryColor
                                   : const Color(0xFF1565C0),
                               size: 26,
                             ),
@@ -427,7 +427,7 @@ class _ChatCard extends StatelessWidget {
                                 ? Icons.work_rounded
                                 : Icons.event_rounded,
                             color: isProject
-                                ? const Color(0xFF7B1FA2)
+                                ? AppColors.kPrimaryColor
                                 : const Color(0xFF1565C0),
                             size: 26,
                           ),
@@ -461,7 +461,7 @@ class _ChatCard extends StatelessWidget {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B1FA2).withOpacity(0.1),
+                                color: AppColors.accentColor.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Text(
@@ -469,7 +469,7 @@ class _ChatCard extends StatelessWidget {
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w700,
-                                  color: const Color(0xFF7B1FA2),
+                                  color: AppColors.kPrimaryColor,
                                 ),
                               ),
                             ),
@@ -517,7 +517,7 @@ class _ChatCard extends StatelessWidget {
                   height: 34,
                   decoration: BoxDecoration(
                     color: isProject
-                        ? const Color(0xFF7B1FA2).withOpacity(0.08)
+                        ? AppColors.accentColor.withOpacity(0.1)
                         : const Color(0xFF1565C0).withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
@@ -525,7 +525,7 @@ class _ChatCard extends StatelessWidget {
                     Icons.chevron_right_rounded,
                     size: 20,
                     color: isProject
-                        ? const Color(0xFF7B1FA2)
+                        ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0),
                   ),
                 ),

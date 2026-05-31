@@ -115,6 +115,11 @@ class PostRepository {
     });
   }
 
+  /// Yorumu siler. Sahiplik kontrolu Cloud Function tarafinda yapilir.
+  Future<void> deleteComment(String postId, String commentId) async {
+    await _functionsService.deleteComment(postId: postId, commentId: commentId);
+  }
+
   /// Kullanıcının kendi gönderilerini çeker (publisherId'ye göre)
   Future<List<Post>> fetchMyPosts(String userId) async {
     final snapshot = await _firestore

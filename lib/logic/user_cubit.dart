@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import '../repo/user_repository.dart';
 import 'user_state.dart';
 
@@ -17,11 +18,11 @@ class UserCubit extends Cubit<UserState> {
         if (user != null) {
           emit(UserLoaded(user));
         } else {
-          emit(const UserError("Kullanıcı verisi bulunamadı"));
+          emit(const UserError(AppErrorCodes.userDataNotFound));
         }
       },
       onError: (error) {
-        emit(UserError("Hata: $error"));
+        emit(const UserError(AppErrorCodes.unexpected));
       },
     );
   }
@@ -30,7 +31,7 @@ class UserCubit extends Cubit<UserState> {
     try {
       await _repository.toggleFollowNgo(ngoId);
     } catch (e) {
-      emit(UserError("Takip işlemi başarısız: $e"));
+      emit(const UserError(AppErrorCodes.followFailed));
     }
   }
 

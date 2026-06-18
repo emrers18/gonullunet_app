@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/user_cubit.dart';
@@ -53,11 +54,13 @@ class _AddPostModalState extends State<AddPostModal> {
         });
       }
     } catch (e) {
-      setState(() => _errorMessage = "Resim seçilemedi: $e");
+      setState(() =>
+          _errorMessage = AppLocalizations.of(context).imagePickFailed('$e'));
     }
   }
 
   void _savePost() async {
+    final l10n = AppLocalizations.of(context);
     final title = _titleController.text.trim();
     final description = _descriptionController.text.trim();
     final user = _auth.currentUser;
@@ -65,20 +68,20 @@ class _AddPostModalState extends State<AddPostModal> {
     setState(() => _errorMessage = null);
 
     if (title.isEmpty) {
-      setState(() => _errorMessage = 'Başlık boş bırakılamaz.');
+      setState(() => _errorMessage = l10n.titleEmpty);
       return;
     }
     if (description.isEmpty) {
-      setState(() => _errorMessage = 'Açıklama boş bırakılamaz.');
+      setState(() => _errorMessage = l10n.descriptionEmpty);
       return;
     }
     if (user == null) {
-      setState(() => _errorMessage = 'Kullanıcı oturumu bulunamadı.');
+      setState(() => _errorMessage = l10n.userSessionNotFound);
       return;
     }
 
     if (!_isResponsibilityAccepted || !_isCommunityRulesAccepted) {
-      setState(() => _errorMessage = 'Lütfen tüm onay kutucuklarını işaretleyin.');
+      setState(() => _errorMessage = l10n.checkAllBoxes);
       return;
     }
 
@@ -93,7 +96,7 @@ class _AddPostModalState extends State<AddPostModal> {
       if (_selectedImage != null) {
         imageUrl = await repo.uploadImage(_selectedImage!);
         if (imageUrl.isEmpty) {
-          throw Exception('Resim yüklenemedi, URL boş döndü.');
+          throw Exception(l10n.imageUploadFailed);
         }
       }
 
@@ -102,11 +105,11 @@ class _AddPostModalState extends State<AddPostModal> {
       if (mounted) {
         Navigator.pop(context, true);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Gönderi başarıyla paylaşıldı."),
+          SnackBar(
+            content: Text(AppLocalizations.of(context).postShared),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
-            duration: Duration(seconds: 2),
+            duration: const Duration(seconds: 2),
           ),
         );
       }
@@ -123,6 +126,7 @@ class _AddPostModalState extends State<AddPostModal> {
   @override
   Widget build(BuildContext context) {
     final keyboardPadding = MediaQuery.of(context).viewInsets.bottom;
+    final l10n = AppLocalizations.of(context);
 
     return Container(
       constraints: BoxConstraints(
@@ -156,7 +160,7 @@ class _AddPostModalState extends State<AddPostModal> {
                 TextButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text(
-                    'İptal',
+                    l10n.cancel,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.grey[600],
                       fontWeight: FontWeight.w600,
@@ -164,7 +168,7 @@ class _AddPostModalState extends State<AddPostModal> {
                   ),
                 ),
                 Text(
-                  'Yeni Gönderi',
+                  l10n.newPost,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -185,7 +189,7 @@ class _AddPostModalState extends State<AddPostModal> {
                           ),
                         ),
                         child: Text(
-                          'Paylaş',
+                          l10n.share,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.bold,
                           ),
@@ -220,7 +224,7 @@ class _AddPostModalState extends State<AddPostModal> {
                   // User Profile Section
                   BlocBuilder<UserCubit, UserState>(
                     builder: (context, state) {
-                      String displayName = 'Gönüllü';
+                      String displayName = l10n.defaultVolunteerName;
                       String? imageUrl;
                       if (state is UserLoaded) {
                         displayName = state.user.displayName;
@@ -260,7 +264,7 @@ class _AddPostModalState extends State<AddPostModal> {
                       fontWeight: FontWeight.bold,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Başlık Ekle',
+                      hintText: l10n.addTitle,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       border: InputBorder.none,
                     ),
@@ -275,7 +279,7 @@ class _AddPostModalState extends State<AddPostModal> {
                       color: Colors.black87,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Neler oluyor?',
+                      hintText: l10n.whatsHappening,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       border: InputBorder.none,
                     ),
@@ -333,7 +337,7 @@ class _AddPostModalState extends State<AddPostModal> {
                                       size: 40, color: AppColors.primaryColor.withOpacity(0.5)),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Fotoğraf Ekle',
+                                    l10n.addPhoto,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.grey[600],
                                       fontWeight: FontWeight.w500,
@@ -354,7 +358,7 @@ class _AddPostModalState extends State<AddPostModal> {
                     value: _isResponsibilityAccepted,
                     onChanged: (val) => setState(() => _isResponsibilityAccepted = val ?? false),
                     title: Text(
-                      'Paylaştığım içeriğin doğruluğundan sorumluyum.',
+                      l10n.consentAccuracy,
                       style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,
@@ -368,7 +372,7 @@ class _AddPostModalState extends State<AddPostModal> {
                     value: _isCommunityRulesAccepted,
                     onChanged: (val) => setState(() => _isCommunityRulesAccepted = val ?? false),
                     title: Text(
-                      'Topluluk kurallarına uygun hareket edeceğimi taahhüt ederim.',
+                      l10n.consentRules,
                       style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,

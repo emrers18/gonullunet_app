@@ -1,8 +1,16 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:in_app_review/in_app_review.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/services/auth.dart';
+import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'about_page.dart';
+import 'notification_settings_page.dart';
+import 'privacy_policy_page.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -16,11 +24,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
       appBar: AppBar(
         title: Text(
-          "Ayarlar",
+          l10n.settingsTitle,
           style: GoogleFonts.inter(fontWeight: FontWeight.w600),
         ),
         elevation: 0,
@@ -32,28 +41,61 @@ class _SettingsPageState extends State<SettingsPage> {
           ListView(
             padding: const EdgeInsets.symmetric(vertical: 20),
             children: [
-              _buildSectionHeader("Genel Ayarlar"),
-              _buildSettingItem(context, "Şifre Değiştir", Icons.lock_outline),
-              _buildSettingItem(
-                  context, "Bildirim Ayarları", Icons.notifications_none),
-
-              const SizedBox(height: 24),
-              _buildSectionHeader("Hesap Ayarları"),
+              _buildSectionHeader(l10n.generalSettings),
               _buildSettingItem(
                 context,
-                "Hesabımı Sil",
+                l10n.changePassword,
+                Icons.lock_outline,
+                onTap: () => _sendPasswordReset(context),
+              ),
+              _buildSettingItem(
+                context,
+                l10n.notificationSettings,
+                Icons.notifications_none,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NotificationSettingsPage()),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+              _buildSectionHeader(l10n.accountSettingsSection),
+              _buildSettingItem(
+                context,
+                l10n.deleteAccount,
                 Icons.delete_outline,
                 isDestructive: true,
                 onTap: () => _showDeleteConfirmation(context),
               ),
 
               const SizedBox(height: 24),
-              _buildSectionHeader("Uygulama"),
+              _buildSectionHeader(l10n.application),
               _buildSettingItem(
-                  context, "Gizlilik Politikası", Icons.privacy_tip_outlined),
-              _buildSettingItem(context, "Hakkımızda", Icons.info_outline),
+                context,
+                l10n.privacyPolicy,
+                Icons.privacy_tip_outlined,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const PrivacyPolicyPage()),
+                ),
+              ),
               _buildSettingItem(
-                  context, "Uygulamayı Değerlendir", Icons.star_outline),
+                context,
+                l10n.aboutUs,
+                Icons.info_outline,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutPage()),
+                ),
+              ),
+              _buildSettingItem(
+                context,
+                l10n.rateApp,
+                Icons.star_outline,
+                onTap: () => _rateApp(context),
+              ),
             ],
           ),
           if (_isDeleting)
@@ -132,7 +174,7 @@ class _SettingsPageState extends State<SettingsPage> {
             () {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("$title yakında eklenecek!"),
+                  content: Text(AppLocalizations.of(context).comingSoon(title)),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -141,7 +183,96 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Future<void> _sendPasswordReset(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final email = FirebaseAuth.instance.currentUser?.email;
+
+    if (email == null || email.isEmpty) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.emailUnavailable),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(l10n.changePassword,
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+        content: Text(l10n.changePasswordConfirm(email),
+            style: GoogleFonts.inter()),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.cancel,
+                style: GoogleFonts.inter(color: Colors.grey.shade600)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.send,
+                style: GoogleFonts.inter(
+                    color: AppColors.kPrimaryColor,
+                    fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.passwordResetSent),
+          backgroundColor: const Color(0xFF16A34A),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!context.mounted) return;
+      messenger.showSnackBar(
+        SnackBar(
+          content:
+              Text(AppMessages.resolve(context, FirebaseErrorTranslator.translate(e))),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _rateApp(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      final inAppReview = InAppReview.instance;
+      if (await inAppReview.isAvailable()) {
+        await inAppReview.requestReview();
+      } else {
+        await inAppReview.openStoreListing();
+      }
+    } catch (_) {
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(l10n.rateAppFailed),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
   void _showDeleteConfirmation(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -150,7 +281,7 @@ class _SettingsPageState extends State<SettingsPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "Hesabınızı silmek istediğinize emin misiniz?",
+              l10n.deleteAccountConfirm,
               style: GoogleFonts.inter(),
             ),
             const SizedBox(height: 8),
@@ -162,7 +293,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   },
                   child: Text(
-                    "İPTAL",
+                    l10n.cancelUpper,
                     style: GoogleFonts.inter(
                       color: Colors.white70,
                       fontWeight: FontWeight.bold,
@@ -183,7 +314,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       if (context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text("Hata oluştu: $e"),
+                            content: Text(
+                                AppLocalizations.of(context).errorOccurred('$e')),
                             backgroundColor: Colors.red,
                             behavior: SnackBarBehavior.floating,
                           ),
@@ -192,7 +324,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     }
                   },
                   child: Text(
-                    "EVET, SİL",
+                    l10n.yesDelete,
                     style: GoogleFonts.inter(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.bold,

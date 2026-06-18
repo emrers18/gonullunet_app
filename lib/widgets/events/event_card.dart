@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import '../../views/event_detail_page.dart';
 import '../app_loading_indicator.dart';
 
@@ -12,8 +14,10 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
     // --- TARİH FORMATLAMA ---
-    String dateString = DateFormat('dd MMM', 'tr_TR').format(event.date);
+    String dateString = DateFormat('dd MMM', localeName).format(event.date);
     String timeString = DateFormat('HH:mm').format(event.date);
 
     // Tarih Aralığı Kontrolü
@@ -24,7 +28,7 @@ class EventCard extends StatelessWidget {
 
       if (!isSameDay) {
         final String endDayString =
-            DateFormat('dd MMM', 'tr_TR').format(event.endDate!);
+            DateFormat('dd MMM', localeName).format(event.endDate!);
         dateString = "$dateString - $endDayString";
       }
     }
@@ -127,15 +131,15 @@ class EventCard extends StatelessWidget {
                                     color: const Color(0xFF0D7377),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: const Row(
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.work_rounded,
+                                      const Icon(Icons.work_rounded,
                                           size: 10, color: Colors.white),
-                                      SizedBox(width: 4),
+                                      const SizedBox(width: 4),
                                       Text(
-                                        "PROJE",
-                                        style: TextStyle(
+                                        l10n.typeProject.toUpperCase(),
+                                        style: const TextStyle(
                                           fontSize: 9,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -198,7 +202,7 @@ class EventCard extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: Text(
-                                    isFull ? "Dolu" : quotaText,
+                                    isFull ? l10n.eventFull : quotaText,
                                     style: TextStyle(
                                       fontSize: 11,
                                       fontWeight: FontWeight.w600,
@@ -251,7 +255,8 @@ class EventCard extends StatelessWidget {
           Icon(placeholderIcon, color: Colors.white.withOpacity(0.9), size: 36),
           const SizedBox(height: 6),
           Text(
-            event.category,
+            CategoryLocalizer.category(AppLocalizations.of(context),
+                event.category),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
@@ -379,7 +384,7 @@ class EventCard extends StatelessWidget {
       BuildContext context, List<dynamic> participants) {
     if (participants.isEmpty) {
       return Text(
-        "İlk sen ol!",
+        AppLocalizations.of(context).beFirstToJoin,
         style: TextStyle(
           color: Colors.grey.shade400,
           fontSize: 11,

@@ -8,6 +8,7 @@ class Event {
   final GeoPoint? geoPoint;
   final DateTime date;
   final DateTime? endDate;
+  final DateTime? lastApplyDate;
   final String imageUrl;
   final String organizerId;
   final List<String> participants;
@@ -24,6 +25,7 @@ class Event {
     this.geoPoint,
     required this.date,
     this.endDate,
+    this.lastApplyDate,
     required this.imageUrl,
     required this.organizerId,
     required this.participants,
@@ -48,6 +50,11 @@ class Event {
       endDateTime = (data['endDate'] as Timestamp).toDate();
     }
 
+    DateTime? lastApplyDateTime;
+    if (data['lastApplyDate'] != null) {
+      lastApplyDateTime = (data['lastApplyDate'] as Timestamp).toDate();
+    }
+
     return Event(
       id: doc.id,
       title: data['title'] ?? 'Başlık Yok',
@@ -56,6 +63,7 @@ class Event {
       geoPoint: data['geoPoint'],
       date: startDateTime,
       endDate: endDateTime,
+      lastApplyDate: lastApplyDateTime,
       imageUrl: data['imageUrl'] ?? '',
       organizerId: data['organizerId'] ?? '',
       participants: List<String>.from(data['participants'] ?? []),
@@ -77,6 +85,7 @@ class Event {
         'geoLng': geoPoint?.longitude,
         'date': date.millisecondsSinceEpoch,
         'endDate': endDate?.millisecondsSinceEpoch,
+        'lastApplyDate': lastApplyDate?.millisecondsSinceEpoch,
         'imageUrl': imageUrl,
         'organizerId': organizerId,
         'participants': participants,
@@ -104,6 +113,9 @@ class Event {
       date: DateTime.fromMillisecondsSinceEpoch(j['date'] as int),
       endDate: j['endDate'] != null
           ? DateTime.fromMillisecondsSinceEpoch(j['endDate'] as int)
+          : null,
+      lastApplyDate: j['lastApplyDate'] != null
+          ? DateTime.fromMillisecondsSinceEpoch(j['lastApplyDate'] as int)
           : null,
       imageUrl: j['imageUrl'] as String,
       organizerId: j['organizerId'] as String,

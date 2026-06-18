@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import '../services/auth.dart';
 import '../services/firebase_error_translator.dart';
 import '../utils/app_colors.dart';
@@ -45,19 +47,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _onLoginPressed() async {
+    final l10n = AppLocalizations.of(context);
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
     if (email.isEmpty) {
-      _showError('E-posta boş bırakılamaz.');
+      _showError(l10n.emailEmpty);
       return;
     }
     if (!AppValidators.emailReg.hasMatch(email)) {
-      _showError('Geçersiz e-posta formatı.');
+      _showError(l10n.invalidEmailFormat);
       return;
     }
     if (password.isEmpty) {
-      _showError('Şifre boş bırakılamaz.');
+      _showError(l10n.passwordEmpty);
       return;
     }
 
@@ -66,7 +69,10 @@ class _LoginPageState extends State<LoginPage> {
     try {
       await _auth.signIn(email: email, password: password);
     } catch (e) {
-      _showError(FirebaseErrorTranslator.translate(e));
+      if (mounted) {
+        _showError(
+            AppMessages.resolve(context, FirebaseErrorTranslator.translate(e)));
+      }
     }
 
     if (mounted) setState(() => _isLoading = false);
@@ -96,7 +102,10 @@ class _LoginPageState extends State<LoginPage> {
         }
       }
     } catch (e) {
-      _showError(FirebaseErrorTranslator.translate(e));
+      if (mounted) {
+        _showError(
+            AppMessages.resolve(context, FirebaseErrorTranslator.translate(e)));
+      }
     }
 
     if (mounted) setState(() => _isSocialLoading = false);
@@ -130,7 +139,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              "Neredeyse Hazır!",
+              AppLocalizations.of(context).almostReady,
               style: GoogleFonts.dmSans(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -139,7 +148,7 @@ class _LoginPageState extends State<LoginPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Lütfen kullanıcı türünüzü seçerek devam edin.",
+              AppLocalizations.of(context).selectUserType,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
                 fontSize: 16,
@@ -151,8 +160,8 @@ class _LoginPageState extends State<LoginPage> {
               children: [
                 Expanded(
                   child: _roleOptionCard(
-                    title: "Gönüllü",
-                    subtitle: "Etkinlik ara ve katıl",
+                    title: AppLocalizations.of(context).roleVolunteer,
+                    subtitle: AppLocalizations.of(context).roleVolunteerDesc,
                     icon: Icons.person_outline,
                     color: AppColors.kPrimaryColor,
                     onTap: () async {
@@ -170,8 +179,8 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: _roleOptionCard(
-                    title: "STK",
-                    subtitle: "Kurum profili oluştur",
+                    title: AppLocalizations.of(context).roleNgo,
+                    subtitle: AppLocalizations.of(context).roleNgoDesc,
                     icon: Icons.business_outlined,
                     color: AppColors.kSecondaryColor,
                     onTap: () async {
@@ -241,6 +250,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       body: LayoutBuilder(
@@ -277,7 +287,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 24),
                       Text(
-                        "Tekrar Hoş Geldin!",
+                        l10n.welcomeBack,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.dmSans(
                           fontSize: 28,
@@ -288,7 +298,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        "İyilik yolculuğuna kaldığın yerden devam et.",
+                        l10n.loginSubtitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.dmSans(
                           fontSize: 16,
@@ -303,7 +313,7 @@ class _LoginPageState extends State<LoginPage> {
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Text(
-                              "E-posta",
+                              l10n.emailLabel,
                               style: GoogleFonts.dmSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -319,7 +329,7 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w500,
                             ),
                             decoration: _inputDecoration(
-                              hint: "merhaba@ornek.com",
+                              hint: l10n.emailHint,
                               suffixIcon: const Icon(Icons.mail_outline,
                                   color: Colors.grey),
                             ),
@@ -328,7 +338,7 @@ class _LoginPageState extends State<LoginPage> {
                           Padding(
                             padding: const EdgeInsets.only(left: 4, bottom: 8),
                             child: Text(
-                              "Şifre",
+                              l10n.passwordLabel,
                               style: GoogleFonts.dmSans(
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
@@ -367,7 +377,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: TextButton(
                           onPressed: () {},
                           child: Text(
-                            "Şifremi Unuttum?",
+                            l10n.forgotPassword,
                             style: GoogleFonts.dmSans(
                               color: AppColors.kTextMain.withOpacity(0.7),
                               fontWeight: FontWeight.w600,
@@ -399,7 +409,7 @@ class _LoginPageState extends State<LoginPage> {
                                   child: AppLoadingIndicator(size: 24),
                                 )
                               : Text(
-                                  "Giriş Yap",
+                                  l10n.login,
                                   style: GoogleFonts.dmSans(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
@@ -459,7 +469,7 @@ class _LoginPageState extends State<LoginPage> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              "Hesabın yok mu?",
+                              l10n.noAccount,
                               style: GoogleFonts.dmSans(
                                 color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w500,
@@ -473,9 +483,9 @@ class _LoginPageState extends State<LoginPage> {
                                       builder: (context) => const SignUpPage()),
                                 );
                               },
-                              child: const Text(
-                                "Kayıt Ol",
-                                style: TextStyle(
+                              child: Text(
+                                l10n.signUp,
+                                style: const TextStyle(
                                   color: AppColors.kPrimaryColor,
                                   fontWeight: FontWeight.bold,
                                 ),

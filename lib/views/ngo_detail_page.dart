@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import '../logic/user_cubit.dart';
 import '../logic/user_state.dart';
@@ -99,7 +100,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   ),
                   centerTitle: true,
                   title: Text(
-                    "STK Detayı",
+                    AppLocalizations.of(context).ngoDetail,
                     style: GoogleFonts.plusJakartaSans(
                       color: AppColors.kTextColor,
                       fontWeight: FontWeight.bold,
@@ -176,7 +177,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "Sivil Toplum Kuruluşu",
+                          AppLocalizations.of(context).civilSocietyOrg,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -231,8 +232,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                     ),
                                     child: Text(
                                         isFollowing
-                                            ? "Takibi Bırak"
-                                            : "Takip Et",
+                                            ? AppLocalizations.of(context)
+                                                .unfollow
+                                            : AppLocalizations.of(context)
+                                                .follow,
                                         style: const TextStyle(
                                             fontWeight: FontWeight.bold)),
                                   ),
@@ -243,8 +246,9 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                     onPressed: () {},
                                     icon: const Icon(Icons.chat_bubble_outline,
                                         size: 18),
-                                    label: const Text("İletişim",
-                                        style: TextStyle(
+                                    label: Text(
+                                        AppLocalizations.of(context).contact,
+                                        style: const TextStyle(
                                             fontWeight: FontWeight.bold)),
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor: AppColors.kTextColor,
@@ -271,8 +275,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
-                            buildStatItem(
-                                context, followersCount.toString(), "Takipçi"),
+                            buildStatItem(context, followersCount.toString(),
+                                AppLocalizations.of(context).followers),
                             // Etkinlik Sayısını Canlı Çek
                             StreamBuilder<QuerySnapshot>(
                                 stream: _firestore
@@ -285,10 +289,11 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                   if (snap.hasData) {
                                     count = snap.data!.docs.length.toString();
                                   }
-                                  return buildStatItem(
-                                      context, count, "Etkinlik");
+                                  return buildStatItem(context, count,
+                                      AppLocalizations.of(context).statEvent);
                                 }),
-                            buildStatItem(context, "—", "Puan"),
+                            buildStatItem(context, "—",
+                                AppLocalizations.of(context).statScore),
                           ],
                         ),
                       ],
@@ -307,10 +312,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                       indicatorSize: TabBarIndicatorSize.label,
                       labelStyle: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.bold, fontSize: 14),
-                      tabs: const [
-                        Tab(text: "Açıklama"),
-                        Tab(text: "Etkinlikler"),
-                        Tab(text: "Gönderiler"),
+                      tabs: [
+                        Tab(text: AppLocalizations.of(context).tabDescription),
+                        Tab(text: AppLocalizations.of(context).events),
+                        Tab(text: AppLocalizations.of(context).tabPosts),
                       ],
                     ),
                   ),
@@ -326,8 +331,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildSectionTitle(
-                          context, Icons.info_outline, "Hakkımızda"),
+                      buildSectionTitle(context, Icons.info_outline,
+                          AppLocalizations.of(context).aboutUs),
                       const SizedBox(height: 12),
                       Container(
                         padding: const EdgeInsets.all(20),
@@ -363,7 +368,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                               Expanded(
                                   child: buildInfoCard(
                                       context,
-                                      "Misyonumuz",
+                                      AppLocalizations.of(context).ourMission,
                                       mission,
                                       Icons.flag_outlined,
                                       Colors.blue.shade600,
@@ -374,7 +379,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                               Expanded(
                                   child: buildInfoCard(
                                       context,
-                                      "Vizyonumuz",
+                                      AppLocalizations.of(context).ourVision,
                                       vision,
                                       Icons.visibility_outlined,
                                       Colors.orange.shade600,
@@ -383,7 +388,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         ),
                       const SizedBox(height: 24),
                       buildSectionTitle(context, Icons.contact_support_outlined,
-                          "İletişim Bilgileri"),
+                          AppLocalizations.of(context).contactInfo),
                       const SizedBox(height: 12),
                       Container(
                         decoration: BoxDecoration(
@@ -443,7 +448,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
           return const AppLoadingCenter();
         }
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return const Center(child: Text("Henüz etkinlik yok."));
+          return Center(
+              child: Text(AppLocalizations.of(context).noEventsShort));
         }
 
         final allEvents =
@@ -487,7 +493,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
             return const AppLoadingCenter();
           }
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text("Henüz paylaşım yapılmamış."));
+            return Center(
+                child: Text(AppLocalizations.of(context).noPostsShared));
           }
 
           final posts = snapshot.data!.docs

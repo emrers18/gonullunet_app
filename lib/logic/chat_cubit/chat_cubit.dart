@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/models/chat_message_model.dart';
 import 'package:gonullunet_app/repo/chat_repository.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'chat_state.dart';
 
 class ChatCubit extends Cubit<ChatState> {
@@ -17,7 +18,7 @@ class ChatCubit extends Cubit<ChatState> {
       final sessions = await repository.getSessions();
       emit(ChatSessionsLoaded(sessions));
     } catch (e) {
-      emit(ChatError('Sohbet geçmişi yüklenemedi: $e'));
+      emit(const ChatError(AppErrorCodes.chatHistoryLoad));
     }
   }
 
@@ -34,7 +35,7 @@ class ChatCubit extends Cubit<ChatState> {
       await repository.deleteSession(sessionId);
       await loadSessions();
     } catch (e) {
-      emit(ChatError('Sohbet silinemedi: $e'));
+      emit(const ChatError(AppErrorCodes.chatDelete));
     }
   }
 
@@ -48,7 +49,7 @@ class ChatCubit extends Cubit<ChatState> {
         messages: messages,
       ));
     } catch (e) {
-      emit(ChatError('Mesajlar yüklenemedi: $e'));
+      emit(const ChatError(AppErrorCodes.messagesLoad));
     }
   }
 

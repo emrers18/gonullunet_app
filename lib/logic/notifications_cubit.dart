@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import '../repo/notification_repository.dart';
 import 'notidication_state.dart';
 
@@ -17,7 +18,7 @@ class NotificationCubit extends Cubit<NotificationState> {
         emit(NotificationLoaded(notifications));
       },
       onError: (error) {
-        emit(NotificationError("Bildirimler alınamadı: $error"));
+        emit(const NotificationError(AppErrorCodes.notificationsLoad));
       },
     );
   }

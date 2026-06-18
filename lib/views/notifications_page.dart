@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 
 import '../logic/notidication_state.dart';
@@ -28,9 +30,9 @@ class NotificationsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          "Bildirimler",
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context).notifications,
+          style: const TextStyle(
               color: AppColors.kTextColor,
               fontWeight: FontWeight.bold),
         ),
@@ -49,7 +51,7 @@ class NotificationsView extends StatelessWidget {
                 return IconButton(
                   icon: const Icon(Icons.delete_sweep_outlined,
                       color: Colors.redAccent),
-                  tooltip: "Tümünü Sil",
+                  tooltip: AppLocalizations.of(context).deleteAll,
                   onPressed: () => _showDeleteAllDialog(context),
                 );
               }
@@ -65,21 +67,21 @@ class NotificationsView extends StatelessWidget {
           }
 
           if (state is NotificationError) {
-            return Center(child: Text(state.message));
+            return Center(child: Text(AppMessages.resolve(context, state.message)));
           }
 
           if (state is NotificationLoaded) {
             if (state.notifications.isEmpty) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.notifications_off_outlined,
+                    const Icon(Icons.notifications_off_outlined,
                         size: 80, color: Colors.grey),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Text(
-                      "Henüz bildiriminiz yok.",
-                      style: TextStyle(
+                      AppLocalizations.of(context).noNotifications,
+                      style: const TextStyle(
                           color: Colors.grey, fontSize: 16),
                     ),
                   ],
@@ -189,24 +191,25 @@ class NotificationsView extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text("Tümünü Sil"),
-        content:
-            const Text("Tüm bildirimleri silmek istediğinize emin misiniz?"),
+        title: Text(AppLocalizations.of(context).deleteAll),
+        content: Text(AppLocalizations.of(context).deleteAllConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext),
-            child: const Text("İptal"),
+            child: Text(AppLocalizations.of(context).cancel),
           ),
           TextButton(
             onPressed: () {
               context.read<NotificationCubit>().clearAll();
               Navigator.pop(dialogContext);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Tüm bildirimler silindi")),
+                SnackBar(
+                    content:
+                        Text(AppLocalizations.of(context).allNotificationsDeleted)),
               );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text("Hepsini Sil"),
+            child: Text(AppLocalizations.of(context).deleteAll),
           ),
         ],
       ),

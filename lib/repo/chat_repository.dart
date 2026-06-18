@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:gonullunet_app/models/chat_message_model.dart';
 import 'package:gonullunet_app/models/chat_session_model.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 
 class ChatRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -142,33 +143,29 @@ class ChatRepository {
         sessionId: sessionId,
       );
     } catch (e) {
-      String errorMessage = 'Mesaj gönderilirken bir hata oluştu.';
+      String errorMessage = AppErrorCodes.messageSend;
 
       if (e is FirebaseFunctionsException) {
         switch (e.code) {
           case 'resource-exhausted':
             // Günlük limit veya kota aşımı
             if (e.message != null && e.message!.contains('Günlük')) {
-              errorMessage =
-                  'Bugünlük soru limitine ulaştın. Yarın tekrar görüşmek üzere! 🚀';
+              errorMessage = AppErrorCodes.aiDailyLimit;
             } else {
-              errorMessage =
-                  'Şu an çok yoğunum, lütfen bir dakika sonra tekrar dener misin? ☕';
+              errorMessage = AppErrorCodes.aiBusy;
             }
             break;
           case 'deadline-exceeded':
-            errorMessage =
-                'Yanıt vermem biraz uzun sürdü, internetini kontrol edip tekrar dener misin? ⏳';
+            errorMessage = AppErrorCodes.aiTimeout;
             break;
           case 'unavailable':
-            errorMessage =
-                'Sunucuya şu an ulaşılamıyor, lütfen daha sonra tekrar dene. 🛠️';
+            errorMessage = AppErrorCodes.aiUnreachable;
             break;
           default:
             errorMessage = e.message ?? errorMessage;
         }
       } else if (e.toString().toUpperCase().contains('TIMEOUT')) {
-        errorMessage = 'İşlem zaman aşımına uğradı, lütfen tekrar dene. ⏳';
+        errorMessage = AppErrorCodes.aiOpTimeout;
       }
 
       throw Exception(errorMessage);

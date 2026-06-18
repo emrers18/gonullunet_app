@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import '../repo/user_repository.dart';
 import 'profile_state.dart';
 
@@ -26,7 +27,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
           email: data['email'],
         ));
       } else {
-        emit(const EditProfileError("Kullanıcı verisi bulunamadı."));
+        emit(const EditProfileError(AppErrorCodes.userDataNotFound));
       }
     } catch (e) {
       emit(EditProfileError(FirebaseErrorTranslator.translate(e)));
@@ -86,7 +87,7 @@ class EditProfileCubit extends Cubit<EditProfileState> {
           phone: data['phone'] ?? '',
         ));
       } else {
-        emit(const EditProfileError("Kullanıcı verisi bulunamadı."));
+        emit(const EditProfileError(AppErrorCodes.userDataNotFound));
       }
     } catch (e) {
       emit(EditProfileError(FirebaseErrorTranslator.translate(e)));

@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/services/functions_service.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'signup_state.dart';
 
 class SignUpCubit extends Cubit<SignUpState> {
@@ -30,11 +31,11 @@ class SignUpCubit extends Cubit<SignUpState> {
 
       emit(SignUpSuccess(email: email));
     } on FirebaseFunctionsException catch (e) {
-      // Cloud Function'dan dönen anlamlı hata mesajlarını direkt kullan
-      emit(SignUpError(e.message ?? 'Kayıt sırasında bir hata oluştu.'));
+      // Cloud Function'dan dönen anlamlı (okunabilir) mesaj varsa olduğu gibi
+      // göster; yoksa kod ile çevrilecek genel mesajı kullan.
+      emit(SignUpError(e.message ?? AppErrorCodes.signupFailed));
     } catch (e) {
-      emit(const SignUpError(
-          'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'));
+      emit(const SignUpError(AppErrorCodes.unexpectedRetry));
     }
   }
 }

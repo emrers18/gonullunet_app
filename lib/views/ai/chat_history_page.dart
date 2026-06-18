@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/models/chat_session_model.dart';
@@ -66,16 +68,16 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text('Sohbeti Sil',
+        title: Text(AppLocalizations.of(context).deleteChat,
             style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
         content: Text(
-          'Bu sohbet kalıcı olarak silinecek. Emin misiniz?',
+          AppLocalizations.of(context).deleteChatConfirm,
           style: GoogleFonts.plusJakartaSans(color: AppColors.secondaryText),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: Text('İptal',
+            child: Text(AppLocalizations.of(context).cancel,
                 style: GoogleFonts.plusJakartaSans(color: Colors.grey)),
           ),
           ElevatedButton(
@@ -89,7 +91,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text('Sil',
+            child: Text(AppLocalizations.of(context).delete,
                 style:
                     GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
           ),
@@ -184,7 +186,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'Gönüllü AI',
+                                    AppLocalizations.of(context).volunteerAi,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -192,7 +194,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                                     ),
                                   ),
                                   Text(
-                                    'Akıllı Gönüllülük Asistanı',
+                                    AppLocalizations.of(context)
+                                        .smartVolunteerAssistant,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.white.withOpacity(0.75),
                                       fontSize: 13,
@@ -224,7 +227,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
               child: Text(
-                'GEÇMİŞ SOHBETLER',
+                AppLocalizations.of(context).pastChats,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -279,7 +282,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                           Icon(Icons.cloud_off_rounded,
                               size: 52, color: Colors.grey.shade300),
                           const SizedBox(height: 16),
-                          Text(state.message,
+                          Text(AppMessages.resolve(context, state.message),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
                                   color: Colors.grey.shade500)),
@@ -342,7 +345,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'GönüllüNet AI Asistanı',
+              AppLocalizations.of(context).aiAssistantTitle,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -351,7 +354,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
             ),
             const SizedBox(height: 10),
             Text(
-              'Erasmus+, gönüllülük projeleri, STK\'lar ve\nsosyal sorumluluk hakkında bilgi almak için\nyeni bir sohbet başlatın.',
+              AppLocalizations.of(context).aiHistoryIntro,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13.5,
@@ -409,7 +412,7 @@ class _NewChatBanner extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Yeni Sohbet Başlat',
+                    AppLocalizations.of(context).startNewChat,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
@@ -417,7 +420,7 @@ class _NewChatBanner extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'AI asistanına yeni bir soru sor',
+                    AppLocalizations.of(context).askNewQuestion,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white.withOpacity(0.75),
                       fontSize: 12,
@@ -450,7 +453,8 @@ class _SessionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     timeago.setLocaleMessages('tr', timeago.TrMessages());
-    final time = timeago.format(session.lastMessageAt.toDate(), locale: 'tr');
+    final time = timeago.format(session.lastMessageAt.toDate(),
+        locale: Localizations.localeOf(context).languageCode);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),

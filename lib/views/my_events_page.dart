@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
@@ -12,13 +13,14 @@ class MyEventsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
-        title: const Text(
-          "Yayınladığım Etkinlikler",
-          style: TextStyle(
+        title: Text(
+          l10n.myPublishedEvents,
+          style: const TextStyle(
               color: AppColors.primaryText, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.white,
@@ -30,7 +32,7 @@ class MyEventsPage extends StatelessWidget {
         ),
       ),
       body: user == null
-          ? const Center(child: Text("Kullanıcı bulunamadı"))
+          ? Center(child: Text(l10n.userNotFound))
           : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('events')
@@ -42,7 +44,8 @@ class MyEventsPage extends StatelessWidget {
                   return const AppLoadingCenter();
                 }
                 if (snapshot.hasError) {
-                  return Center(child: Text("Hata: ${snapshot.error}"));
+                  return Center(
+                      child: Text(l10n.errorOccurred('${snapshot.error}')));
                 }
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Center(
@@ -53,7 +56,7 @@ class MyEventsPage extends StatelessWidget {
                             size: 80, color: Colors.grey[300]),
                         const SizedBox(height: 16),
                         Text(
-                          "Henüz etkinlik yayınlamadınız.",
+                          l10n.noEventsPublished,
                           style: TextStyle(color: Colors.grey[500]),
                         ),
                       ],

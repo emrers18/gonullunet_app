@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 import '../models/user_model.dart';
@@ -14,8 +15,13 @@ import '../widgets/gamification/level_badge.dart';
 /// STK'ların başvuran gönüllünün profilini inceleyeceği sayfa.
 class ApplicantProfilePage extends StatefulWidget {
   final String userId;
+  final String? coverLetter;
 
-  const ApplicantProfilePage({super.key, required this.userId});
+  const ApplicantProfilePage({
+    super.key,
+    required this.userId,
+    this.coverLetter,
+  });
 
   @override
   State<ApplicantProfilePage> createState() => _ApplicantProfilePageState();
@@ -58,7 +64,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
       backgroundColor: const Color(0xFFF8F6F5),
       appBar: AppBar(
         title: Text(
-          'Başvuran Profili',
+          AppLocalizations.of(context).applicantProfile,
           style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFF181210),
             fontWeight: FontWeight.bold,
@@ -78,7 +84,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
           : _user == null
               ? Center(
                   child: Text(
-                    'Kullanıcı bulunamadı.',
+                    AppLocalizations.of(context).userNotFound,
                     style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey, fontSize: 16),
                   ),
@@ -136,14 +142,29 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                       const SizedBox(height: 8),
                       LevelBadge(xp: _user!.xp),
                       const SizedBox(height: 16),
-                      _buildXpProgressBar(_user!.xp),
+                      _buildXpProgressBar(context, _user!.xp),
                       const SizedBox(height: 24),
 
                       // --- Info Cards ---
+                      if (widget.coverLetter != null &&
+                          widget.coverLetter!.isNotEmpty)
+                        _buildSection(
+                          icon: Icons.description_outlined,
+                          title: AppLocalizations.of(context).applicationLetter,
+                          child: Text(
+                            widget.coverLetter!,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 14,
+                              color: const Color(0xFF4B4B4B),
+                              height: 1.5,
+                            ),
+                          ),
+                        ),
+
                       if (_user!.bio != null && _user!.bio!.isNotEmpty)
                         _buildSection(
                           icon: Icons.person_outline,
-                          title: 'Hakkında',
+                          title: AppLocalizations.of(context).about,
                           child: Text(
                             _user!.bio!,
                             style: GoogleFonts.plusJakartaSans(
@@ -157,7 +178,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                       if (_user!.interests.isNotEmpty)
                         _buildSection(
                           icon: Icons.interests_outlined,
-                          title: 'İlgi Alanları',
+                          title: AppLocalizations.of(context).interests,
                           child: Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -170,7 +191,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                       if (_user!.skills.isNotEmpty)
                         _buildSection(
                           icon: Icons.build_outlined,
-                          title: 'Yetenekler',
+                          title: AppLocalizations.of(context).skills,
                           child: Wrap(
                             spacing: 8,
                             runSpacing: 8,
@@ -182,36 +203,36 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
 
                       _buildInfoRow(
                         icon: Icons.cake_outlined,
-                        label: 'Doğum Tarihi',
+                        label: AppLocalizations.of(context).birthDate,
                         value: _user!.birthDate != null
-                            ? '${DateFormat('d MMMM yyyy', 'tr_TR').format(_user!.birthDate!.toDate())} (${_calculateAge(_user!.birthDate)} yaş)'
-                            : 'Belirtilmemiş',
+                            ? '${DateFormat('d MMMM yyyy', Localizations.localeOf(context).toString()).format(_user!.birthDate!.toDate())} (${AppLocalizations.of(context).ageLabel(_calculateAge(_user!.birthDate) ?? 0)})'
+                            : AppLocalizations.of(context).notSpecified,
                       ),
 
                       _buildInfoRow(
                         icon: Icons.school_outlined,
-                        label: 'Eğitim / Meslek',
+                        label: AppLocalizations.of(context).educationProfessionShort,
                         value: (_user!.education != null &&
                                 _user!.education!.isNotEmpty)
                             ? _user!.education!
-                            : 'Belirtilmemiş',
+                            : AppLocalizations.of(context).notSpecified,
                       ),
 
                       _buildInfoRow(
                         icon: Icons.location_on_outlined,
-                        label: 'Konum',
+                        label: AppLocalizations.of(context).location,
                         value: (_user!.city != null && _user!.city!.isNotEmpty)
                             ? _user!.city!
-                            : 'Belirtilmemiş',
+                            : AppLocalizations.of(context).notSpecified,
                       ),
 
                       _buildInfoRow(
                         icon: Icons.phone_outlined,
-                        label: 'Telefon',
+                        label: AppLocalizations.of(context).phone,
                         value:
                             (_user!.phone != null && _user!.phone!.isNotEmpty)
                                 ? _user!.phone!
-                                : 'Belirtilmemiş',
+                                : AppLocalizations.of(context).notSpecified,
                       ),
 
                       const SizedBox(height: 32),
@@ -339,7 +360,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
   }
 
 
-  Widget _buildXpProgressBar(int xp) {
+  Widget _buildXpProgressBar(BuildContext context, int xp) {
     final level = GamificationUtils.getLevelInfo(xp);
     final progress = GamificationUtils.getProgress(xp);
 
@@ -349,7 +370,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Gönüllü Seviyesi',
+              AppLocalizations.of(context).volunteerLevel,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -405,7 +426,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
         ),
         const SizedBox(height: 12),
         Text(
-          "Etkinliklere katılarak, paylaşım yaparak ve etkileşim kurarak XP kazanabilirsin.\nRozetler: Gözlemci (0+), Aktif (100+), Öncü (500+), Usta (1500+), Efsane (5000+)",
+          AppLocalizations.of(context).xpInfo,
           textAlign: TextAlign.center,
           style: GoogleFonts.plusJakartaSans(
             fontSize: 10,

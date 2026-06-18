@@ -16,6 +16,7 @@ class ApplicationModel {
   final String? userPhone;
 
   final int? xp;
+  final String? coverLetter;
 
   ApplicationModel({
     required this.id,
@@ -29,6 +30,7 @@ class ApplicationModel {
     this.userEmail,
     this.userPhone,
     this.xp,
+    this.coverLetter,
   });
 
   String get timeAgo {
@@ -44,6 +46,7 @@ class ApplicationModel {
       eventId: data['eventId'] ?? '',
       status: data['status'] ?? 'pending',
       appliedAt: data['appliedAt'] ?? Timestamp.now(),
+      coverLetter: data['coverLetter'] as String?,
     );
   }
 
@@ -67,6 +70,7 @@ class ApplicationModel {
       userEmail: email,
       userPhone: phone,
       xp: xp,
+      coverLetter: coverLetter,
     );
   }
 }

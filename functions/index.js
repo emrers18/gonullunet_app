@@ -879,7 +879,7 @@ exports.createEvent = onCall(async (request) => {
   const uid = request.auth.uid;
   const {
     title, description, location, geoPoint,
-    startDate, endDate, category, type, imageUrl, quota
+    startDate, endDate, category, type, imageUrl, quota, lastApplyDate
   } = request.data;
 
   // 2. Girdi Doğrulama
@@ -924,6 +924,10 @@ exports.createEvent = onCall(async (request) => {
 
     if (quota !== undefined && quota !== null) {
       eventData.quota = quota;
+    }
+
+    if (lastApplyDate !== undefined && lastApplyDate !== null) {
+      eventData.lastApplyDate = Timestamp.fromDate(new Date(lastApplyDate));
     }
 
     const eventRef = await db.collection("events").add(eventData);
@@ -1062,6 +1066,15 @@ exports.toggleJoinEvent = onCall(async (request) => {
         transaction.delete(appRef);
       } else {
         // Yeni başvuru oluştur (pending)
+        // Son başvuru tarihi kontrolü
+        const eventData = eventDoc.data();
+        const lastApplyDate = eventData.lastApplyDate;
+        const startDate = eventData.startDate;
+        const deadline = lastApplyDate ? lastApplyDate.toDate() : startDate.toDate();
+        if (new Date() > deadline) {
+          throw new HttpsError("failed-precondition", "Bu etkinlik/proje için başvuru süresi dolmuştur.");
+        }
+
         transaction.set(appRef, {
           userId: uid,
           eventId: eventId,
@@ -1525,7 +1538,7 @@ exports.updateEvent = onCall(async (request) => {
   }
 
   const uid = request.auth.uid;
-  const { eventId, title, description, location, geoPoint, startDate, endDate, category, type, imageUrl, quota } = request.data;
+  const { eventId, title, description, location, geoPoint, startDate, endDate, category, type, imageUrl, quota, lastApplyDate } = request.data;
 
   if (!eventId) {
     throw new HttpsError("invalid-argument", "eventId zorunludur.");
@@ -1559,6 +1572,9 @@ exports.updateEvent = onCall(async (request) => {
   }
   if (imageUrl !== undefined) updateData.imageUrl = imageUrl;
   if (quota !== undefined) updateData.quota = quota;
+  if (lastApplyDate !== undefined) {
+    updateData.lastApplyDate = lastApplyDate ? Timestamp.fromDate(new Date(lastApplyDate)) : null;
+  }
 
   if (Object.keys(updateData).length === 0) {
     throw new HttpsError("invalid-argument", "Güncellenecek alan bulunamadı.");

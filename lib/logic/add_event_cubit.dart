@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/logic/add_event_state.dart';
 import 'package:gonullunet_app/repo/event_repository.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:latlong2/latlong.dart';
 
 class AddEventCubit extends Cubit<AddEventState> {
@@ -23,6 +24,7 @@ class AddEventCubit extends Cubit<AddEventState> {
     required String type,
     File? imageFile,
     int? quota,
+    DateTime? lastApplyDate,
   }) async {
     try {
       emit(AddEventLoading());
@@ -49,6 +51,7 @@ class AddEventCubit extends Cubit<AddEventState> {
         type: type,
         imageUrl: imageUrl,
         quota: quota,
+        lastApplyDate: lastApplyDate,
       );
 
       emit(AddEventSuccess());
@@ -60,19 +63,19 @@ class AddEventCubit extends Cubit<AddEventState> {
       final String message;
       switch (e.code) {
         case 'permission-denied':
-          message = 'Etkinlik olusturmak icin STK hesabiniz olmalidir.';
+          message = AppErrorCodes.eventNgoOnly;
           break;
         case 'unauthenticated':
-          message = 'Bu islemi yapmak icin giris yapmaniz gerekiyor.';
+          message = AppErrorCodes.eventLoginRequired;
           break;
         case 'invalid-argument':
-          message = e.message ?? 'Lutfen tum alanlari doldurun.';
+          message = e.message ?? AppErrorCodes.eventFillAll;
           break;
         case 'not-found':
-          message = 'Kullanici profili bulunamadi.';
+          message = AppErrorCodes.eventProfileNotFound;
           break;
         default:
-          message = e.message ?? 'Etkinlik olusturulamadi. Lutfen tekrar deneyin.';
+          message = e.message ?? AppErrorCodes.eventCreateFailed;
       }
       emit(AddEventError(message));
     } catch (e) {

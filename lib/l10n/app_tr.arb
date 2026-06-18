@@ -1,0 +1,616 @@
+{
+  "@@locale": "tr",
+  "appTitle": "GönüllüNet",
+  "languageTurkish": "Türkçe",
+  "languageEnglish": "İngilizce",
+  "languageOption": "Dil Seçeneği",
+  "selectLanguage": "Dil Seçin",
+  "cancel": "İptal",
+  "save": "Kaydet",
+  "delete": "Sil",
+  "yes": "Evet",
+  "no": "Hayır",
+  "ok": "Tamam",
+  "close": "Kapat",
+  "comingSoon": "{feature} yakında eklenecek!",
+  "@comingSoon": {
+    "placeholders": {
+      "feature": {
+        "type": "String"
+      }
+    }
+  },
+  "errorOccurred": "Hata oluştu: {error}",
+  "@errorOccurred": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "profileTitle": "Profil",
+  "accountAndActions": "Hesap & İşlemler",
+  "accountSettings": "Hesap Ayarları",
+  "myPosts": "Gönderilerim",
+  "notifications": "Bildirimler",
+  "events": "Etkinlikler",
+  "myPublishedEvents": "Yayınladığım Etkinlikler",
+  "myJoinedEvents": "Katıldığım Etkinlikler",
+  "application": "Uygulama",
+  "generalSettings": "Genel Ayarlar",
+  "about": "Hakkında",
+  "signOut": "Çıkış Yap",
+  "signOutConfirm": "Çıkış yapmak istediğinizden emin misiniz?",
+  "version": "Versiyon {version}",
+  "@version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "corporateMember": "Kurumsal Üye",
+  "volunteerMember": "Gönüllü Üye",
+  "nextLevel": "Sonraki Seviye: {xp} XP",
+  "@nextLevel": {
+    "placeholders": {
+      "xp": {
+        "type": "Object"
+      }
+    }
+  },
+  "xpInfo": "Etkinliklere katılarak, paylaşım yaparak ve etkileşim kurarak XP kazanabilirsin.\nRozetler: Gözlemci (0+), Aktif (100+), Öncü (500+), Usta (1500+), Efsane (5000+)",
+  "settingsTitle": "Ayarlar",
+  "changePassword": "Şifre Değiştir",
+  "notificationSettings": "Bildirim Ayarları",
+  "accountSettingsSection": "Hesap Ayarları",
+  "deleteAccount": "Hesabımı Sil",
+  "privacyPolicy": "Gizlilik Politikası",
+  "aboutUs": "Hakkımızda",
+  "rateApp": "Uygulamayı Değerlendir",
+  "deleteAccountConfirm": "Hesabınızı silmek istediğinize emin misiniz?",
+  "cancelUpper": "İPTAL",
+  "yesDelete": "EVET, SİL",
+  "onboardTitle1": "GönüllüNet'e\nHoş Geldin",
+  "onboardDesc1": "Çevrendeki iyilik hareketlerini keşfet, topluluğa katıl ve fark yaratmaya hemen başla.",
+  "onboardTitle2": "Etkinlikleri\nKeşfet",
+  "onboardDesc2": "Sana en yakın gönüllülük etkinliklerini harita üzerinde bul ve ilgi alanına göre filtrele.",
+  "onboardTitle3": "Birlikte\nGüçlüyüz",
+  "onboardDesc3": "STK'lar ve gönüllülerle bir araya gelerek büyük değişimlerin bir parçası ol.",
+  "onboardSkip": "Atla",
+  "onboardStart": "Keşfetmeye Başla",
+  "onboardContinue": "Devam Et",
+  "emailEmpty": "E-posta boş bırakılamaz.",
+  "invalidEmailFormat": "Geçersiz e-posta formatı.",
+  "invalidEmail": "Geçersiz e-posta adresi.",
+  "passwordEmpty": "Şifre boş bırakılamaz.",
+  "passwordWeak": "Şifre zayıf. En az 8 karakter, büyük/küçük harf, rakam ve özel karakter içermelidir.",
+  "nameEmpty": "Ad boş bırakılamaz.",
+  "surnameEmpty": "Soyad boş bırakılamaz.",
+  "ngoNameEmpty": "STK adı boş bırakılamaz.",
+  "almostReady": "Neredeyse Hazır!",
+  "selectUserType": "Lütfen kullanıcı türünüzü seçerek devam edin.",
+  "roleVolunteer": "Gönüllü",
+  "roleVolunteerDesc": "Etkinlik ara ve katıl",
+  "roleNgo": "STK",
+  "roleNgoDesc": "Kurum profili oluştur",
+  "welcomeBack": "Tekrar Hoş Geldin!",
+  "loginSubtitle": "İyilik yolculuğuna kaldığın yerden devam et.",
+  "emailLabel": "E-posta",
+  "emailHint": "merhaba@ornek.com",
+  "passwordLabel": "Şifre",
+  "forgotPassword": "Şifremi Unuttum?",
+  "login": "Giriş Yap",
+  "noAccount": "Hesabın yok mu?",
+  "signUp": "Kayıt Ol",
+  "signupVolunteerTagline": "Gönüllü Ol, Etkinliklere Katıl",
+  "signupNgoTagline": "Kurum Portalı",
+  "createAccount": "Hesap Oluştur",
+  "signupVolunteerSubtitle": "Gönüllü olmak için bilgilerinizi giriniz.",
+  "signupNgoSubtitle": "Gönüllülerle buluşmak için katılın.",
+  "firstName": "Ad",
+  "lastName": "Soyad",
+  "emailAddress": "E-posta Adresi",
+  "ngoName": "STK Adı",
+  "alreadyHaveAccount": "Zaten bir hesabın var mı?",
+  "loginAction": "Giriş yap",
+  "navHome": "Ana Sayfa",
+  "navDiscover": "Keşfet",
+  "navOrganizations": "Kurumlar",
+  "navMessages": "Mesajlar",
+  "navProfile": "Profil",
+  "tabVolunteers": "Gönüllüler",
+  "assistant": "Asistan",
+  "homeGreeting": "Merhaba, 👋",
+  "retry": "Tekrar Dene",
+  "noPostsYet": "Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!",
+  "upcomingEvents": "YAKLAŞAN ETKİNLİKLER",
+  "seeAll": "Tümünü Gör",
+  "seeAllShort": "Hepsini Gör",
+  "defaultVolunteerName": "Gönüllü",
+  "defaultNgoName": "STK",
+  "errorTitle": "Bir Hata Oluştu",
+  "checkingProfile": "Profil Bilgileri Kontrol Ediliyor...",
+  "userSessionNotFound": "Kullanıcı oturumu bulunamadı.",
+  "verificationEmailResent": "Doğrulama e-postası tekrar gönderildi.",
+  "tooManyRequests": "Çok fazla istek gönderildi. Lütfen birkaç dakika bekleyin.",
+  "emailSendFailed": "E-posta gönderilemedi: {error}",
+  "@emailSendFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "unexpectedError": "Beklenmeyen hata: {error}",
+  "@unexpectedError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "verifyYourEmail": "E-postanızı Doğrulayın",
+  "cancelRegistrationTooltip": "Kayıt işlemini iptal et",
+  "verificationLinkSent": "Bu adrese bir doğrulama bağlantısı gönderdik. Bağlantıya tıkladıktan sonra uygulama otomatik olarak devam edecek.",
+  "countdownExpired": "doldu",
+  "countdownRemaining": "kalan",
+  "checkInbox": "E-posta kutunuzu kontrol edin. Doğrulama bağlantısına tıkladıktan sonra otomatik olarak yönlendirileceksiniz.",
+  "timeUp": "Süre Doldu!",
+  "linkExpiredDesc": "Doğrulama bağlantısının süresi geçti. Aşağıdaki butona basarak yeni bir bağlantı gönderebilirsiniz.",
+  "sending": "Gönderiliyor...",
+  "sendNewLink": "Yeni Bağlantı Gönder",
+  "resendLink": "Bağlantıyı Yeniden Gönder",
+  "resendIn": "Yeniden Gönder ({seconds} s)",
+  "@resendIn": {
+    "placeholders": {
+      "seconds": {
+        "type": "Object"
+      }
+    }
+  },
+  "cancelReturnLogin": "Vazgeç — Giriş ekranına dön",
+  "allEvents": "Tüm Etkinlikler",
+  "noEventsFound": "Henüz hiç etkinlik yok\nveya filtreye uygun sonuç bulunamadı.",
+  "clearFilters": "Filtreleri Temizle",
+  "eventsSubtitle": "Gönüllü etkinlikleri keşfet ve katıl",
+  "filter": "Filtre",
+  "fullScreen": "Tam Ekran",
+  "statUpcoming": "{count} Yaklaşan",
+  "@statUpcoming": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "statOnMap": "{count} Haritada",
+  "@statOnMap": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "imagePickFailed": "Resim seçilemedi: {error}",
+  "@imagePickFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "titleEmpty": "Başlık boş bırakılamaz.",
+  "selectLocationOnMap": "Lütfen haritadan bir konum seçin.",
+  "selectAllTimes": "Lütfen başlangıç, bitiş ve son başvuru zamanlarını seçin.",
+  "endBeforeStart": "Bitiş tarihi başlangıçtan önce olamaz!",
+  "lastApplyAfterStart": "Son başvuru tarihi başlangıç tarihinden sonra olamaz!",
+  "lastApplyInPast": "Son başvuru tarihi geçmiş bir zaman olamaz!",
+  "selectPlaceholder": "Seçiniz",
+  "eventCreatedSuccess": "İçerik başarıyla oluşturuldu!",
+  "newEvent": "Yeni Etkinlik",
+  "publish": "Yayınla",
+  "eventTitleHint": "Etkinlik Başlığı",
+  "eventDescriptionHint": "Etkinlik hakkında bilgi ver...",
+  "type": "Tür",
+  "category": "Kategori",
+  "quotaOptional": "Kontenjan (Opsiyonel)",
+  "location": "Konum",
+  "change": "Değiştir",
+  "selectLocationFromMap": "Haritadan Konum Seç",
+  "startLabel": "Başlangıç",
+  "endLabel": "Bitiş",
+  "lastApplyDateLabel": "Son Başvuru Tarihi",
+  "addImageOptional": "Görsel Ekle (Opsiyonel)",
+  "categoryAll": "Tümü",
+  "categoryGeneral": "Genel",
+  "categoryEducation": "Eğitim",
+  "categoryEnvironment": "Çevre",
+  "categoryHealth": "Sağlık",
+  "categoryAnimalRights": "Hayvan Hakları",
+  "categoryDisaster": "Afet",
+  "categoryArt": "Sanat",
+  "categorySports": "Spor",
+  "categoryCulture": "Kültür",
+  "typeEvent": "Etkinlik",
+  "typeProject": "Proje",
+  "eventFull": "Dolu",
+  "beFirstToJoin": "İlk sen ol!",
+  "filterTitle": "Filtrele",
+  "clear": "Temizle",
+  "cityLabel": "Şehir",
+  "eventCategoryLabel": "Etkinlik Türü",
+  "selectDateRange": "Tarih Aralığı Seç",
+  "apply": "Uygula",
+  "organizer": "Düzenleyen",
+  "loading": "Yükleniyor...",
+  "applicationStat": "Başvuru",
+  "participantStat": "Katılımcı",
+  "personCount": "{count} Kişi",
+  "@personCount": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "soFar": "Şimdiye kadar",
+  "manageApplications": "Başvuruları Yönet",
+  "eventExpired": "Bu etkinliğin süresi doldu",
+  "applicationClosed": "Başvuru süresi doldu",
+  "applyNow": "Hemen Başvur",
+  "leaveEvent": "Etkinlikten Ayrıl",
+  "applicationPending": "Başvuru Bekleniyor (İptal)",
+  "leaveEventConfirm": "Etkinlikten ayrılmak istediğinize emin misiniz?",
+  "cancelApplicationConfirm": "Başvurunuzu iptal etmek istediğinize emin misiniz?",
+  "applicationSubmitted": "Başvurunuz iletildi, onay bekleniyor!",
+  "projectLetterPrompt": "Bu projeye başvurmak için lütfen niyetinizi belirten bir mektup yazın. Başvurunuzun onaylanması için bu mektup kurum tarafından incelenecektir.",
+  "letterHint": "Niyetinizi bu alana detaylıca yazınız...",
+  "send": "Gönder",
+  "dateLabel": "Tarih",
+  "details": "Detaylar",
+  "quotaFull": "Kontenjan Dolu",
+  "intentLetter": "Niyet Mektubu",
+  "charCountLabel": "{count} / {min} karakter",
+  "@charCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      },
+      "min": {
+        "type": "Object"
+      }
+    }
+  },
+  "lastApplyPrefix": "Son Başvuru: {date}",
+  "@lastApplyPrefix": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "searchEvent": "Etkinlik ara...",
+  "shrink": "Küçült",
+  "noEventsForCriteria": "Bu kritere uygun etkinlik bulunamadı.",
+  "examine": "İncele",
+  "participantCount": "{count} katılımcı",
+  "@participantCount": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "userNotFound": "Kullanıcı bulunamadı",
+  "noEventsPublished": "Henüz etkinlik yayınlamadınız.",
+  "noEventsJoined": "Henüz bir etkinliğe katılmadınız.",
+  "searchLocationHint": "Konum ara...",
+  "selectingLocation": "Konum seçiliyor...",
+  "selectedAddress": "Seçilen Adres",
+  "addressFinding": "Adres bulunuyor...",
+  "confirmLocation": "Konumu Onayla",
+  "likeCountLabel": "{count} Beğeni",
+  "@likeCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "commentCountLabel": "{count} Yorum",
+  "@commentCountLabel": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "like": "Beğen",
+  "comment": "Yorum",
+  "descriptionEmpty": "Açıklama boş bırakılamaz.",
+  "checkAllBoxes": "Lütfen tüm onay kutucuklarını işaretleyin.",
+  "imageUploadFailed": "Resim yüklenemedi, URL boş döndü.",
+  "postShared": "Gönderi başarıyla paylaşıldı.",
+  "newPost": "Yeni Gönderi",
+  "share": "Paylaş",
+  "addTitle": "Başlık Ekle",
+  "whatsHappening": "Neler oluyor?",
+  "addPhoto": "Fotoğraf Ekle",
+  "consentAccuracy": "Paylaştığım içeriğin doğruluğundan sorumluyum.",
+  "consentRules": "Topluluk kurallarına uygun hareket edeceğimi taahhüt ederim.",
+  "noComments": "Henüz yorum yok. İlk yorumu sen yap!",
+  "commentHint": "Yorumunuzu yazın...",
+  "filterByCity": "Şehre Göre Filtrele",
+  "searchCity": "Şehir ara...",
+  "noCityInfo": "Henüz şehir bilgisi mevcut değil.",
+  "noCityMatch": "Eşleşen şehir bulunamadı.",
+  "allOrganizations": "Tüm Kurumlar",
+  "ngosSubtitle": "Sivil toplum kuruluşlarını keşfet ve destek ol",
+  "noResults": "Sonuç bulunamadı.",
+  "ngoDetail": "STK Detayı",
+  "civilSocietyOrg": "Sivil Toplum Kuruluşu",
+  "unfollow": "Takibi Bırak",
+  "follow": "Takip Et",
+  "contact": "İletişim",
+  "followers": "Takipçi",
+  "tabDescription": "Açıklama",
+  "tabPosts": "Gönderiler",
+  "contactInfo": "İletişim Bilgileri",
+  "noEventsShort": "Henüz etkinlik yok.",
+  "noPostsShared": "Henüz paylaşım yapılmamış.",
+  "locationUnspecified": "Lokasyon Belirtilmemiş",
+  "statEvent": "Etkinlik",
+  "statScore": "Puan",
+  "ourMission": "Misyonumuz",
+  "ourVision": "Vizyonumuz",
+  "groupChatsSubtitle": "Katıldığın etkinliklerin grup sohbetleri",
+  "connectionError": "Bağlantı Hatası",
+  "noActiveChats": "Henüz aktif sohbet yok",
+  "joinEventsForChats": "Etkinliklere katılarak\ngrup sohbetlerine dahil ol!",
+  "discoverEvents": "Etkinlikleri Keşfet",
+  "userInfoUnavailable": "Kullanıcı bilgisi alınamadı.",
+  "genericErrorMessage": "Bir hata oluştu:\n{message}",
+  "@genericErrorMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAll": "Tümünü Sil",
+  "noNotifications": "Henüz bildiriminiz yok.",
+  "deleteAllConfirm": "Tüm bildirimleri silmek istediğinize emin misiniz?",
+  "allNotificationsDeleted": "Tüm bildirimler silindi",
+  "volunteerAi": "Gönüllü AI",
+  "smartAssistant": "Akıllı Asistan",
+  "aiGreeting": "Merhaba! 👋",
+  "aiIntro": "Ben GönüllüNet AI Asistanı.\nErasmus+, gönüllülük projeleri ve STK'lar\nhakkında sorularınızı yanıtlayabilirim.",
+  "quickStart": "HIZLI BAŞLANGIÇ",
+  "qErasmus": "Erasmus+ nedir?",
+  "qHowVolunteer": "Nasıl gönüllü olabilirim?",
+  "qHowJoinNgo": "STK'lara nasıl katılırım?",
+  "qNearbyEvents": "Bana yakın etkinlikler",
+  "qNearbyEventsFull": "Bana yakın gönüllülük etkinlikleri nelerdir?",
+  "deleteChat": "Sohbeti Sil",
+  "deleteChatConfirm": "Bu sohbet kalıcı olarak silinecek. Emin misiniz?",
+  "smartVolunteerAssistant": "Akıllı Gönüllülük Asistanı",
+  "pastChats": "GEÇMİŞ SOHBETLER",
+  "aiAssistantTitle": "GönüllüNet AI Asistanı",
+  "aiHistoryIntro": "Erasmus+, gönüllülük projeleri, STK'lar ve\nsosyal sorumluluk hakkında bilgi almak için\nyeni bir sohbet başlatın.",
+  "startNewChat": "Yeni Sohbet Başlat",
+  "askNewQuestion": "AI asistanına yeni bir soru sor",
+  "messageHint": "Mesaj yazın...",
+  "noMessages": "Henüz hiç mesaj yok.\nİlk mesajı sen gönder!",
+  "editProfile": "Profilini Düzenle",
+  "profileUpdatedSuccess": "Profil başarıyla güncellendi!",
+  "profileUpdating": "Profil güncelleniyor...",
+  "profileVisibilityNote": "Profil bilgileriniz başvuru yapacağınız etkinliğin sahibi STK tarafından görüntülenecektir.",
+  "aboutMe": "Hakkımda",
+  "aboutMeHint": "Kendinizi tanıtın, motivasyonunuzu ve neden gönüllülük yaptığınızı yazın...",
+  "interests": "İlgi Alanları",
+  "skills": "Yetenekler",
+  "birthDate": "Doğum Tarihi",
+  "selectBirthDate": "Doğum tarihinizi seçin",
+  "educationProfession": "Eğitim Durumu / Meslek",
+  "educationHint": "Örn: Üniversite Öğrencisi, Psikoloji Bölümü",
+  "locationCityDistrict": "Konum (Şehir / İlçe)",
+  "locationExampleHint": "Örn: Kadıköy, İstanbul",
+  "phoneNumber": "Telefon Numarası",
+  "ngoNameEmptyError": "STK Adı boş olamaz.",
+  "editNgoProfile": "STK Profilini Düzenle",
+  "tapToChangeLogo": "Logoyu değiştirmek için dokunun",
+  "cityExampleHint": "Kadıköy, İstanbul",
+  "ngoDescriptionHint": "Kuruluşunuz hakkında kısa bir açıklama yazın...",
+  "visionLabel": "Vizyon",
+  "missionLabel": "Misyon",
+  "visionHint": "Vizyonunuz...",
+  "missionHint": "Misyonunuz...",
+  "applicantProfile": "Başvuran Profili",
+  "applicationLetter": "Başvuru Niyet Mektubu",
+  "notSpecified": "Belirtilmemiş",
+  "ageLabel": "{age} yaş",
+  "@ageLabel": {
+    "placeholders": {
+      "age": {
+        "type": "Object"
+      }
+    }
+  },
+  "errNetwork": "İnternet bağlantınızı kontrol edin.",
+  "errTimeout": "İstek zaman aşımına uğradı. Lütfen tekrar deneyin.",
+  "errUnexpected": "Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.",
+  "errUnexpectedRetry": "Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.",
+  "errEmailInUse": "Bu e-posta adresi zaten kullanılıyor.",
+  "errInvalidEmailAddr": "Geçersiz e-posta adresi.",
+  "errWeakPassword": "Şifre en az 6 karakter olmalıdır.",
+  "errWrongCredentials": "E-posta veya şifre hatalı.",
+  "errUserNotFoundAuth": "Bu e-posta adresine kayıtlı bir hesap bulunamadı.",
+  "errUserDisabled": "Bu hesap devre dışı bırakılmış. Destek ile iletişime geçin.",
+  "errTooManyAttempts": "Çok fazla başarısız deneme. Lütfen bir süre bekleyin.",
+  "errRequiresRecentLogin": "Bu işlem için tekrar giriş yapmanız gerekiyor.",
+  "errOperationNotAllowed": "Bu giriş yöntemi şu an desteklenmiyor.",
+  "errExpiredActionCode": "Bağlantının süresi dolmuş. Lütfen yeni bir bağlantı isteyin.",
+  "errInvalidActionCode": "Geçersiz doğrulama bağlantısı.",
+  "errAuthGeneric": "Kimlik doğrulama hatası. Lütfen tekrar deneyin.",
+  "errPermissionDenied": "Bu işlem için yetkiniz bulunmuyor.",
+  "errNotFound": "İstenen veri bulunamadı.",
+  "errAlreadyExists": "Bu kayıt zaten mevcut.",
+  "errResourceExhausted": "Limitinize ulaştınız veya sunucu şu an çok yoğun.",
+  "errCancelled": "İşlem iptal edildi.",
+  "errUnauthenticated": "Oturum süreniz doldu. Lütfen tekrar giriş yapın.",
+  "errFileNotFound": "Dosya bulunamadı.",
+  "errQuotaExceeded": "Depolama kotası aşıldı.",
+  "errServer": "Sunucu hatası oluştu. Lütfen tekrar deneyin.",
+  "errChatHistoryLoad": "Sohbet geçmişi yüklenemedi.",
+  "errChatDelete": "Sohbet silinemedi.",
+  "errMessagesLoad": "Mesajlar yüklenemedi.",
+  "errLocationFailed": "Konum alınamadı.",
+  "errLocationNotFound": "Konum bulunamadı.",
+  "errSearchFailed": "Arama sırasında hata oluştu.",
+  "errAddressDetail": "Adres detayı alınamadı",
+  "errUnknownLocation": "Bilinmeyen Konum",
+  "errNotificationsLoad": "Bildirimler alınamadı.",
+  "errUserDataNotFound": "Kullanıcı verisi bulunamadı.",
+  "errFollowFailed": "Takip işlemi başarısız.",
+  "errSignupFailed": "Kayıt sırasında bir hata oluştu.",
+  "errEventNgoOnly": "Etkinlik oluşturmak için STK hesabınız olmalıdır.",
+  "errEventLoginRequired": "Bu işlemi yapmak için giriş yapmanız gerekiyor.",
+  "errEventFillAll": "Lütfen tüm alanları doldurun.",
+  "errEventProfileNotFound": "Kullanıcı profili bulunamadı.",
+  "errEventCreateFailed": "Etkinlik oluşturulamadı. Lütfen tekrar deneyin.",
+  "errMessageSend": "Mesaj gönderilirken bir hata oluştu.",
+  "errAiDailyLimit": "Bugünlük soru limitine ulaştın. Yarın tekrar görüşmek üzere! 🚀",
+  "errAiBusy": "Şu an çok yoğunum, lütfen bir dakika sonra tekrar dener misin? ☕",
+  "errAiTimeout": "Yanıt vermem biraz uzun sürdü, internetini kontrol edip tekrar dener misin? ⏳",
+  "errAiUnreachable": "Sunucuya şu an ulaşılamıyor, lütfen daha sonra tekrar dene. 🛠️",
+  "errAiOpTimeout": "İşlem zaman aşımına uğradı, lütfen tekrar dene. ⏳",
+  "errImageUpload": "Resim yükleme hatası.",
+  "errSessionNotFound": "Kullanıcı oturumu bulunamadı.",
+  "aboutAppName": "GönüllüNet",
+  "aboutTagline": "Birlikte iyilik için",
+  "aboutDescription": "GönüllüNet; gönüllüleri ve sivil toplum kuruluşlarını bir araya getiren bir gönüllülük platformudur. Çevrendeki etkinlikleri keşfet, başvur, grup sohbetlerine katıl ve toplulukla birlikte fark yarat.",
+  "aboutContact": "İletişim",
+  "aboutContactEmail": "gonullunet@gmail.com",
+  "aboutRights": "© 2025 GönüllüNet. Tüm hakları saklıdır.",
+  "aboutMadeWith": "Sevgiyle geliştirildi ❤️",
+  "notifPushTitle": "Anlık Bildirimler",
+  "notifPushSubtitle": "Tüm bildirimleri aç veya kapat",
+  "notifEventsTitle": "Etkinlik Bildirimleri",
+  "notifEventsSubtitle": "Yeni etkinlikler ve hatırlatmalar",
+  "notifApplicationsTitle": "Başvuru Bildirimleri",
+  "notifApplicationsSubtitle": "Başvuru durumu güncellemeleri",
+  "notifMessagesTitle": "Mesaj Bildirimleri",
+  "notifMessagesSubtitle": "Grup sohbeti mesajları",
+  "notifAnnouncementsTitle": "Duyurular",
+  "notifAnnouncementsSubtitle": "Genel duyurular ve haberler",
+  "notifSavedHint": "Tercihleriniz bu cihazda saklanır.",
+
+  "changePasswordConfirm": "Şifrenizi sıfırlamak için {email} adresine bir bağlantı göndereceğiz. Devam edilsin mi?",
+  "@changePasswordConfirm": {
+    "placeholders": { "email": { "type": "String" } }
+  },
+  "passwordResetSent": "Şifre sıfırlama bağlantısı e-postanıza gönderildi.",
+  "emailUnavailable": "Hesabınıza ait bir e-posta adresi bulunamadı.",
+
+  "privacyIntro": "Gizliliğiniz bizim için önemlidir. Bu politika, GönüllüNet'i kullanırken hangi verileri topladığımızı ve nasıl kullandığımızı açıklar.",
+  "privacyDataTitle": "Topladığımız Veriler",
+  "privacyDataBody": "Hesap bilgileriniz (ad, e-posta, profil bilgileri), oluşturduğunuz gönderi ve etkinlikler ile konum tercihleriniz gibi uygulamayı kullanmak için sağladığınız verileri toplarız.",
+  "privacyUsageTitle": "Verilerin Kullanımı",
+  "privacyUsageBody": "Verilerinizi yalnızca hizmeti sunmak, etkinlik başvurularını yönetmek ve deneyiminizi iyileştirmek için kullanırız. Verileriniz izniniz olmadan üçüncü taraflarla pazarlama amacıyla paylaşılmaz.",
+  "privacySecurityTitle": "Güvenlik",
+  "privacySecurityBody": "Verileriniz Firebase altyapısında güvenli biçimde saklanır. Hesabınızı dilediğiniz zaman uygulama üzerinden silebilirsiniz.",
+  "privacyContactTitle": "İletişim",
+  "privacyContactBody": "Gizlilik ile ilgili sorularınız için bizimle iletişime geçebilirsiniz: {email}",
+  "@privacyContactBody": {
+    "placeholders": { "email": { "type": "String" } }
+  },
+  "privacyLastUpdated": "Son güncelleme: Haziran 2025",
+
+  "rateAppFailed": "Mağaza açılamadı.",
+  "educationProfessionShort": "Eğitim / Meslek",
+  "volunteerLevel": "Gönüllü Seviyesi",
+  "applications": "Başvurular",
+  "phone": "Telefon",
+  "colApplicationStatus": "Başvuru Durumu",
+  "colApplicationDate": "Başvuru Tarihi",
+  "statusApproved": "Onaylandı",
+  "statusRejected": "Reddedildi",
+  "statusPending": "Bekliyor",
+  "excelCreateFailedException": "Excel oluşturulamadı",
+  "excelCreated": "Excel dosyası oluşturuldu: {path}",
+  "@excelCreated": {
+    "placeholders": {
+      "path": {
+        "type": "String"
+      }
+    }
+  },
+  "excelCreateError": "Excel oluşturulamadı: {error}",
+  "@excelCreateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noApprovedApplications": "Onaylanmış başvuru bulunamadı.",
+  "participationListTitle": "ETKİNLİK KATILIM LİSTESİ",
+  "createdDateLabel": "Oluşturma Tarihi: {date}",
+  "@createdDateLabel": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "totalApprovedParticipants": "Toplam Onaylı Katılımcı: {count}",
+  "@totalApprovedParticipants": {
+    "placeholders": {
+      "count": {
+        "type": "Object"
+      }
+    }
+  },
+  "colFullName": "Ad Soyad",
+  "pdfPageLabel": "Sayfa {current} / {total}",
+  "@pdfPageLabel": {
+    "placeholders": {
+      "current": {
+        "type": "Object"
+      },
+      "total": {
+        "type": "Object"
+      }
+    }
+  },
+  "pdfCreateError": "PDF oluşturulamadı: {error}",
+  "@pdfCreateError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "exportToExcel": "Excel'e Aktar",
+  "participationListPdf": "Katılım Listesi (PDF)",
+  "noApplications": "Henüz başvuru yok.",
+  "unnamed": "İsimsiz",
+  "viewProfile": "Profili Gör",
+  "reject": "Reddet",
+  "approve": "Onayla",
+  "noPostsOwn": "Henüz hiç gönderiniz yok",
+  "shareFirstPost": "Anasayfadaki + butonunu kullanarak\nilk gönderinizi paylaşabilirsiniz.",
+  "editPost": "Gönderiyi Düzenle",
+  "titleFieldLabel": "Başlık",
+  "titleCannotBeEmpty": "Başlık boş olamaz",
+  "descriptionLabel": "Açıklama",
+  "deletePost": "Gönderiyi Sil",
+  "deletePostConfirm": "Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+  "edit": "Düzenle",
+  "levelObserver": "Gözlemci",
+  "levelActive": "Aktif",
+  "levelPioneer": "Öncü",
+  "levelMaster": "Usta",
+  "levelLegend": "Efsane"
+}

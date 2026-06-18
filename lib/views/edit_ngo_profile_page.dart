@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -81,7 +83,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   void _onSavePressed(BuildContext context) {
     if (_stkNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("STK Adı boş olamaz.")),
+        SnackBar(content: Text(AppLocalizations.of(context).ngoNameEmptyError)),
       );
       return;
     }
@@ -103,7 +105,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'STK Profilini Düzenle',
+          AppLocalizations.of(context).editNgoProfile,
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
@@ -127,8 +129,8 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
         listener: (context, state) {
           if (state is EditProfileSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Profil başarıyla güncellendi!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).profileUpdatedSuccess),
                 backgroundColor: Colors.green,
               ),
             );
@@ -136,7 +138,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
           } else if (state is EditProfileError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.red),
+                  content: Text(AppMessages.resolve(context, state.message)), backgroundColor: Colors.red),
             );
           }
         },
@@ -166,7 +168,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                   children: [
                     const AppLoadingIndicator(),
                     const SizedBox(height: 16),
-                    Text("Profil güncelleniyor...",
+                    Text(AppLocalizations.of(context).profileUpdating,
                         style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
                   ],
                 ),
@@ -236,7 +238,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           ),
                           const SizedBox(height: 12),
                           Text(
-                            'Logoyu değiştirmek için dokunun',
+                            AppLocalizations.of(context).tapToChangeLogo,
                             style: GoogleFonts.plusJakartaSans(
                               color: Colors.grey,
                               fontSize: 14,
@@ -248,7 +250,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                     ),
                     const SizedBox(height: 32),
 
-                    _buildLabel("STK Adı"),
+                    _buildLabel(AppLocalizations.of(context).ngoName),
                     _buildInput(controller: _stkNameController, hint: ""),
 
                     const SizedBox(height: 20),
@@ -259,7 +261,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildLabel("E-posta"),
+                              _buildLabel(AppLocalizations.of(context).emailLabel),
                               _buildInput(
                                 controller: _emailController,
                                 hint: "",
@@ -272,7 +274,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    _buildLabel("Telefon"),
+                    _buildLabel(AppLocalizations.of(context).phone),
                     _buildInput(
                         controller: _phoneController,
                         hint: "",
@@ -280,34 +282,34 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                         inputType: TextInputType.phone),
 
                     const SizedBox(height: 20),
-                    _buildLabel("Konum"),
+                    _buildLabel(AppLocalizations.of(context).location),
                     _buildInput(
                         controller: _locationController,
-                        hint: "Kadıköy, İstanbul",
+                        hint: AppLocalizations.of(context).cityExampleHint,
                         icon: Icons.location_on_outlined),
 
                     const SizedBox(height: 24),
                     const Divider(), // default divider uses dividerColor
                     const SizedBox(height: 24),
 
-                    _buildLabel("Hakkımızda"),
+                    _buildLabel(AppLocalizations.of(context).aboutUs),
                     _buildTextArea(
                         controller: _descriptionController,
-                        hint: "Kuruluşunuz hakkında kısa bir açıklama yazın...",
+                        hint: AppLocalizations.of(context).ngoDescriptionHint,
                         maxLines: 4),
 
                     const SizedBox(height: 20),
-                    _buildLabel("Vizyon"),
+                    _buildLabel(AppLocalizations.of(context).visionLabel),
                     _buildTextArea(
                         controller: _visionController,
-                        hint: "Vizyonunuz...",
+                        hint: AppLocalizations.of(context).visionHint,
                         maxLines: 3),
 
                     const SizedBox(height: 20),
-                    _buildLabel("Misyon"),
+                    _buildLabel(AppLocalizations.of(context).missionLabel),
                     _buildTextArea(
                         controller: _missionController,
-                        hint: "Misyonunuz...",
+                        hint: AppLocalizations.of(context).missionHint,
                         maxLines: 3),
 
                     const SizedBox(height: 32),
@@ -330,7 +332,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           const Icon(Icons.save_outlined, size: 22),
                           const SizedBox(width: 8),
                           Text(
-                            'Kaydet',
+                            AppLocalizations.of(context).save,
                             style: GoogleFonts.plusJakartaSans(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -347,7 +349,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                             borderRadius: BorderRadius.circular(30)),
                       ),
                       child: Text(
-                        'İptal',
+                        AppLocalizations.of(context).cancel,
                         style: GoogleFonts.plusJakartaSans(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),

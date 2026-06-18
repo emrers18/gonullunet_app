@@ -1,12 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:country_flags/country_flags.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/services/auth.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/models/user_model.dart';
+import '../logic/locale_cubit.dart';
 import '../logic/user_cubit.dart';
+import 'about_page.dart';
 import '../logic/user_state.dart';
 import '../utils/gamification_utils.dart';
 import '../widgets/gamification/level_badge.dart';
@@ -38,27 +43,28 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _showSignOutDialog() async {
+    final l10n = AppLocalizations.of(context);
     return showDialog<void>(
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
           backgroundColor: Colors.white,
-          title: Text('Çıkış Yap',
+          title: Text(l10n.signOut,
               style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
-          content: Text('Çıkış yapmak istediğinizden emin misiniz?',
+          content: Text(l10n.signOutConfirm,
               style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           actions: <Widget>[
             TextButton(
-              child: Text('İptal',
+              child: Text(l10n.cancel,
                   style:
                       GoogleFonts.plusJakartaSans(color: Colors.grey.shade600)),
               onPressed: () => Navigator.of(dialogContext).pop(),
             ),
             TextButton(
-              child: Text('Çıkış Yap',
+              child: Text(l10n.signOut,
                   style: GoogleFonts.plusJakartaSans(
                       color: Colors.red, fontWeight: FontWeight.bold)),
               onPressed: () async {
@@ -72,8 +78,85 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  Future<void> _showLanguageDialog() async {
+    final l10n = AppLocalizations.of(context);
+    final localeCubit = context.read<LocaleCubit>();
+    final currentCode = localeCubit.state.languageCode;
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(l10n.selectLanguage,
+              style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<String>(
+                value: 'tr',
+                groupValue: currentCode,
+                activeColor: AppColors.kPrimaryColor,
+                title: Row(
+                  children: [
+                    CountryFlag.fromCountryCode(
+                      'TR',
+                      height: 22,
+                      width: 30,
+                      shape: const RoundedRectangle(6),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.languageTurkish,
+                        style: GoogleFonts.plusJakartaSans()),
+                  ],
+                ),
+                onChanged: (value) {
+                  localeCubit.setLocale(const Locale('tr'));
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+              RadioListTile<String>(
+                value: 'en',
+                groupValue: currentCode,
+                activeColor: AppColors.kPrimaryColor,
+                title: Row(
+                  children: [
+                    CountryFlag.fromCountryCode(
+                      'GB',
+                      height: 22,
+                      width: 30,
+                      shape: const RoundedRectangle(6),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(l10n.languageEnglish,
+                        style: GoogleFonts.plusJakartaSans()),
+                  ],
+                ),
+                onChanged: (value) {
+                  localeCubit.setLocale(const Locale('en'));
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(l10n.cancel,
+                  style:
+                      GoogleFonts.plusJakartaSans(color: Colors.grey.shade600)),
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
@@ -82,7 +165,7 @@ class _ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
         scrolledUnderElevation: 0,
         title: Text(
-          'Profil',
+          l10n.profileTitle,
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
@@ -97,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
           }
 
           if (state is UserError) {
-            return Center(child: Text(state.message));
+            return Center(child: Text(AppMessages.resolve(context, state.message)));
           }
 
           if (state is UserLoaded) {
@@ -115,22 +198,31 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(height: 24),
 
                   // --- 2. GRUP: HESAP & İŞLEMLER ---
-                  _buildSectionTitle("Hesap & İşlemler"),
+                  _buildSectionTitle(l10n.accountAndActions),
                   _buildSettingsContainer(
                     children: [
                       _buildSettingsItem(
                         icon: Icons.edit_outlined,
                         iconColor: Colors.blue,
                         iconBg: Colors.blue.withOpacity(0.1),
-                        title: 'Hesap Ayarları',
-                        onTap: () {},
+                        title: l10n.accountSettings,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => user.isNgo
+                                  ? const EditNgoProfilePage()
+                                  : const EditVolunteerProfilePage(),
+                            ),
+                          );
+                        },
                       ),
                       _buildDivider(),
                       _buildSettingsItem(
                         icon: Icons.feed_outlined,
                         iconColor: AppColors.kPrimaryColor,
                         iconBg: AppColors.kPrimaryColor.withOpacity(0.1),
-                        title: 'Gönderilerim',
+                        title: l10n.myPosts,
                         onTap: () {
                           Navigator.push(
                               context,
@@ -143,7 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         icon: Icons.notifications_none_rounded,
                         iconColor: Colors.orange,
                         iconBg: Colors.orange.withOpacity(0.1),
-                        title: 'Bildirimler',
+                        title: l10n.notifications,
                         onTap: () {
                           Navigator.push(
                               context,
@@ -159,7 +251,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   // --- 3. GRUP: ETKİNLİKLER (Kullanıcı Tipine Göre) ---
                   if (user.isNgo || user.isVolunteer) ...[
-                    _buildSectionTitle("Etkinlikler"),
+                    _buildSectionTitle(l10n.events),
                     _buildSettingsContainer(
                       children: [
                         if (user.isNgo)
@@ -167,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: Icons.event_available_rounded,
                             iconColor: Colors.indigo,
                             iconBg: Colors.indigo.withOpacity(0.1),
-                            title: 'Yayınladığım Etkinlikler',
+                            title: l10n.myPublishedEvents,
                             onTap: () {
                               Navigator.push(
                                   context,
@@ -181,7 +273,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             icon: Icons.check_circle_outline_rounded,
                             iconColor: const Color(0xFF14B8A6),
                             iconBg: const Color(0xFF14B8A6).withOpacity(0.1),
-                            title: 'Katıldığım Etkinlikler',
+                            title: l10n.myJoinedEvents,
                             onTap: () {
                               Navigator.push(
                                   context,
@@ -195,14 +287,14 @@ class _ProfilePageState extends State<ProfilePage> {
                     const SizedBox(height: 24),
                   ],
 
-                  _buildSectionTitle("Uygulama"),
+                  _buildSectionTitle(l10n.application),
                   _buildSettingsContainer(
                     children: [
                       _buildSettingsItem(
                         icon: Icons.settings_outlined,
                         iconColor: Colors.purple,
                         iconBg: Colors.purple.withOpacity(0.1),
-                        title: 'Genel Ayarlar',
+                        title: l10n.generalSettings,
                         onTap: () {
                           Navigator.push(
                               context,
@@ -215,18 +307,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         icon: Icons.language_rounded,
                         iconColor: Colors.green,
                         iconBg: Colors.green.withOpacity(0.1),
-                        title: 'Dil Seçeneği',
-                        onTap: () {
-                          // Dil ayarları sayfasına git
-                        },
+                        title: l10n.languageOption,
+                        onTap: _showLanguageDialog,
                       ),
                       _buildSettingsItem(
                         icon: Icons.info_outline_rounded,
                         iconColor: Colors.amber,
                         iconBg: Colors.amber.withOpacity(0.1),
-                        title: 'Hakkında',
+                        title: l10n.about,
                         onTap: () {
-                          // Hakkında sayfasına git
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const AboutPage()));
                         },
                       ),
                     ],
@@ -254,7 +347,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           const Icon(Icons.logout_rounded, size: 20),
                           const SizedBox(width: 8),
                           Text(
-                            "Çıkış Yap",
+                            l10n.signOut,
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -270,7 +363,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   // Versiyon
                   Center(
                     child: Text(
-                      "Versiyon 1.0.4",
+                      l10n.version('1.0.4'),
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade600,
                         fontSize: 12,
@@ -394,7 +487,9 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        user.isNgo ? "Kurumsal Üye" : "Gönüllü Üye",
+                        user.isNgo
+                            ? AppLocalizations.of(context).corporateMember
+                            : AppLocalizations.of(context).volunteerMember,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 14,
                           color: Colors.grey.shade600,
@@ -430,7 +525,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   if (levelInfo.title != 'Efsane')
                     Text(
-                      "Sonraki Seviye: ${levelInfo.maxXp} XP",
+                      AppLocalizations.of(context).nextLevel(levelInfo.maxXp),
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade500,
                         fontSize: 10,
@@ -451,7 +546,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               const SizedBox(height: 12),
               Text(
-                "Etkinliklere katılarak, paylaşım yaparak ve etkileşim kurarak XP kazanabilirsin.\nRozetler: Gözlemci (0+), Aktif (100+), Öncü (500+), Usta (1500+), Efsane (5000+)",
+                AppLocalizations.of(context).xpInfo,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 10,

@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -131,9 +133,9 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
-                    tabs: const [
-                      Tab(text: "Kurumlar"),
-                      Tab(text: "Gönüllüler"),
+                    tabs: [
+                      Tab(text: AppLocalizations.of(context).navOrganizations),
+                      Tab(text: AppLocalizations.of(context).tabVolunteers),
                     ],
                   ),
                 ),
@@ -162,9 +164,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildUserHeader({bool isDark = false}) {
+    final l10n = AppLocalizations.of(context);
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, state) {
-        String displayName = 'Gönüllü';
+        String displayName = l10n.defaultVolunteerName;
         String? imageUrl;
 
         if (state is UserLoaded) {
@@ -182,11 +185,11 @@ class _HomePageState extends State<HomePage> {
                   snapshot.data!.exists) {
                 final data = snapshot.data!.data() as Map<String, dynamic>;
                 if (data['userType'] == 'ngo') {
-                  displayName = data['stkName'] ?? 'STK';
+                  displayName = data['stkName'] ?? l10n.defaultNgoName;
                 } else {
                   displayName =
                       "${data['name'] ?? ''} ${data['surname'] ?? ''}".trim();
-                  if (displayName.isEmpty) displayName = 'Gönüllü';
+                  if (displayName.isEmpty) displayName = l10n.defaultVolunteerName;
                 }
                 imageUrl = data['imageUrl'];
               }
@@ -235,7 +238,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               if (!isCollapsed)
                 Text(
-                  'Merhaba, 👋',
+                  AppLocalizations.of(context).homeGreeting,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 13,
                     color: AppColors.kCardBackgroundColor.withOpacity(0.8),
@@ -313,7 +316,7 @@ class _PostListView extends StatelessWidget {
                         color: Colors.red, size: 48),
                     const SizedBox(height: 16),
                     Text(
-                      state.message,
+                      AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                           color: Colors.grey.shade600),
@@ -321,7 +324,7 @@ class _PostListView extends StatelessWidget {
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () => context.read<PostCubit>().refresh(),
-                      child: const Text('Tekrar Dene'),
+                      child: Text(AppLocalizations.of(context).retry),
                     ),
                   ],
                 ),
@@ -348,7 +351,7 @@ class _PostListView extends StatelessWidget {
                       size: 60, color: Colors.grey.shade400),
                   const SizedBox(height: 16),
                   Text(
-                    'Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!',
+                    AppLocalizations.of(context).noPostsYet,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade600),
@@ -554,28 +557,28 @@ class _QuickNavSection extends StatelessWidget {
         children: [
           _NavButton(
             icon: Icons.explore_rounded,
-            label: 'Keşfet',
+            label: AppLocalizations.of(context).navDiscover,
             gradientColors: const [Color(0xFF6C63FF), Color(0xFF957DFF)],
             onTap: () => onNavigate(const EventsPage()),
             isDark: isDark,
           ),
           _NavButton(
             icon: Icons.corporate_fare_rounded,
-            label: 'Kurumlar',
+            label: AppLocalizations.of(context).navOrganizations,
             gradientColors: const [Color(0xFF00897B), Color(0xFF4DB6AC)],
             onTap: () => onNavigate(const NgosPage()),
             isDark: isDark,
           ),
           _NavButton(
             icon: Icons.chat_bubble_rounded,
-            label: 'Mesajlar',
+            label: AppLocalizations.of(context).navMessages,
             gradientColors: const [Color(0xFFFF6B35), Color(0xFFFFAB76)],
             onTap: () => onNavigate(const ActiveChatsPage()),
             isDark: isDark,
           ),
           _NavButton(
             icon: Icons.auto_awesome_rounded,
-            label: 'Asistan',
+            label: AppLocalizations.of(context).assistant,
             gradientColors: const [Color(0xFF2196F3), Color(0xFF00BCD4)],
             onTap: () => onNavigate(const ChatHistoryPage()),
             isDark: isDark,
@@ -705,7 +708,7 @@ class _EventPreviewSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'YAKLAŞAN ETKİNLİKLER',
+                AppLocalizations.of(context).upcomingEvents,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -716,7 +719,7 @@ class _EventPreviewSection extends StatelessWidget {
               GestureDetector(
                 onTap: () => onNavigate(const EventsPage()),
                 child: Text(
-                  'Tümünü Gör',
+                  AppLocalizations.of(context).seeAll,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
@@ -775,7 +778,9 @@ class _EventPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final double cardWidth = MediaQuery.of(context).size.width * 0.75;
-    final String dateString = DateFormat('dd MMMM', 'tr_TR').format(event.date);
+    final String localeName = Localizations.localeOf(context).toString();
+    final String dateString =
+        DateFormat('dd MMMM', localeName).format(event.date);
 
     return GestureDetector(
       onTap: () {
@@ -940,7 +945,7 @@ class _SeeAllCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Hepsini Gör',
+              AppLocalizations.of(context).seeAllShort,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 13,
                 fontWeight: FontWeight.bold,

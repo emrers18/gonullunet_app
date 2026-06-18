@@ -5,7 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui' as ui;
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import '../logic/location_cubit.dart';
 import '../logic/location_state.dart';
@@ -55,7 +57,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
           } else if (state is LocationError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(AppMessages.resolve(context, state.message)),
                 backgroundColor: Colors.red,
                 behavior: SnackBarBehavior.floating,
               ),
@@ -190,14 +192,16 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             fontSize: 14,
                             color: AppColors.primaryText,
                           ),
-                          decoration: const InputDecoration(
-                            hintText: "Konum ara...",
-                            hintStyle: TextStyle(
+                          decoration: InputDecoration(
+                            hintText:
+                                AppLocalizations.of(context).searchLocationHint,
+                            hintStyle: const TextStyle(
                                 color: AppColors.textSub, fontSize: 14),
-                            prefixIcon: Icon(Icons.search,
+                            prefixIcon: const Icon(Icons.search,
                                 color: AppColors.textSub, size: 20),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(vertical: 14),
+                            contentPadding:
+                                const EdgeInsets.symmetric(vertical: 14),
                           ),
                         ),
                       ),
@@ -238,15 +242,17 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                 ),
                 child: BlocBuilder<LocationCubit, LocationState>(
                   builder: (context, state) {
-                    String displayAddress = "Konum seçiliyor...";
+                    final l10n = AppLocalizations.of(context);
+                    String displayAddress = l10n.selectingLocation;
                     LatLng? confirmCoordinates;
                     bool isLoading = false;
 
                     if (state is LocationLoaded) {
-                      displayAddress = state.address;
+                      displayAddress =
+                          AppMessages.resolve(context, state.address);
                       confirmCoordinates = state.location;
                     } else if (state is LocationLoading) {
-                      displayAddress = "Adres bulunuyor...";
+                      displayAddress = l10n.addressFinding;
                       isLoading = true;
                     }
 
@@ -274,7 +280,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Seçilen Adres",
+                                    l10n.selectedAddress,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.grey[500],
                                       fontSize: 11,
@@ -324,7 +330,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                   child: AppLoadingIndicator(size: 20),
                                 )
                               : Text(
-                                  "Konumu Onayla",
+                                  l10n.confirmLocation,
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

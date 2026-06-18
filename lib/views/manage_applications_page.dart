@@ -6,7 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -52,21 +55,22 @@ class ManageApplicationsView extends StatelessWidget {
   // ── Excel Export ──────────────────────────────────────────────────────────
   Future<void> _exportExcel(
       BuildContext context, List<ApplicationModel> apps) async {
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
     try {
-      // Türkçe locale başlat
-      await initializeDateFormatting('tr_TR', null);
+      await initializeDateFormatting(localeName, null);
 
       final excel = ex.Excel.createExcel();
-      final sheet = excel['Başvurular'];
+      final sheet = excel[l10n.applications];
 
       // Başlık satırı
       final headers = [
-        'Ad',
-        'Soyad',
-        'E-posta',
-        'Telefon',
-        'Başvuru Durumu',
-        'Başvuru Tarihi',
+        l10n.firstName,
+        l10n.lastName,
+        l10n.emailLabel,
+        l10n.phone,
+        l10n.colApplicationStatus,
+        l10n.colApplicationDate,
       ];
       for (int i = 0; i < headers.length; i++) {
         final cell = sheet.cell(
@@ -85,13 +89,13 @@ class ManageApplicationsView extends StatelessWidget {
         String statusText;
         switch (app.status) {
           case 'approved':
-            statusText = 'Onaylandı';
+            statusText = l10n.statusApproved;
             break;
           case 'rejected':
-            statusText = 'Reddedildi';
+            statusText = l10n.statusRejected;
             break;
           default:
-            statusText = 'Bekliyor';
+            statusText = l10n.statusPending;
         }
 
         final row = [
@@ -100,7 +104,7 @@ class ManageApplicationsView extends StatelessWidget {
           app.userEmail ?? '',
           app.userPhone ?? '',
           statusText,
-          DateFormat('dd MMMM yyyy HH:mm', 'tr_TR')
+          DateFormat('dd MMMM yyyy HH:mm', localeName)
               .format(app.appliedAt.toDate()),
         ];
 
@@ -118,7 +122,7 @@ class ManageApplicationsView extends StatelessWidget {
       }
 
       final rawBytes = excel.encode();
-      if (rawBytes == null) throw Exception('Excel oluşturulamadı');
+      if (rawBytes == null) throw Exception(l10n.excelCreateFailedException);
       final bytes = Uint8List.fromList(rawBytes);
 
       final dir = await getTemporaryDirectory();
@@ -131,7 +135,7 @@ class ManageApplicationsView extends StatelessWidget {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Excel dosyası oluşturuldu: ${file.path}',
+              l10n.excelCreated(file.path),
               style: GoogleFonts.plusJakartaSans(),
             ),
             backgroundColor: const Color(0xFF16A34A),
@@ -148,7 +152,7 @@ class ManageApplicationsView extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Excel oluşturulamadı: $e',
+            content: Text(l10n.excelCreateError('$e'),
                 style: GoogleFonts.plusJakartaSans()),
             backgroundColor: Colors.red,
           ),
@@ -160,9 +164,10 @@ class ManageApplicationsView extends StatelessWidget {
   // ── PDF Export (sadece onaylananlar – katılım listesi) ────────────────────
   Future<void> _exportPdf(
       BuildContext context, List<ApplicationModel> apps) async {
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
     try {
-      // Türkçe locale başlat
-      await initializeDateFormatting('tr_TR', null);
+      await initializeDateFormatting(localeName, null);
 
       final approved = apps.where((a) => a.status == 'approved').toList();
 
@@ -170,7 +175,7 @@ class ManageApplicationsView extends StatelessWidget {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Onaylanmış başvuru bulunamadı.',
+              content: Text(l10n.noApprovedApplications,
                   style: GoogleFonts.plusJakartaSans()),
               backgroundColor: Colors.orange,
               behavior: SnackBarBehavior.floating,
@@ -193,7 +198,7 @@ class ManageApplicationsView extends StatelessWidget {
 
       final now = DateTime.now();
       final dateStr =
-          DateFormat('dd MMMM yyyy HH:mm', 'tr_TR').format(now);
+          DateFormat('dd MMMM yyyy HH:mm', localeName).format(now);
       final fileDate = DateFormat('yyyyMMdd').format(now);
 
       final pdf = pw.Document();
@@ -215,7 +220,7 @@ class ManageApplicationsView extends StatelessWidget {
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
-                        'ETKİNLİK KATILIM LİSTESİ',
+                        l10n.participationListTitle,
                         style: pw.TextStyle(
                           font: fontBold,
                           fontSize: 16,
@@ -241,14 +246,14 @@ class ManageApplicationsView extends StatelessWidget {
               pw.Row(
                 children: [
                   pw.Text(
-                    'Oluşturma Tarihi: $dateStr',
+                    l10n.createdDateLabel(dateStr),
                     style:
                         pw.TextStyle(font: fontRegular, fontSize: 9,
                             color: PdfColors.grey600),
                   ),
                   pw.Spacer(),
                   pw.Text(
-                    'Toplam Onaylı Katılımcı: ${approved.length}',
+                    l10n.totalApprovedParticipants(approved.length),
                     style: pw.TextStyle(
                         font: fontBold, fontSize: 9, color: PdfColors.green800),
                   ),
@@ -278,9 +283,9 @@ class ManageApplicationsView extends StatelessWidget {
                       const pw.BoxDecoration(color: PdfColors.green700),
                   children: [
                     '#',
-                    'Ad Soyad',
-                    'E-posta',
-                    'Telefon',
+                    l10n.colFullName,
+                    l10n.emailLabel,
+                    l10n.phone,
                   ]
                       .map(
                         (h) => pw.Padding(
@@ -331,7 +336,7 @@ class ManageApplicationsView extends StatelessWidget {
           footer: (ctx) => pw.Align(
             alignment: pw.Alignment.centerRight,
             child: pw.Text(
-              'Sayfa ${ctx.pageNumber} / ${ctx.pagesCount}',
+              l10n.pdfPageLabel(ctx.pageNumber, ctx.pagesCount),
               style: pw.TextStyle(
                   font: fontRegular,
                   fontSize: 8,
@@ -354,7 +359,7 @@ class ManageApplicationsView extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('PDF oluşturulamadı: $e',
+            content: Text(l10n.pdfCreateError('$e'),
                 style: GoogleFonts.plusJakartaSans()),
             backgroundColor: Colors.red,
           ),
@@ -369,7 +374,7 @@ class ManageApplicationsView extends StatelessWidget {
       backgroundColor: const Color(0xFFF8F6F5),
       appBar: AppBar(
         title: Text(
-          "Başvurular",
+          AppLocalizations.of(context).applications,
           style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFF181210),
             fontWeight: FontWeight.bold,
@@ -394,7 +399,7 @@ class ManageApplicationsView extends StatelessWidget {
                 children: [
                   // Excel ikonu
                   Tooltip(
-                    message: 'Excel\'e Aktar',
+                    message: AppLocalizations.of(context).exportToExcel,
                     child: IconButton(
                       onPressed: () => _exportExcel(context, apps),
                       icon: const Icon(Icons.table_view_rounded),
@@ -410,7 +415,7 @@ class ManageApplicationsView extends StatelessWidget {
                   const SizedBox(width: 6),
                   // PDF ikonu
                   Tooltip(
-                    message: 'Katılım Listesi (PDF)',
+                    message: AppLocalizations.of(context).participationListPdf,
                     child: IconButton(
                       onPressed: () => _exportPdf(context, apps),
                       icon: const Icon(Icons.picture_as_pdf_rounded),
@@ -446,7 +451,7 @@ class ManageApplicationsView extends StatelessWidget {
                         size: 48, color: Colors.red.shade300),
                     const SizedBox(height: 12),
                     Text(
-                      state.message,
+                      AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(color: Colors.grey),
                     ),
@@ -465,7 +470,7 @@ class ManageApplicationsView extends StatelessWidget {
                         size: 64, color: Colors.grey.shade300),
                     const SizedBox(height: 12),
                     Text(
-                      "Henüz başvuru yok.",
+                      AppLocalizations.of(context).noApplications,
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade500,
                         fontSize: 16,
@@ -499,6 +504,7 @@ class _ApplicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // Status styling
     Color statusColor;
     IconData statusIcon;
@@ -509,19 +515,19 @@ class _ApplicationCard extends StatelessWidget {
       case 'approved':
         statusColor = const Color(0xFF16A34A);
         statusIcon = Icons.check_circle_rounded;
-        statusText = "Onaylandı";
+        statusText = l10n.statusApproved;
         statusBg = const Color(0xFFDCFCE7);
         break;
       case 'rejected':
         statusColor = const Color(0xFFDC2626);
         statusIcon = Icons.cancel_rounded;
-        statusText = "Reddedildi";
+        statusText = l10n.statusRejected;
         statusBg = const Color(0xFFFEE2E2);
         break;
       default:
         statusColor = const Color(0xFFF59E0B);
         statusIcon = Icons.schedule_rounded;
-        statusText = "Bekliyor";
+        statusText = l10n.statusPending;
         statusBg = const Color(0xFFFEF3C7);
     }
 
@@ -530,7 +536,10 @@ class _ApplicationCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ApplicantProfilePage(userId: app.userId),
+            builder: (context) => ApplicantProfilePage(
+              userId: app.userId,
+              coverLetter: app.coverLetter,
+            ),
           ),
         );
       },
@@ -595,7 +604,7 @@ class _ApplicationCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "${app.userName ?? 'İsimsiz'} ${app.userSurname ?? ''}",
+                        "${app.userName ?? l10n.unnamed} ${app.userSurname ?? ''}",
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -604,7 +613,7 @@ class _ApplicationCard extends StatelessWidget {
                       ),
                       if (app.xp != null) ...[
                         const SizedBox(height: 4),
-                        _buildLevelBadge(app.xp!),
+                        _buildLevelBadge(context, app.xp!),
                       ],
                       const SizedBox(height: 3),
                       Text(
@@ -659,14 +668,16 @@ class _ApplicationCard extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                ApplicantProfilePage(userId: app.userId),
+                            builder: (context) => ApplicantProfilePage(
+                              userId: app.userId,
+                              coverLetter: app.coverLetter,
+                            ),
                           ),
                         );
                       },
                       icon: const Icon(Icons.person_outline, size: 18),
                       label: Text(
-                        "Profili Gör",
+                        l10n.viewProfile,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -693,7 +704,7 @@ class _ApplicationCard extends StatelessWidget {
                       },
                       icon: const Icon(Icons.close_rounded, size: 18),
                       label: Text(
-                        "Reddet",
+                        l10n.reject,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -720,7 +731,7 @@ class _ApplicationCard extends StatelessWidget {
                       },
                       icon: const Icon(Icons.check_rounded, size: 18),
                       label: Text(
-                        "Onayla",
+                        l10n.approve,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
@@ -754,7 +765,7 @@ class _ApplicationCard extends StatelessWidget {
     return '$n$s';
   }
 
-  Widget _buildLevelBadge(int xp) {
+  Widget _buildLevelBadge(BuildContext context, int xp) {
     final level = GamificationUtils.getLevelInfo(xp);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -769,7 +780,7 @@ class _ApplicationCard extends StatelessWidget {
           Icon(Icons.stars, size: 12, color: level.color),
           const SizedBox(width: 4),
           Text(
-            level.title,
+            CategoryLocalizer.level(AppLocalizations.of(context), level.title),
             style: GoogleFonts.plusJakartaSans(
               fontSize: 10,
               fontWeight: FontWeight.bold,

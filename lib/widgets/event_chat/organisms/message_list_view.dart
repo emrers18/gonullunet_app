@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_chat_message_model.dart';
 import '../molecules/message_bubble.dart';
 
@@ -57,11 +58,11 @@ class _MessageListViewState extends State<MessageListView> {
   @override
   Widget build(BuildContext context) {
     if (widget.messages.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'Henüz hiç mesaj yok.\nİlk mesajı sen gönder!',
+          AppLocalizations.of(context).noMessages,
           textAlign: TextAlign.center,
-          style: TextStyle(color: Colors.black54),
+          style: const TextStyle(color: Colors.black54),
         ),
       );
     }

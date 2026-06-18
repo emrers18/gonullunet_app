@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
@@ -79,7 +81,7 @@ class _ChatPageState extends State<ChatPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Gönüllü AI',
+                  AppLocalizations.of(context).volunteerAi,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
@@ -87,7 +89,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                 ),
                 Text(
-                  'Akıllı Asistan',
+                  AppLocalizations.of(context).smartAssistant,
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 11,
                     color: AppColors.primaryColor,
@@ -161,7 +163,7 @@ class _ChatPageState extends State<ChatPage> {
                         size: 52, color: Colors.grey.shade300),
                     const SizedBox(height: 16),
                     Text(
-                      state.message,
+                      AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                           color: Colors.grey.shade500),
@@ -223,7 +225,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           const SizedBox(height: 20),
           Text(
-            'Merhaba! 👋',
+            AppLocalizations.of(context).aiGreeting,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -232,7 +234,7 @@ class _ChatPageState extends State<ChatPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Ben GönüllüNet AI Asistanı.\nErasmus+, gönüllülük projeleri ve STK\'lar\nhakkında sorularınızı yanıtlayabilirim.',
+            AppLocalizations.of(context).aiIntro,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 14,
@@ -243,7 +245,7 @@ class _ChatPageState extends State<ChatPage> {
           const SizedBox(height: 28),
           // Suggestion chips
           Text(
-            'HIZLI BAŞLANGIÇ',
+            AppLocalizations.of(context).quickStart,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 11,
               fontWeight: FontWeight.bold,
@@ -259,23 +261,31 @@ class _ChatPageState extends State<ChatPage> {
             children: [
               _SuggestionCard(
                 icon: Icons.public_rounded,
-                text: 'Erasmus+ nedir?',
-                onTap: () => context.read<ChatCubit>().sendMessage('Erasmus+ nedir?'),
+                text: AppLocalizations.of(context).qErasmus,
+                onTap: () => context
+                    .read<ChatCubit>()
+                    .sendMessage(AppLocalizations.of(context).qErasmus),
               ),
               _SuggestionCard(
                 icon: Icons.volunteer_activism_rounded,
-                text: 'Nasıl gönüllü olabilirim?',
-                onTap: () => context.read<ChatCubit>().sendMessage('Nasıl gönüllü olabilirim?'),
+                text: AppLocalizations.of(context).qHowVolunteer,
+                onTap: () => context
+                    .read<ChatCubit>()
+                    .sendMessage(AppLocalizations.of(context).qHowVolunteer),
               ),
               _SuggestionCard(
                 icon: Icons.corporate_fare_rounded,
-                text: 'STK\'lara nasıl katılırım?',
-                onTap: () => context.read<ChatCubit>().sendMessage('STK\'lara nasıl katılırım?'),
+                text: AppLocalizations.of(context).qHowJoinNgo,
+                onTap: () => context
+                    .read<ChatCubit>()
+                    .sendMessage(AppLocalizations.of(context).qHowJoinNgo),
               ),
               _SuggestionCard(
                 icon: Icons.search_rounded,
-                text: 'Bana yakın etkinlikler',
-                onTap: () => context.read<ChatCubit>().sendMessage('Bana yakın gönüllülük etkinlikleri nelerdir?'),
+                text: AppLocalizations.of(context).qNearbyEvents,
+                onTap: () => context
+                    .read<ChatCubit>()
+                    .sendMessage(AppLocalizations.of(context).qNearbyEventsFull),
               ),
             ],
           ),

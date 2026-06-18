@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
@@ -66,6 +67,18 @@ class PostCard extends StatelessWidget {
                 children: [
                   _buildHeader(
                       context, displayName, avatarUrl, isVolunteer, xp),
+                  if (post.title.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                      child: Text(
+                        post.title,
+                        style: GoogleFonts.poppins(
+                          color: AppColors.kTextColor,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
                   if (post.description.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
@@ -193,14 +206,14 @@ class PostCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "${post.likeCount} Beğeni",
+            AppLocalizations.of(context).likeCountLabel(post.likeCount),
             style: GoogleFonts.poppins(
               fontSize: 12,
               color: Colors.grey.shade600,
             ),
           ),
           Text(
-            "${post.commentCount} Yorum",
+            AppLocalizations.of(context).commentCountLabel(post.commentCount),
             style: GoogleFonts.poppins(
               fontSize: 12,
               color: Colors.grey.shade600,
@@ -220,7 +233,7 @@ class PostCard extends StatelessWidget {
           _buildSingleActionButton(
             context: context,
             icon: post.isLiked ? Icons.favorite : Icons.favorite_border,
-            label: "Beğen",
+            label: AppLocalizations.of(context).like,
             color: post.isLiked ? Colors.red : Colors.grey.shade600,
             onTap: () {
               context.read<PostCubit>().toggleLike(post.id);
@@ -230,7 +243,7 @@ class PostCard extends StatelessWidget {
           _buildSingleActionButton(
             context: context,
             icon: Icons.chat_bubble_outline,
-            label: "Yorum",
+            label: AppLocalizations.of(context).comment,
             color: Colors.grey.shade600,
             onTap: () {
               _showCommentModal(context);

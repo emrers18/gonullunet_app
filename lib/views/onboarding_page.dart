@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import '../logic/onboarding_cubit.dart';
 import '../logic/onboarding_state.dart';
 import '../utils/app_colors.dart';
@@ -35,26 +36,23 @@ class _OnboardingViewState extends State<OnboardingView>
   late final AnimationController _floatController1;
   late final AnimationController _floatController2;
 
-  final List<Map<String, String>> _contents = [
-    {
-      "title": "GönüllüNet'e\nHoş Geldin",
-      "desc":
-          "Çevrendeki iyilik hareketlerini keşfet, topluluğa katıl ve fark yaratmaya hemen başla.",
-      "image": "lib/assets/images/logo.png",
-    },
-    {
-      "title": "Etkinlikleri\nKeşfet",
-      "desc":
-          "Sana en yakın gönüllülük etkinliklerini harita üzerinde bul ve ilgi alanına göre filtrele.",
-      "image": "lib/assets/images/onboarding_2.png",
-    },
-    {
-      "title": "Birlikte\nGüçlüyüz",
-      "desc":
-          "STK'lar ve gönüllülerle bir araya gelerek büyük değişimlerin bir parçası ol.",
-      "image": "lib/assets/images/onboarding_3.png",
-    },
-  ];
+  List<Map<String, String>> _buildContents(AppLocalizations l10n) => [
+        {
+          "title": l10n.onboardTitle1,
+          "desc": l10n.onboardDesc1,
+          "image": "lib/assets/images/logo.png",
+        },
+        {
+          "title": l10n.onboardTitle2,
+          "desc": l10n.onboardDesc2,
+          "image": "lib/assets/images/onboarding_2.png",
+        },
+        {
+          "title": l10n.onboardTitle3,
+          "desc": l10n.onboardDesc3,
+          "image": "lib/assets/images/onboarding_3.png",
+        },
+      ];
 
   @override
   void initState() {
@@ -82,6 +80,8 @@ class _OnboardingViewState extends State<OnboardingView>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+    final l10n = AppLocalizations.of(context);
+    final contents = _buildContents(l10n);
 
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
@@ -154,7 +154,7 @@ class _OnboardingViewState extends State<OnboardingView>
                           context.read<OnboardingCubit>().completeOnboarding();
                         },
                         child: Text(
-                          "Atla",
+                          l10n.onboardSkip,
                           style: GoogleFonts.dmSans(
                             color: Colors.grey.shade600,
                             fontWeight: FontWeight.w600,
@@ -169,7 +169,7 @@ class _OnboardingViewState extends State<OnboardingView>
                   Expanded(
                     child: PageView.builder(
                       controller: _pageController,
-                      itemCount: _contents.length,
+                      itemCount: contents.length,
                       onPageChanged: (index) {
                         context.read<OnboardingCubit>().updateIndex(index);
                       },
@@ -210,7 +210,7 @@ class _OnboardingViewState extends State<OnboardingView>
                                     Padding(
                                       padding: const EdgeInsets.all(40.0),
                                       child: Image.asset(
-                                        _contents[index]["image"]!,
+                                        contents[index]["image"]!,
                                         fit: BoxFit.contain,
                                         errorBuilder:
                                             (context, error, stackTrace) =>
@@ -256,13 +256,13 @@ class _OnboardingViewState extends State<OnboardingView>
                               const SizedBox(height: 32),
 
                               // BAŞLIK
-                              _buildTitle(_contents[index]["title"]!),
+                              _buildTitle(contents[index]["title"]!),
 
                               const SizedBox(height: 16),
 
                               // AÇIKLAMA
                               Text(
-                                _contents[index]["desc"]!,
+                                contents[index]["desc"]!,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.dmSans(
                                   fontSize: 18,
@@ -289,7 +289,7 @@ class _OnboardingViewState extends State<OnboardingView>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: List.generate(
-                                _contents.length,
+                                contents.length,
                                 (index) => _buildDot(index, state.currentIndex),
                               ),
                             ),
@@ -302,7 +302,7 @@ class _OnboardingViewState extends State<OnboardingView>
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (state.currentIndex ==
-                                      _contents.length - 1) {
+                                      contents.length - 1) {
                                     context
                                         .read<OnboardingCubit>()
                                         .completeOnboarding();
@@ -329,9 +329,9 @@ class _OnboardingViewState extends State<OnboardingView>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      state.currentIndex == _contents.length - 1
-                                          ? "Keşfetmeye Başla"
-                                          : "Devam Et",
+                                      state.currentIndex == contents.length - 1
+                                          ? l10n.onboardStart
+                                          : l10n.onboardContinue,
                                       style: GoogleFonts.dmSans(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,

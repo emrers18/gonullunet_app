@@ -3,8 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:intl/intl.dart';
 
 import '../constants/app_constants.dart';
@@ -185,6 +187,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final categories = ['Tümü', ...AppConstants.eventCategories];
     final initialCenter = _filteredEvents.isNotEmpty
         ? LatLng(_filteredEvents.first.geoPoint!.latitude,
@@ -204,8 +207,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
             children: [
               TileLayer(
                 urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                subdomains: const ['a', 'b', 'c'],
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                subdomains: const ['a', 'b', 'c', 'd'],
                 userAgentPackageName: 'com.gonullunet.gonullunet_app',
               ),
               MarkerLayer(
@@ -262,14 +265,14 @@ class _EventsMapPageState extends State<EventsMapPage> {
                           child: TextField(
                             controller: _searchController,
                             onChanged: _onSearchChanged,
-                            decoration: const InputDecoration(
-                              hintText: "Etkinlik ara...",
-                              hintStyle: TextStyle(color: AppColors.textSub),
-                              prefixIcon:
-                                  Icon(Icons.search, color: AppColors.textSub),
+                            decoration: InputDecoration(
+                              hintText: l10n.searchEvent,
+                              hintStyle: const TextStyle(color: AppColors.textSub),
+                              prefixIcon: const Icon(Icons.search,
+                                  color: AppColors.textSub),
                               border: InputBorder.none,
                               contentPadding:
-                                  EdgeInsets.symmetric(vertical: 14),
+                                  const EdgeInsets.symmetric(vertical: 14),
                             ),
                           ),
                         ),
@@ -297,7 +300,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
                           .map((cat) => GestureDetector(
                                 onTap: () => _onCategorySelected(cat),
                                 child: _buildCategoryChip(
-                                    cat, _selectedCategory == cat),
+                                    CategoryLocalizer.category(l10n, cat),
+                                    _selectedCategory == cat),
                               ))
                           .toList(),
                     ),
@@ -326,14 +330,14 @@ class _EventsMapPageState extends State<EventsMapPage> {
                         offset: const Offset(0, 4)),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   children: [
-                    Icon(Icons.close_fullscreen_rounded,
+                    const Icon(Icons.close_fullscreen_rounded,
                         color: AppColors.kPrimaryColor, size: 20),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     Text(
-                      "Küçült",
-                      style: TextStyle(
+                      l10n.shrink,
+                      style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText),
                     ),
@@ -376,8 +380,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
                               blurRadius: 10),
                         ],
                       ),
-                      child: const Text("Bu kritere uygun etkinlik bulunamadı.",
-                          style: TextStyle(
+                      child: Text(l10n.noEventsForCriteria,
+                          style: const TextStyle(
                               color: AppColors.primaryText,
                               fontWeight: FontWeight.w500)),
                     ),
@@ -388,7 +392,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
                     itemCount: _filteredEvents.length,
                     itemBuilder: (context, index) {
                       final event = _filteredEvents[index];
-                      return _buildEventCard(event);
+                      return _buildEventCard(context, event);
                     },
                   ),
           ),
@@ -399,9 +403,11 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
   // --- WIDGET YARDIMCILARI ---
 
-  Widget _buildEventCard(Event event) {
+  Widget _buildEventCard(BuildContext context, Event event) {
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
     final formattedDate =
-        DateFormat('dd MMM, HH:mm', 'tr_TR').format(event.date);
+        DateFormat('dd MMM, HH:mm', localeName).format(event.date);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -486,7 +492,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildParticipantsBadge(event.participants.length),
+                    _buildParticipantsBadge(context, event.participants.length),
                     ElevatedButton(
                       onPressed: () {
                         Navigator.push(
@@ -507,8 +513,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      child: const Text("İncele",
-                          style: TextStyle(
+                      child: Text(l10n.examine,
+                          style: const TextStyle(
                               fontSize: 12, fontWeight: FontWeight.bold)),
                     )
                   ],
@@ -521,10 +527,11 @@ class _EventsMapPageState extends State<EventsMapPage> {
     );
   }
 
-  Widget _buildParticipantsBadge(int count) {
+  Widget _buildParticipantsBadge(BuildContext context, int count) {
+    final l10n = AppLocalizations.of(context);
     if (count == 0) {
       return Text(
-        "İlk sen ol!",
+        l10n.beFirstToJoin,
         style: TextStyle(color: Colors.grey[500], fontSize: 11),
       );
     }
@@ -533,7 +540,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
         Icon(Icons.people, size: 16, color: Colors.grey[500]),
         const SizedBox(width: 4),
         Text(
-          "$count katılımcı",
+          l10n.participantCount(count),
           style: TextStyle(
             fontSize: 11,
             color: Colors.grey[600],

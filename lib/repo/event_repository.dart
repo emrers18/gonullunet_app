@@ -123,6 +123,7 @@ class EventRepository {
     required String type,
     String? imageUrl,
     int? quota,
+    DateTime? lastApplyDate,
   }) async {
     await _functionsService.createEvent(
       title: title,
@@ -136,13 +137,31 @@ class EventRepository {
       type: type,
       imageUrl: imageUrl,
       quota: quota,
+      lastApplyDate: lastApplyDate,
     );
   }
 
   /// Etkinlige katilma/ayrilma islemini Cloud Function uzerinden yapar.
   /// XP odulu/cezasi sunucu tarafinda guvenle uygulanir.
-  Future<void> toggleJoinEvent(String eventId, String userId) async {
+  Future<void> toggleJoinEvent(String eventId, String userId,
+      {String? coverLetter}) async {
     await _functionsService.toggleJoinEvent(eventId: eventId);
+    if (coverLetter != null && coverLetter.isNotEmpty) {
+      try {
+        await _firestore
+            .collection('events')
+            .doc(eventId)
+            .collection('applications')
+            .doc(userId)
+            .update({
+          'coverLetter': coverLetter,
+        });
+      } catch (e) {
+        if (kDebugMode) {
+          debugPrint('[EventRepository] Niyet mektubu kaydedilemedi: $e');
+        }
+      }
+    }
   }
 
   Future<String> getOrganizerName(String organizerId) async {

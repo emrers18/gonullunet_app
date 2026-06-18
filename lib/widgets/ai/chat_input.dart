@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 
 class ChatInput extends StatefulWidget {
@@ -76,7 +77,7 @@ class _ChatInputState extends State<ChatInput> {
                 color: AppColors.primaryText,
               ),
               decoration: InputDecoration(
-                hintText: 'Mesajınızı yazın...',
+                hintText: AppLocalizations.of(context).messageHint,
                 hintStyle: TextStyle(
                   color: AppColors.secondaryText.withOpacity(0.6),
                   fontSize: 15,

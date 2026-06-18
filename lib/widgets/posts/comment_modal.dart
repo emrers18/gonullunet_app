@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
@@ -73,7 +74,7 @@ class _CommentModalState extends State<CommentModal> {
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return Center(
                     child: Text(
-                      "Henüz yorum yok. İlk yorumu sen yap!",
+                      AppLocalizations.of(context).noComments,
                       style: GoogleFonts.poppins(color: Colors.grey),
                     ),
                   );
@@ -109,7 +110,7 @@ class _CommentModalState extends State<CommentModal> {
                   child: TextField(
                     controller: _commentController,
                     decoration: InputDecoration(
-                      hintText: "Yorumunuzu yazın...",
+                      hintText: AppLocalizations.of(context).commentHint,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(30),
                         borderSide: BorderSide.none,
@@ -151,7 +152,7 @@ class _CommentModalState extends State<CommentModal> {
           .doc(comment.userId)
           .get(),
       builder: (context, snapshot) {
-        String name = "Yükleniyor...";
+        String name = AppLocalizations.of(context).loading;
         String? imageUrl;
 
         if (snapshot.hasData && snapshot.data!.exists) {
@@ -191,7 +192,8 @@ class _CommentModalState extends State<CommentModal> {
                       ),
                       Text(
                         timeago.format(comment.createdAt.toDate(),
-                            locale: 'tr'),
+                            locale:
+                                Localizations.localeOf(context).languageCode),
                         style: GoogleFonts.poppins(
                           fontSize: 12,
                           color: Colors.grey,

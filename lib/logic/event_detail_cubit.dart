@@ -30,7 +30,7 @@ class EventDetailCubit extends Cubit<EventDetailState> {
     ));
   }
 
-  Future<void> toggleJoin() async {
+  Future<void> toggleJoin({String? coverLetter}) async {
     if (_currentUserId.isEmpty) return;
 
     final currentState = state;
@@ -59,7 +59,7 @@ class EventDetailCubit extends Cubit<EventDetailState> {
           participantCount: nextCount,
         ));
 
-        await _repository.toggleJoinEvent(_event.id, _currentUserId);
+        await _repository.toggleJoinEvent(_event.id, _currentUserId, coverLetter: coverLetter);
         
         // İşlem sonrası gerçek durumu tekrar çek (sayaç senkronizasyonu için önemli)
         await _loadPageData();

@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 
@@ -105,7 +107,7 @@ class _EventBodyState extends State<_EventBody> {
             borderRadius: BorderRadius.circular(12),
           ),
           action: SnackBarAction(
-            label: 'Evet',
+            label: AppLocalizations.of(context).yes,
             textColor: Colors.white,
             onPressed: () {
               _dismissBarrier();
@@ -120,15 +122,22 @@ class _EventBodyState extends State<_EventBody> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final event = widget.event;
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
 
-    final formattedDate = DateFormat('d MMMM yyyy', 'tr_TR').format(event.date);
+    final formattedDate =
+        DateFormat('d MMMM yyyy', localeName).format(event.date);
     final formattedTime = DateFormat('HH:mm').format(event.date);
-    final dayName = DateFormat('EEEE', 'tr_TR').format(event.date);
+    final dayName = DateFormat('EEEE', localeName).format(event.date);
 
     final bool isProject = (event.type == 'Proje');
     // Etkinlik/proje süresi doldu mu?
     final DateTime effectiveEndDate = event.endDate ?? event.date;
     final bool isExpired = effectiveEndDate.isBefore(DateTime.now());
+
+    // Son başvuru tarihi doldu mu?
+    final DateTime applyDeadline = event.lastApplyDate ?? event.date;
+    final bool isApplyExpired = applyDeadline.isBefore(DateTime.now());
 
     return Stack(
       children: [
@@ -207,7 +216,8 @@ class _EventBodyState extends State<_EventBody> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              event.type.toUpperCase(),
+                              CategoryLocalizer.type(l10n, event.type)
+                                  .toUpperCase(),
                               style: GoogleFonts.plusJakartaSans(
                                 color: AppColors.kPrimaryColor,
                                 fontWeight: FontWeight.bold,
@@ -224,7 +234,7 @@ class _EventBodyState extends State<_EventBody> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              event.category,
+                              CategoryLocalizer.category(l10n, event.category),
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w600,
@@ -248,8 +258,7 @@ class _EventBodyState extends State<_EventBody> {
                       Row(
                         children: [
                           const Icon(Icons.location_on,
-                              color: AppColors.kPrimaryColor,
-                              size: 20),
+                              color: AppColors.kPrimaryColor, size: 20),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
@@ -264,6 +273,28 @@ class _EventBodyState extends State<_EventBody> {
                           ),
                         ],
                       ),
+                      if (event.lastApplyDate != null) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            const Icon(Icons.timer_outlined,
+                                color: Colors.orange, size: 20),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                l10n.lastApplyPrefix(DateFormat(
+                                        'd MMMM yyyy, HH:mm', localeName)
+                                    .format(event.lastApplyDate!)),
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: Colors.orange.shade900,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                       const SizedBox(height: 32),
                       Container(
                         padding: const EdgeInsets.all(16),
@@ -283,7 +314,7 @@ class _EventBodyState extends State<_EventBody> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "Düzenleyen",
+                                    l10n.organizer,
                                     style: GoogleFonts.plusJakartaSans(
                                       fontSize: 12,
                                       color: Colors.grey.shade600,
@@ -292,7 +323,7 @@ class _EventBodyState extends State<_EventBody> {
                                   BlocBuilder<EventDetailCubit,
                                       EventDetailState>(
                                     builder: (context, state) {
-                                      String orgName = "Yükleniyor...";
+                                      String orgName = l10n.loading;
                                       if (state is EventDetailLoaded) {
                                         orgName = state.organizerName;
                                       } else if (state is EventDetailUpdated) {
@@ -321,7 +352,7 @@ class _EventBodyState extends State<_EventBody> {
                               child: buildInfoCard(
                                   context,
                                   Icons.calendar_month,
-                                  "Tarih",
+                                  l10n.dateLabel,
                                   formattedDate,
                                   "$dayName, $formattedTime",
                                   AppColors.kPrimaryColor)),
@@ -338,16 +369,18 @@ class _EventBodyState extends State<_EventBody> {
                               return buildInfoCard(
                                   context,
                                   Icons.group,
-                                  isProject ? "Başvuru" : "Katılımcı",
-                                  "$count Kişi",
-                                  "Şimdiye kadar",
+                                  isProject
+                                      ? l10n.applicationStat
+                                      : l10n.participantStat,
+                                  l10n.personCount(count),
+                                  l10n.soFar,
                                   AppColors.kSecondaryColor);
                             },
                           )),
                         ],
                       ),
                       const SizedBox(height: 32),
-                      Text("Detaylar",
+                      Text(l10n.details,
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -357,8 +390,7 @@ class _EventBodyState extends State<_EventBody> {
                         event.description,
                         style: GoogleFonts.plusJakartaSans(
                             fontSize: 14,
-                            color:
-                                Colors.grey.shade600,
+                            color: Colors.grey.shade600,
                             height: 1.6),
                       ),
                     ],
@@ -418,8 +450,7 @@ class _EventBodyState extends State<_EventBody> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16),
                         side: const BorderSide(
-                            color: AppColors.kPrimaryColor,
-                            width: 2),
+                            color: AppColors.kPrimaryColor, width: 2),
                       ),
                     ),
                     child: Row(
@@ -428,7 +459,7 @@ class _EventBodyState extends State<_EventBody> {
                         const Icon(Icons.admin_panel_settings_outlined),
                         const SizedBox(width: 10),
                         Text(
-                          "Başvuruları Yönet",
+                          l10n.manageApplications,
                           style: GoogleFonts.plusJakartaSans(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
@@ -449,25 +480,21 @@ class _EventBodyState extends State<_EventBody> {
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                        color: Colors.grey.shade300),
+                    border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.event_busy,
-                            color:
-                                Colors.grey,
-                            size: 22),
+                            color: Colors.grey, size: 22),
                         const SizedBox(width: 10),
                         Text(
-                          "Bu etkinliğin süresi doldu",
+                          l10n.eventExpired,
                           style: GoogleFonts.plusJakartaSans(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color:
-                                Colors.grey,
+                            color: Colors.grey,
                           ),
                         ),
                       ],
@@ -487,6 +514,36 @@ class _EventBodyState extends State<_EventBody> {
                 currentCount = state.participantCount;
               }
 
+              // Son başvuru süresi dolmuşsa ve başvuru yoksa
+              if (isApplyExpired && applicationStatus == null) {
+                return Container(
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.timer_off_outlined,
+                            color: Colors.grey, size: 22),
+                        const SizedBox(width: 10),
+                        Text(
+                          l10n.applicationClosed,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
               bool isFull = false;
               if (event.quota != null && event.quota! > 0) {
                 isFull = currentCount >= event.quota!;
@@ -497,19 +554,19 @@ class _EventBodyState extends State<_EventBody> {
 
               // Duruma göre stil belirleme
               Color buttonColor = AppColors.kPrimaryColor;
-              String buttonText = "Hemen Başvur";
+              String buttonText = l10n.applyNow;
               IconData buttonIcon = Icons.send_rounded;
 
               if (applicationStatus == 'approved') {
                 buttonColor = Colors.red;
-                buttonText = "Etkinlikten Ayrıl";
+                buttonText = l10n.leaveEvent;
                 buttonIcon = Icons.exit_to_app_rounded;
               } else if (applicationStatus == 'pending') {
                 buttonColor = Colors.orange;
-                buttonText = "Başvuru Bekleniyor (İptal)";
+                buttonText = l10n.applicationPending;
                 buttonIcon = Icons.hourglass_empty_rounded;
               } else if (isFull) {
-                buttonText = "Kontenjan Dolu";
+                buttonText = l10n.quotaFull;
                 buttonIcon = Icons.lock_outline;
               }
 
@@ -520,40 +577,71 @@ class _EventBodyState extends State<_EventBody> {
                       ? () {
                           final bool needsConfirmation =
                               applicationStatus == 'approved' ||
-                              applicationStatus == 'pending';
+                                  applicationStatus == 'pending';
 
                           if (needsConfirmation) {
                             final String confirmMessage =
                                 applicationStatus == 'approved'
-                                    ? 'Etkinlikten ayrılmak istediğinize emin misiniz?'
-                                    : 'Başvurunuzu iptal etmek istediğinize emin misiniz?';
+                                    ? l10n.leaveEventConfirm
+                                    : l10n.cancelApplicationConfirm;
 
                             _showConfirmSnackBar(
                               context: context,
                               message: confirmMessage,
                               color: buttonColor,
-                              onConfirm: () => context
-                                  .read<EventDetailCubit>()
-                                  .toggleJoin(),
+                              onConfirm: () =>
+                                  context.read<EventDetailCubit>().toggleJoin(),
                             );
                           } else {
-                            // İlk başvuru — doğrudan gönder
-                            context.read<EventDetailCubit>().toggleJoin();
-                            if (applicationStatus == null && !isFull) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Başvurunuz iletildi, onay bekleniyor!',
-                                    style: GoogleFonts.plusJakartaSans(
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                  backgroundColor: Colors.orange,
-                                  behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
+                            // İlk başvuru
+                            if (isProject) {
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                builder: (dialogContext) {
+                                  return _CoverLetterDialog(
+                                    onConfirm: (coverLetter) {
+                                      context
+                                          .read<EventDetailCubit>()
+                                          .toggleJoin(coverLetter: coverLetter);
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            l10n.applicationSubmitted,
+                                            style: GoogleFonts.plusJakartaSans(
+                                                fontWeight: FontWeight.w600),
+                                          ),
+                                          backgroundColor: Colors.orange,
+                                          behavior: SnackBarBehavior.floating,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
                               );
+                            } else {
+                              context.read<EventDetailCubit>().toggleJoin();
+                              if (applicationStatus == null && !isFull) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Başvurunuz iletildi, onay bekleniyor!',
+                                      style: GoogleFonts.plusJakartaSans(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    backgroundColor: Colors.orange,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                              }
                             }
                           }
                         }
@@ -561,10 +649,9 @@ class _EventBodyState extends State<_EventBody> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
-                    shadowColor: (isButtonEnabled
-                            ? buttonColor
-                            : Colors.grey.shade400)
-                        .withOpacity(0.4),
+                    shadowColor:
+                        (isButtonEnabled ? buttonColor : Colors.grey.shade400)
+                            .withOpacity(0.4),
                     elevation: 10,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
@@ -594,3 +681,184 @@ class _EventBodyState extends State<_EventBody> {
   }
 }
 
+class _CoverLetterDialog extends StatefulWidget {
+  final ValueChanged<String> onConfirm;
+
+  const _CoverLetterDialog({required this.onConfirm});
+
+  @override
+  State<_CoverLetterDialog> createState() => _CoverLetterDialogState();
+}
+
+class _CoverLetterDialogState extends State<_CoverLetterDialog> {
+  final TextEditingController _controller = TextEditingController();
+  int _charCount = 0;
+  final int _minLength = 50;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_updateCharCount);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_updateCharCount);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _updateCharCount() {
+    setState(() {
+      _charCount = _controller.text.trim().length;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isValid = _charCount >= _minLength;
+    final l10n = AppLocalizations.of(context);
+
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
+      elevation: 16,
+      backgroundColor: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(
+                  Icons.description_outlined,
+                  color: AppColors.kPrimaryColor,
+                  size: 28,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  l10n.intentLetter,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.kTextColor,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.projectLetterPrompt,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _controller,
+              minLines: 4,
+              maxLines: 6,
+              keyboardType: TextInputType.multiline,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 14,
+                color: AppColors.kTextColor,
+              ),
+              decoration: InputDecoration(
+                hintText: l10n.letterHint,
+                hintStyle: GoogleFonts.plusJakartaSans(
+                  color: Colors.grey.shade400,
+                  fontSize: 14,
+                ),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.all(16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(
+                      color: AppColors.kPrimaryColor, width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                l10n.charCountLabel(_charCount, _minLength),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 12,
+                  color: isValid ? Colors.green : Colors.grey.shade500,
+                  fontWeight: isValid ? FontWeight.bold : FontWeight.normal,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    child: Text(
+                      l10n.cancel,
+                      style: GoogleFonts.plusJakartaSans(
+                        color: Colors.grey.shade700,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isValid
+                        ? () {
+                            Navigator.pop(context);
+                            widget.onConfirm(_controller.text.trim());
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.kPrimaryColor,
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.grey.shade300,
+                      disabledForegroundColor: Colors.grey.shade500,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: isValid ? 4 : 0,
+                    ),
+                    child: Text(
+                      l10n.send,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

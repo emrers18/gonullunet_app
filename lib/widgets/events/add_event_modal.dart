@@ -9,7 +9,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'dart:ui' as ui;
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:gonullunet_app/constants/app_constants.dart';
 
 import '../../logic/add_event_cubit.dart';
@@ -62,6 +65,8 @@ class _AddEventViewState extends State<AddEventView> {
   TimeOfDay? _startTime;
   DateTime? _endDate;
   TimeOfDay? _endTime;
+  DateTime? _lastApplyDate;
+  TimeOfDay? _lastApplyTime;
 
   @override
   void dispose() {
@@ -85,20 +90,25 @@ class _AddEventViewState extends State<AddEventView> {
     }
   }
 
-  Future<void> _pickDateTime({required bool isStart}) async {
+  Future<void> _pickDateTime({required String type}) async {
     DateTime initialDate = DateTime.now();
     DateTime firstDate = DateTime.now();
+    DateTime lastDate = DateTime(2101);
 
-    if (!isStart && _startDate != null) {
+    if (type == 'end' && _startDate != null) {
       initialDate = _startDate!;
       firstDate = _startDate!;
+    } else if (type == 'lastApply') {
+      if (_startDate != null) {
+        lastDate = _startDate!;
+      }
     }
 
     final DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
       firstDate: firstDate,
-      lastDate: DateTime(2101),
+      lastDate: lastDate,
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
@@ -133,7 +143,7 @@ class _AddEventViewState extends State<AddEventView> {
     if (pickedTime == null) return;
 
     setState(() {
-      if (isStart) {
+      if (type == 'start') {
         _startDate = pickedDate;
         _startTime = pickedTime;
         if (_endDate == null || _endDate!.isBefore(_startDate!)) {
@@ -141,9 +151,22 @@ class _AddEventViewState extends State<AddEventView> {
           _endTime = TimeOfDay(
               hour: (pickedTime.hour + 2) % 24, minute: pickedTime.minute);
         }
-      } else {
+        if (_lastApplyDate != null) {
+          final startDateTime = DateTime(_startDate!.year, _startDate!.month,
+              _startDate!.day, _startTime!.hour, _startTime!.minute);
+          final lastApplyDateTime = DateTime(_lastApplyDate!.year, _lastApplyDate!.month,
+              _lastApplyDate!.day, _lastApplyTime!.hour, _lastApplyTime!.minute);
+          if (lastApplyDateTime.isAfter(startDateTime)) {
+            _lastApplyDate = _startDate;
+            _lastApplyTime = _startTime;
+          }
+        }
+      } else if (type == 'end') {
         _endDate = pickedDate;
         _endTime = pickedTime;
+      } else if (type == 'lastApply') {
+        _lastApplyDate = pickedDate;
+        _lastApplyTime = pickedTime;
       }
     });
   }
@@ -159,27 +182,30 @@ class _AddEventViewState extends State<AddEventView> {
         setState(() => _selectedImage = File(pickedFile.path));
       }
     } catch (e) {
-      setState(() => _errorMessage = "Resim seçilemedi: $e");
+      setState(() =>
+          _errorMessage = AppLocalizations.of(context).imagePickFailed('$e'));
     }
   }
 
   void _saveEvent() {
+    final l10n = AppLocalizations.of(context);
     setState(() => _errorMessage = null);
 
     if (_titleController.text.trim().isEmpty) {
-      setState(() => _errorMessage = 'Başlık boş bırakılamaz.');
+      setState(() => _errorMessage = l10n.titleEmpty);
       return;
     }
     if (_selectedAddress == null || _selectedCoordinates == null) {
-      setState(() => _errorMessage = 'Lütfen haritadan bir konum seçin.');
+      setState(() => _errorMessage = l10n.selectLocationOnMap);
       return;
     }
     if (_startDate == null ||
         _startTime == null ||
         _endDate == null ||
-        _endTime == null) {
-      setState(
-          () => _errorMessage = 'Lütfen başlangıç ve bitiş zamanlarını seçin.');
+        _endTime == null ||
+        _lastApplyDate == null ||
+        _lastApplyTime == null) {
+      setState(() => _errorMessage = l10n.selectAllTimes);
       return;
     }
 
@@ -190,9 +216,24 @@ class _AddEventViewState extends State<AddEventView> {
     final DateTime endDateTime = DateTime(_endDate!.year, _endDate!.month,
         _endDate!.day, _endTime!.hour, _endTime!.minute);
 
+    final DateTime lastApplyDateTime = DateTime(_lastApplyDate!.year, _lastApplyDate!.month,
+        _lastApplyDate!.day, _lastApplyTime!.hour, _lastApplyTime!.minute);
+
     // Mantık Kontrolü: Bitiş tarihi başlangıçtan önce olamaz
     if (endDateTime.isBefore(startDateTime)) {
-      setState(() => _errorMessage = 'Bitiş tarihi başlangıçtan önce olamaz!');
+      setState(() => _errorMessage = l10n.endBeforeStart);
+      return;
+    }
+
+    // Mantık Kontrolü: Son başvuru tarihi başlangıçtan sonra olamaz
+    if (lastApplyDateTime.isAfter(startDateTime)) {
+      setState(() => _errorMessage = l10n.lastApplyAfterStart);
+      return;
+    }
+
+    // Mantık Kontrolü: Son başvuru tarihi geçmiş bir zaman olamaz
+    if (lastApplyDateTime.isBefore(DateTime.now())) {
+      setState(() => _errorMessage = l10n.lastApplyInPast);
       return;
     }
 
@@ -213,18 +254,21 @@ class _AddEventViewState extends State<AddEventView> {
           type: _selectedType,
           imageFile: _selectedImage,
           quota: quota,
+          lastApplyDate: lastApplyDateTime,
         );
   }
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final l10n = AppLocalizations.of(context);
+    final localeName = Localizations.localeOf(context).toString();
 
     // Tarih gösterimi için formatlayıcı
     String formatDateTime(DateTime? d, TimeOfDay? t) {
-      if (d == null || t == null) return "Seçiniz";
+      if (d == null || t == null) return l10n.selectPlaceholder;
       final dt = DateTime(d.year, d.month, d.day, t.hour, t.minute);
-      return DateFormat('dd MMM yyyy, HH:mm', 'tr_TR').format(dt);
+      return DateFormat('dd MMM yyyy, HH:mm', localeName).format(dt);
     }
 
     return BlocListener<AddEventCubit, AddEventState>(
@@ -233,14 +277,14 @@ class _AddEventViewState extends State<AddEventView> {
           context.read<EventCubit>().refresh();
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('İçerik başarıyla oluşturuldu!'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context).eventCreatedSuccess),
               backgroundColor: Colors.green,
               behavior: SnackBarBehavior.floating,
             ),
           );
         } else if (state is AddEventError) {
-          setState(() => _errorMessage = state.message);
+          setState(() => _errorMessage = AppMessages.resolve(context, state.message));
         }
       },
       child: Container(
@@ -275,7 +319,7 @@ class _AddEventViewState extends State<AddEventView> {
                   TextButton(
                     onPressed: () => Navigator.pop(context),
                     child: Text(
-                      'İptal',
+                      l10n.cancel,
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey[600],
                         fontWeight: FontWeight.w600,
@@ -283,7 +327,7 @@ class _AddEventViewState extends State<AddEventView> {
                     ),
                   ),
                   Text(
-                    'Yeni Etkinlik',
+                    l10n.newEvent,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -308,7 +352,7 @@ class _AddEventViewState extends State<AddEventView> {
                           ),
                         ),
                         child: Text(
-                          'Yayınla',
+                          l10n.publish,
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.bold,
                           ),
@@ -346,7 +390,7 @@ class _AddEventViewState extends State<AddEventView> {
                     // User Profile Section
                     BlocBuilder<UserCubit, UserState>(
                       builder: (context, state) {
-                        String displayName = 'Gönüllü';
+                        String displayName = l10n.defaultVolunteerName;
                         String? imageUrl;
                         if (state is UserLoaded) {
                           displayName = state.user.displayName;
@@ -387,7 +431,7 @@ class _AddEventViewState extends State<AddEventView> {
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Etkinlik Başlığı',
+                        hintText: l10n.eventTitleHint,
                         hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                       ),
@@ -402,7 +446,7 @@ class _AddEventViewState extends State<AddEventView> {
                         color: Colors.black87,
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Etkinlik hakkında bilgi ver...',
+                        hintText: l10n.eventDescriptionHint,
                         hintStyle: TextStyle(color: Colors.grey[400]),
                         border: InputBorder.none,
                       ),
@@ -414,9 +458,11 @@ class _AddEventViewState extends State<AddEventView> {
                       children: [
                         Expanded(
                           child: _buildDropdown(
-                            label: 'Tür',
+                            label: l10n.type,
                             value: _selectedType,
                             items: _types,
+                            itemLabel: (item) =>
+                                CategoryLocalizer.type(l10n, item),
                             onChanged: (val) =>
                                 setState(() => _selectedType = val!),
                           ),
@@ -424,9 +470,11 @@ class _AddEventViewState extends State<AddEventView> {
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildDropdown(
-                            label: 'Kategori',
+                            label: l10n.category,
                             value: _selectedCategory,
                             items: _categories,
+                            itemLabel: (item) =>
+                                CategoryLocalizer.category(l10n, item),
                             onChanged: (val) =>
                                 setState(() => _selectedCategory = val!),
                           ),
@@ -448,7 +496,7 @@ class _AddEventViewState extends State<AddEventView> {
                         keyboardType: TextInputType.number,
                         style: GoogleFonts.plusJakartaSans(fontSize: 15),
                         decoration: InputDecoration(
-                          hintText: 'Kontenjan (Opsiyonel)',
+                          hintText: l10n.quotaOptional,
                           hintStyle: GoogleFonts.plusJakartaSans(
                             color: Colors.grey[400],
                             fontSize: 14,
@@ -463,7 +511,7 @@ class _AddEventViewState extends State<AddEventView> {
 
                     // Location Picker & Preview
                     Text(
-                      'Konum',
+                      l10n.location,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
@@ -615,7 +663,7 @@ class _AddEventViewState extends State<AddEventView> {
                                               color: AppColors.kPrimaryColor),
                                           const SizedBox(width: 4),
                                           Text(
-                                            'Değiştir',
+                                            l10n.change,
                                             style: GoogleFonts.plusJakartaSans(
                                               fontSize: 11,
                                               fontWeight: FontWeight.bold,
@@ -636,7 +684,7 @@ class _AddEventViewState extends State<AddEventView> {
                                           .withOpacity(0.6)),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Haritadan Konum Seç',
+                                    l10n.selectLocationFromMap,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: AppColors.kPrimaryColor,
                                       fontWeight: FontWeight.w600,
@@ -653,23 +701,31 @@ class _AddEventViewState extends State<AddEventView> {
                       children: [
                         Expanded(
                           child: _buildDateTimePicker(
-                            label: 'Başlangıç',
+                            label: l10n.startLabel,
                             dateTimeText:
                                 formatDateTime(_startDate, _startTime),
-                            onTap: () => _pickDateTime(isStart: true),
+                            onTap: () => _pickDateTime(type: 'start'),
                             icon: Icons.calendar_today_outlined,
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: _buildDateTimePicker(
-                            label: 'Bitiş',
+                            label: l10n.endLabel,
                             dateTimeText: formatDateTime(_endDate, _endTime),
-                            onTap: () => _pickDateTime(isStart: false),
+                            onTap: () => _pickDateTime(type: 'end'),
                             icon: Icons.event_available_outlined,
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildDateTimePicker(
+                      label: l10n.lastApplyDateLabel,
+                      dateTimeText: formatDateTime(_lastApplyDate, _lastApplyTime),
+                      onTap: () => _pickDateTime(type: 'lastApply'),
+                      icon: Icons.timer_outlined,
                     ),
                     const SizedBox(height: 20),
 
@@ -721,7 +777,7 @@ class _AddEventViewState extends State<AddEventView> {
                                       size: 32, color: Colors.grey[400]),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Görsel Ekle (Opsiyonel)',
+                                    l10n.addImageOptional,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.grey[500],
                                       fontWeight: FontWeight.w500,
@@ -747,6 +803,7 @@ class _AddEventViewState extends State<AddEventView> {
     required String value,
     required List<String> items,
     required ValueChanged<String?> onChanged,
+    String Function(String)? itemLabel,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -780,7 +837,7 @@ class _AddEventViewState extends State<AddEventView> {
               items: items.map((String item) {
                 return DropdownMenuItem<String>(
                   value: item,
-                  child: Text(item),
+                  child: Text(itemLabel != null ? itemLabel(item) : item),
                 );
               }).toList(),
               onChanged: onChanged,
@@ -830,7 +887,8 @@ class _AddEventViewState extends State<AddEventView> {
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: dateTimeText == 'Seçiniz'
+                      color: dateTimeText ==
+                              AppLocalizations.of(context).selectPlaceholder
                           ? Colors.grey[400]
                           : Colors.black87,
                     ),

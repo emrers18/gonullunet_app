@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/logic/post_state.dart';
 import 'package:gonullunet_app/models/post_model.dart';
@@ -41,7 +43,7 @@ class _MyPostsView extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
-          'Gönderilerim',
+          AppLocalizations.of(context).myPosts,
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
@@ -54,7 +56,7 @@ class _MyPostsView extends StatelessWidget {
           if (state is PostError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(state.message),
+                content: Text(AppMessages.resolve(context, state.message)),
                 backgroundColor: Colors.red.shade600,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
@@ -96,7 +98,7 @@ class _MyPostsView extends StatelessWidget {
                       size: 52, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   Text(
-                    state.message,
+                    AppMessages.resolve(context, state.message),
                     textAlign: TextAlign.center,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.grey.shade500,
@@ -132,7 +134,7 @@ class _MyPostsView extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'Henüz hiç gönderiniz yok',
+            AppLocalizations.of(context).noPostsOwn,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.bold,
@@ -141,7 +143,7 @@ class _MyPostsView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Anasayfadaki + butonunu kullanarak\nilk gönderinizi paylaşabilirsiniz.',
+            AppLocalizations.of(context).shareFirstPost,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
@@ -170,7 +172,7 @@ class _MyPostCard extends StatelessWidget {
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Gönderiyi Düzenle',
+          AppLocalizations.of(context).editPost,
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             color: AppColors.kTextColor,
@@ -184,7 +186,7 @@ class _MyPostCard extends StatelessWidget {
               TextFormField(
                 controller: titleController,
                 decoration: InputDecoration(
-                  labelText: 'Başlık',
+                  labelText: AppLocalizations.of(context).titleFieldLabel,
                   labelStyle: GoogleFonts.plusJakartaSans(
                       color: Colors.grey),
                   border: OutlineInputBorder(
@@ -196,7 +198,7 @@ class _MyPostCard extends StatelessWidget {
                 ),
                 style: GoogleFonts.plusJakartaSans(),
                 validator: (v) => (v == null || v.trim().isEmpty)
-                    ? 'Başlık boş olamaz'
+                    ? AppLocalizations.of(context).titleCannotBeEmpty
                     : null,
               ),
               const SizedBox(height: 12),
@@ -204,7 +206,7 @@ class _MyPostCard extends StatelessWidget {
                 controller: descController,
                 maxLines: 4,
                 decoration: InputDecoration(
-                  labelText: 'Açıklama',
+                  labelText: AppLocalizations.of(context).descriptionLabel,
                   alignLabelWithHint: true,
                   labelStyle: GoogleFonts.plusJakartaSans(
                       color: Colors.grey),
@@ -223,7 +225,7 @@ class _MyPostCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text('İptal',
+            child: Text(AppLocalizations.of(context).cancel,
                 style: GoogleFonts.plusJakartaSans(color: Colors.grey)),
           ),
           ElevatedButton(
@@ -243,7 +245,7 @@ class _MyPostCard extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text('Kaydet',
+            child: Text(AppLocalizations.of(context).save,
                 style:
                     GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
           ),
@@ -258,20 +260,20 @@ class _MyPostCard extends StatelessWidget {
       builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
-          'Gönderiyi Sil',
+          AppLocalizations.of(context).deletePost,
           style: GoogleFonts.plusJakartaSans(
             fontWeight: FontWeight.bold,
             color: AppColors.kTextColor,
           ),
         ),
         content: Text(
-          'Bu gönderiyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+          AppLocalizations.of(context).deletePostConfirm,
           style: GoogleFonts.plusJakartaSans(color: Colors.grey),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogCtx).pop(),
-            child: Text('İptal',
+            child: Text(AppLocalizations.of(context).cancel,
                 style: GoogleFonts.plusJakartaSans(color: Colors.grey)),
           ),
           ElevatedButton(
@@ -362,7 +364,7 @@ class _MyPostCard extends StatelessWidget {
                           const Icon(Icons.edit_outlined,
                                size: 18, color: Colors.blue),
                           const SizedBox(width: 10),
-                          Text('Düzenle',
+                          Text(AppLocalizations.of(context).edit,
                               style: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.w500)),
                         ],
@@ -375,7 +377,7 @@ class _MyPostCard extends StatelessWidget {
                           Icon(Icons.delete_outline,
                               size: 18, color: Colors.red.shade500),
                           const SizedBox(width: 10),
-                          Text('Sil',
+                          Text(AppLocalizations.of(context).delete,
                               style: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.w500,
                                   color: Colors.red.shade500)),
@@ -439,7 +441,7 @@ class _MyPostCard extends StatelessWidget {
                       size: 15, color: Colors.grey.shade400),
                   const SizedBox(width: 4),
                   Text(
-                    '${post.likeCount} beğeni',
+                    AppLocalizations.of(context).likeCountLabel(post.likeCount),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: Colors.grey.shade400,
@@ -450,7 +452,7 @@ class _MyPostCard extends StatelessWidget {
                       size: 15, color: Colors.grey.shade400),
                   const SizedBox(width: 4),
                   Text(
-                    '${post.commentCount} yorum',
+                    AppLocalizations.of(context).commentCountLabel(post.commentCount),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: Colors.grey.shade400,
@@ -468,7 +470,7 @@ class _MyPostCard extends StatelessWidget {
                       size: 15, color: Colors.grey.shade400),
                   const SizedBox(width: 4),
                   Text(
-                    '${post.likeCount} beğeni',
+                    AppLocalizations.of(context).likeCountLabel(post.likeCount),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: Colors.grey.shade400,
@@ -479,7 +481,7 @@ class _MyPostCard extends StatelessWidget {
                       size: 15, color: Colors.grey.shade400),
                   const SizedBox(width: 4),
                   Text(
-                    '${post.commentCount} yorum',
+                    AppLocalizations.of(context).commentCountLabel(post.commentCount),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 12,
                       color: Colors.grey.shade400,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import '../utils/app_colors.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
@@ -14,6 +15,7 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -35,35 +37,35 @@ class CustomBottomNavBar extends StatelessWidget {
               _NavItem(
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home_rounded,
-                label: 'Ana Sayfa',
+                label: l10n.navHome,
                 isActive: currentIndex == 0,
                 onTap: () => onTap(0),
               ),
               _NavItem(
                 icon: Icons.explore_outlined,
                 activeIcon: Icons.explore_rounded,
-                label: 'Keşfet',
+                label: l10n.navDiscover,
                 isActive: currentIndex == 1,
                 onTap: () => onTap(1),
               ),
               _NavItem(
                 icon: Icons.corporate_fare_outlined,
                 activeIcon: Icons.corporate_fare_rounded,
-                label: 'Kurumlar',
+                label: l10n.navOrganizations,
                 isActive: currentIndex == 2,
                 onTap: () => onTap(2),
               ),
               _NavItem(
                 icon: Icons.chat_bubble_outline_rounded,
                 activeIcon: Icons.chat_bubble_rounded,
-                label: 'Mesajlar',
+                label: l10n.navMessages,
                 isActive: currentIndex == 3,
                 onTap: () => onTap(3),
               ),
               _NavItem(
                 icon: Icons.person_outline_rounded,
                 activeIcon: Icons.person_rounded,
-                label: 'Profil',
+                label: l10n.navProfile,
                 isActive: currentIndex == 4,
                 onTap: () => onTap(4),
               ),

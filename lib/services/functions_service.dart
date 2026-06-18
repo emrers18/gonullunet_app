@@ -128,6 +128,7 @@ class FunctionsService {
     required String type,
     String? imageUrl,
     int? quota,
+    DateTime? lastApplyDate,
   }) async {
     final callable = _functions.httpsCallable(
       'createEvent',
@@ -145,6 +146,7 @@ class FunctionsService {
       'type': type,
       if (imageUrl != null) 'imageUrl': imageUrl,
       if (quota != null) 'quota': quota,
+      if (lastApplyDate != null) 'lastApplyDate': lastApplyDate.toUtc().toIso8601String(),
     };
 
     final result = await callable.call(data);
@@ -281,6 +283,7 @@ class FunctionsService {
     String? type,
     String? imageUrl,
     int? quota,
+    DateTime? lastApplyDate,
   }) async {
     final callable = _functions.httpsCallable('updateEvent');
     final Map<String, dynamic> data = {'eventId': eventId};
@@ -294,6 +297,7 @@ class FunctionsService {
     if (type != null) data['type'] = type;
     if (imageUrl != null) data['imageUrl'] = imageUrl;
     if (quota != null) data['quota'] = quota;
+    if (lastApplyDate != null) data['lastApplyDate'] = lastApplyDate.toUtc().toIso8601String();
     await callable.call(data);
   }
 

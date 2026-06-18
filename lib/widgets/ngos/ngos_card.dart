@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -174,7 +175,10 @@ class NgoCard extends StatelessWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              ngo.location.isNotEmpty ? ngo.location : 'Lokasyon Belirtilmemiş',
+                              ngo.location.isNotEmpty
+                                  ? ngo.location
+                                  : AppLocalizations.of(context)
+                                      .locationUnspecified,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
@@ -207,7 +211,7 @@ class NgoCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Text(
-                            'İncele',
+                            AppLocalizations.of(context).examine,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               color: AppColors.kPrimaryColor,

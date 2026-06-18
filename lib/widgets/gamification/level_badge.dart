@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import '../../utils/gamification_utils.dart';
 
 class LevelBadge extends StatelessWidget {
@@ -47,7 +49,8 @@ class LevelBadge extends StatelessWidget {
           if (showTitle) ...[
             const SizedBox(width: 4),
             Text(
-              level.title,
+              CategoryLocalizer.level(
+                  AppLocalizations.of(context), level.title),
               style: GoogleFonts.plusJakartaSans(
                 color: level.color,
                 fontSize: fontSize,

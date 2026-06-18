@@ -6,6 +6,7 @@ import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:gonullunet_app/services/image_compress_service.dart';
 import 'package:gonullunet_app/services/functions_service.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 
 class PostRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -69,7 +70,7 @@ class PostRepository {
 
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      throw Exception("Resim yükleme hatası: $e");
+      throw Exception(AppErrorCodes.imageUpload);
     }
   }
 

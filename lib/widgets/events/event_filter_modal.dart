@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:intl/intl.dart';
 
 import '../../constants/app_constants.dart';
@@ -91,6 +93,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
       decoration: const BoxDecoration(
@@ -119,9 +122,9 @@ class _EventFilterModalState extends State<EventFilterModal> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Filtrele',
-                style: TextStyle(
+              Text(
+                l10n.filterTitle,
+                style: const TextStyle(
                   fontSize: 24, // text-2xl
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1F2937), // text-gray-900
@@ -133,7 +136,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
                   foregroundColor: Colors.red[500], // text-red-500
                   textStyle: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                child: const Text('Temizle'),
+                child: Text(l10n.clear),
               ),
             ],
           ),
@@ -144,7 +147,8 @@ class _EventFilterModalState extends State<EventFilterModal> {
             value: _selectedCity,
             icon: const SizedBox
                 .shrink(), // Varsayılan ikonu gizle, decoration'da var
-            decoration: _buildInputDecoration('Şehir', Icons.arrow_drop_down),
+            decoration:
+                _buildInputDecoration(l10n.cityLabel, Icons.arrow_drop_down),
             items: _cities.map((city) {
               return DropdownMenuItem(value: city, child: Text(city));
             }).toList(),
@@ -157,10 +161,12 @@ class _EventFilterModalState extends State<EventFilterModal> {
           DropdownButtonFormField<String>(
             value: _selectedCategory,
             icon: const SizedBox.shrink(),
-            decoration:
-                _buildInputDecoration('Etkinlik Türü', Icons.arrow_drop_down),
+            decoration: _buildInputDecoration(
+                l10n.eventCategoryLabel, Icons.arrow_drop_down),
             items: _categories.map((cat) {
-              return DropdownMenuItem(value: cat, child: Text(cat));
+              return DropdownMenuItem(
+                  value: cat,
+                  child: Text(CategoryLocalizer.category(l10n, cat)));
             }).toList(),
             onChanged: (val) => setState(() => _selectedCategory = val),
             dropdownColor: Colors.white,
@@ -183,7 +189,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
                 children: [
                   Text(
                     _selectedDateRange == null
-                        ? 'Tarih Aralığı Seç'
+                        ? l10n.selectDateRange
                         : '${DateFormat('dd/MM').format(_selectedDateRange!.start)} - ${DateFormat('dd/MM').format(_selectedDateRange!.end)}',
                     style: TextStyle(
                       fontSize: 16,
@@ -213,9 +219,9 @@ class _EventFilterModalState extends State<EventFilterModal> {
                 borderRadius: BorderRadius.circular(12), // rounded-xl
               ),
             ),
-            child: const Text(
-              'Uygula',
-              style: TextStyle(
+            child: Text(
+              l10n.apply,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
               ),

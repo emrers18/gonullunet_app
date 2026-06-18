@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/ngos/ngos_card.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,7 +102,7 @@ class _NgosViewState extends State<NgosView> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Şehre Göre Filtrele',
+                        AppLocalizations.of(context).filterByCity,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -115,7 +117,7 @@ class _NgosViewState extends State<NgosView> {
                             Navigator.pop(sheetContext);
                           },
                           child: Text(
-                            'Temizle',
+                            AppLocalizations.of(context).clear,
                             style: GoogleFonts.plusJakartaSans(
                               color: AppColors.kSecondaryColor,
                               fontWeight: FontWeight.w600,
@@ -139,13 +141,14 @@ class _NgosViewState extends State<NgosView> {
                         });
                       },
                       style: GoogleFonts.plusJakartaSans(fontSize: 14),
-                      decoration: const InputDecoration(
-                        hintText: "Şehir ara...",
-                        hintStyle: TextStyle(color: Colors.grey),
-                        prefixIcon:
-                            Icon(Icons.search, size: 20, color: Colors.grey),
+                      decoration: InputDecoration(
+                        hintText: AppLocalizations.of(context).searchCity,
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        prefixIcon: const Icon(Icons.search,
+                            size: 20, color: Colors.grey),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 15),
+                        contentPadding:
+                            const EdgeInsets.symmetric(vertical: 15),
                       ),
                     ),
                   ),
@@ -155,7 +158,7 @@ class _NgosViewState extends State<NgosView> {
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text(
-                          'Henüz şehir bilgisi mevcut değil.',
+                          AppLocalizations.of(context).noCityInfo,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.grey,
                             fontSize: 14,
@@ -168,7 +171,7 @@ class _NgosViewState extends State<NgosView> {
                       padding: const EdgeInsets.symmetric(vertical: 24),
                       child: Center(
                         child: Text(
-                          'Eşleşen şehir bulunamadı.',
+                          AppLocalizations.of(context).noCityMatch,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.grey,
                             fontSize: 14,
@@ -256,7 +259,7 @@ class _NgosViewState extends State<NgosView> {
                   child: Row(
                     children: [
                       Text(
-                        'Tüm Kurumlar',
+                        AppLocalizations.of(context).allOrganizations,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 17,
                           fontWeight: FontWeight.bold,
@@ -323,7 +326,7 @@ class _NgosViewState extends State<NgosView> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Kurumlar',
+                AppLocalizations.of(context).navOrganizations,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
                   fontSize: 28,
@@ -333,7 +336,7 @@ class _NgosViewState extends State<NgosView> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Sivil toplum kuruluşlarını keşfet ve destek ol',
+                AppLocalizations.of(context).ngosSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 13,
@@ -451,7 +454,7 @@ class _NgosViewState extends State<NgosView> {
 
     if (state is NgoError) {
       return SliverFillRemaining(
-        child: Center(child: Text(state.message)),
+        child: Center(child: Text(AppMessages.resolve(context, state.message))),
       );
     }
 
@@ -465,7 +468,7 @@ class _NgosViewState extends State<NgosView> {
                 Icon(Icons.search_off_rounded,
                     size: 64, color: Colors.grey.shade300),
                 const SizedBox(height: 16),
-                Text('Sonuç bulunamadı.',
+                Text(AppLocalizations.of(context).noResults,
                     style: TextStyle(color: Colors.grey.shade500)),
               ],
             ),

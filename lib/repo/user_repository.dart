@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import '../services/functions_service.dart';
 import '../services/image_compress_service.dart';
 import '../models/user_model.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 
 class UserRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -39,7 +40,7 @@ class UserRepository {
 
   Future<String> uploadProfileImage(File imageFile) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
+    if (user == null) throw Exception(AppErrorCodes.sessionNotFound);
 
     // Görseli sıkıştır (max 1080px, %80 kalite)
     final Uint8List? compressed =
@@ -55,7 +56,10 @@ class UserRepository {
             compressed,
             SettableMetadata(contentType: 'image/jpeg'),
           )
-        : ref.putFile(imageFile);
+        : ref.putFile(
+            imageFile,
+            SettableMetadata(contentType: 'image/jpeg'),
+          );
 
     final TaskSnapshot snapshot = await uploadTask;
     return await snapshot.ref.getDownloadURL();
@@ -71,7 +75,7 @@ class UserRepository {
     String? imageUrl,
   }) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
+    if (user == null) throw Exception(AppErrorCodes.sessionNotFound);
 
     final Map<String, dynamic> data = {
       'stkName': stkName,
@@ -114,7 +118,7 @@ class UserRepository {
     File? imageFile,
   }) async {
     final user = _auth.currentUser;
-    if (user == null) throw Exception("Kullanıcı oturumu bulunamadı.");
+    if (user == null) throw Exception(AppErrorCodes.sessionNotFound);
 
     String? imageUrl;
     if (imageFile != null) {

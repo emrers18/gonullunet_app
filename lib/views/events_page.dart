@@ -5,6 +5,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
@@ -162,8 +164,8 @@ class _EventsPageState extends State<EventsPage> {
                 children: [
                   TileLayer(
                     urlTemplate:
-                        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: const ['a', 'b', 'c'],
+                        'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+                    subdomains: const ['a', 'b', 'c', 'd'],
                     userAgentPackageName: 'com.gonullunet.gonullunet_app',
                   ),
                   if (markers.isNotEmpty) MarkerLayer(markers: markers),
@@ -239,7 +241,7 @@ class _EventsPageState extends State<EventsPage> {
                           ),
                           const SizedBox(width: 5),
                           Text(
-                            'Tam Ekran',
+                            AppLocalizations.of(context).fullScreen,
                             style: GoogleFonts.plusJakartaSans(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -323,7 +325,7 @@ class _EventsPageState extends State<EventsPage> {
               Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey[300]),
               const SizedBox(height: 16),
               Text(
-                state.message,
+                AppMessages.resolve(context, state.message),
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.grey[500], fontSize: 15),
               ),
@@ -382,7 +384,7 @@ class _EventsPageState extends State<EventsPage> {
               child: Row(
                 children: [
                   Text(
-                    'Tüm Etkinlikler',
+                    AppLocalizations.of(context).allEvents,
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 17,
                       fontWeight: FontWeight.bold,
@@ -422,15 +424,15 @@ class _EventsPageState extends State<EventsPage> {
                     Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
                     const SizedBox(height: 16),
                     Text(
-                      'Henüz hiç etkinlik yok\nveya filtreye uygun sonuç bulunamadı.',
+                      AppLocalizations.of(context).noEventsFound,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.grey[500], fontSize: 15),
                     ),
                     TextButton(
                       onPressed: () =>
                           context.read<EventCubit>().clearFilters(),
-                      child: const Text('Filtreleri Temizle',
-                          style: TextStyle(color: AppColors.primaryColor)),
+                      child: Text(AppLocalizations.of(context).clearFilters,
+                          style: const TextStyle(color: AppColors.primaryColor)),
                     ),
                   ],
                 ),
@@ -508,7 +510,7 @@ class _EventsPageState extends State<EventsPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Etkinlikler',
+                              AppLocalizations.of(context).events,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.white,
                                 fontSize: 28,
@@ -518,7 +520,7 @@ class _EventsPageState extends State<EventsPage> {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              'Gönüllü etkinlikleri keşfet ve katıl',
+                              AppLocalizations.of(context).eventsSubtitle,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.white.withOpacity(0.8),
                                 fontSize: 12,
@@ -543,7 +545,7 @@ class _EventsPageState extends State<EventsPage> {
                                   color: Colors.white, size: 16),
                               const SizedBox(width: 6),
                               Text(
-                                'Filtre',
+                                AppLocalizations.of(context).filter,
                                 style: GoogleFonts.plusJakartaSans(
                                   color: Colors.white,
                                   fontSize: 13,
@@ -562,11 +564,12 @@ class _EventsPageState extends State<EventsPage> {
                     children: [
                       _buildStatBadge(
                           icon: Icons.event_rounded,
-                          label: '$upcoming Yaklaşan'),
+                          label: AppLocalizations.of(context)
+                              .statUpcoming(upcoming)),
                       const SizedBox(width: 10),
                       _buildStatBadge(
                           icon: Icons.location_on_rounded,
-                          label: '$onMap Haritada'),
+                          label: AppLocalizations.of(context).statOnMap(onMap)),
                     ],
                   ),
                   const SizedBox(height: 20),

@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import 'auth_gate.dart';
@@ -160,6 +161,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       // Reload sonrası güncel user nesnesini yeniden al
       final refreshedUser = FirebaseAuth.instance.currentUser;
       if (refreshedUser?.emailVerified == true) {
+        // ID token'ı zorla yenile ki email_verified: true claim'i Firestore kuralları tarafından görülebilsin
+        await refreshedUser?.getIdToken(true);
         _stopAllTimers();
         if (mounted) {
           _navigateToHome();
@@ -200,15 +203,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     });
 
     try {
+      final l10n = AppLocalizations.of(context);
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) throw Exception('Kullanıcı oturumu bulunamadı.');
+      if (user == null) throw Exception(l10n.userSessionNotFound);
 
       await user.sendEmailVerification();
 
       if (!mounted) return;
 
       // Başarıyla gönderildi
-      _showSnackBar('Doğrulama e-postası tekrar gönderildi.', isError: false);
+      _showSnackBar(l10n.verificationEmailResent, isError: false);
 
       // Eğer timeout olduysa, yeni 3 dakikalık sayacı başlat
       if (_isTimedOut) {
@@ -221,20 +225,22 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       }
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
+      final l10n = AppLocalizations.of(context);
       if (e.code == 'too-many-requests') {
         _showSnackBar(
-          'Çok fazla istek gönderildi. Lütfen birkaç dakika bekleyin.',
+          l10n.tooManyRequests,
           isError: true,
         );
       } else {
         _showSnackBar(
-          'E-posta gönderilemedi: ${e.message ?? e.code}',
+          l10n.emailSendFailed(e.message ?? e.code),
           isError: true,
         );
       }
     } catch (e) {
       if (!mounted) return;
-      _showSnackBar('Beklenmeyen hata: $e', isError: true);
+      _showSnackBar(AppLocalizations.of(context).unexpectedError('$e'),
+          isError: true);
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
@@ -354,7 +360,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
               // ── Başlık ───────────────────────────────────────────────────
               Text(
-                'E-postanızı Doğrulayın',
+                AppLocalizations.of(context).verifyYourEmail,
                 style: GoogleFonts.inter(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
@@ -433,7 +439,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       child: IconButton(
         icon: const Icon(Icons.arrow_back, color: _kText),
         onPressed: _cancelAndGoBack,
-        tooltip: 'Kayıt işlemini iptal et',
+        tooltip: AppLocalizations.of(context).cancelRegistrationTooltip,
       ),
     );
   }
@@ -527,8 +533,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           ),
           const SizedBox(height: 12),
           Text(
-            'Bu adrese bir doğrulama bağlantısı gönderdik. '
-            'Bağlantıya tıkladıktan sonra uygulama otomatik olarak devam edecek.',
+            AppLocalizations.of(context).verificationLinkSent,
             style: GoogleFonts.inter(
               fontSize: 13,
               color: _kSubtext,
@@ -583,7 +588,9 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                     ),
                   ),
                   Text(
-                    _isTimedOut ? 'doldu' : 'kalan',
+                    _isTimedOut
+                        ? AppLocalizations.of(context).countdownExpired
+                        : AppLocalizations.of(context).countdownRemaining,
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       color: _kSubtext,
@@ -618,8 +625,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'E-posta kutunuzu kontrol edin. Doğrulama bağlantısına '
-              'tıkladıktan sonra otomatik olarak yönlendirileceksiniz.',
+              AppLocalizations.of(context).checkInbox,
               style: GoogleFonts.inter(
                 fontSize: 13,
                 color: Colors.blue.shade700,
@@ -652,7 +658,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Süre Doldu!',
+                  AppLocalizations.of(context).timeUp,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -661,8 +667,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Doğrulama bağlantısının süresi geçti. '
-                  'Aşağıdaki butona basarak yeni bir bağlantı gönderebilirsiniz.',
+                  AppLocalizations.of(context).linkExpiredDesc,
                   style: GoogleFonts.inter(
                     fontSize: 13,
                     color: Colors.red.shade600,
@@ -678,14 +683,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   }
 
   Widget _buildResendButton() {
+    final l10n = AppLocalizations.of(context);
     final bool isActive = _canResend && !_isLoading;
     final String label = _isLoading
-        ? 'Gönderiliyor...'
+        ? l10n.sending
         : _isTimedOut
-            ? 'Yeni Bağlantı Gönder'
+            ? l10n.sendNewLink
             : _canResend
-                ? 'Bağlantıyı Yeniden Gönder'
-                : 'Yeniden Gönder ($_resendCooldown s)';
+                ? l10n.resendLink
+                : l10n.resendIn(_resendCooldown);
 
     return SizedBox(
       width: double.infinity,
@@ -739,7 +745,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       onPressed: _cancelAndGoBack,
       icon: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
       label: Text(
-        'Vazgeç — Giriş ekranına dön',
+        AppLocalizations.of(context).cancelReturnLogin,
         style: GoogleFonts.inter(
           color: Colors.grey.shade500,
           fontSize: 13,

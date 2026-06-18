@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'location_state.dart';
 
 class LocationCubit extends Cubit<LocationState> {
@@ -37,7 +38,7 @@ class LocationCubit extends Cubit<LocationState> {
 
       await _getAddressFromLatLng(currentLatLng, moveCamera: true);
     } catch (e) {
-      emit(LocationError("Konum alınamadı: $e"));
+      emit(const LocationError(AppErrorCodes.locationFailed));
       await _getAddressFromLatLng(_defaultLocation, moveCamera: true);
     }
   }
@@ -57,10 +58,10 @@ class LocationCubit extends Cubit<LocationState> {
         LatLng newPos = LatLng(loc.latitude, loc.longitude);
         await _getAddressFromLatLng(newPos, moveCamera: true);
       } else {
-        emit(const LocationError("Konum bulunamadı."));
+        emit(const LocationError(AppErrorCodes.locationNotFound));
       }
     } catch (e) {
-      emit(const LocationError("Arama sırasında hata oluştu."));
+      emit(const LocationError(AppErrorCodes.searchFailed));
     }
   }
 
@@ -72,7 +73,7 @@ class LocationCubit extends Cubit<LocationState> {
         position.longitude,
       );
 
-      String address = "Bilinmeyen Konum";
+      String address = AppErrorCodes.unknownLocation;
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         address =
@@ -89,7 +90,7 @@ class LocationCubit extends Cubit<LocationState> {
     } catch (e) {
       emit(LocationLoaded(
         location: position,
-        address: "Adres detayı alınamadı",
+        address: AppErrorCodes.addressDetail,
         shouldMoveCamera: moveCamera,
       ));
     }

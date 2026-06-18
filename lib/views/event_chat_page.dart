@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/event_chat_cubit/event_chat_cubit.dart';
 import 'package:gonullunet_app/logic/event_chat_cubit/event_chat_state.dart';
 import 'package:gonullunet_app/repo/event_chat_repository.dart';
@@ -110,7 +112,7 @@ class _EventChatView extends StatelessWidget {
                   if (state is EventChatError) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(state.message),
+                        content: Text(AppMessages.resolve(context, state.message)),
                         backgroundColor: Colors.red.shade600,
                         behavior: SnackBarBehavior.floating,
                         shape: RoundedRectangleBorder(
@@ -150,7 +152,8 @@ class _EventChatView extends StatelessWidget {
                                 size: 52, color: Colors.grey.shade300),
                             const SizedBox(height: 16),
                             Text(
-                              'Bir hata oluştu:\n${state.message}',
+                              AppLocalizations.of(context).genericErrorMessage(
+                                  AppMessages.resolve(context, state.message)),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.grey.shade500,

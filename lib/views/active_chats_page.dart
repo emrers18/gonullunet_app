@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/logic/active_chats_cubit/active_chats_cubit.dart';
@@ -45,7 +47,8 @@ class _ActiveChatsView extends StatelessWidget {
                 }
 
                 if (state is ActiveChatsError) {
-                  return _buildError(state.message, context);
+                  return _buildError(
+                      AppMessages.resolve(context, state.message), context);
                 }
 
                 if (state is ActiveChatsLoaded) {
@@ -101,7 +104,7 @@ class _ActiveChatsView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Mesajlar',
+                    AppLocalizations.of(context).navMessages,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
                       fontSize: 28,
@@ -126,7 +129,7 @@ class _ActiveChatsView extends StatelessWidget {
               ),
               const SizedBox(height: 6),
               Text(
-                'Katıldığın etkinliklerin grup sohbetleri',
+                AppLocalizations.of(context).groupChatsSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 13,
@@ -214,7 +217,7 @@ class _ActiveChatsView extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             Text(
-              'Bağlantı Hatası',
+              AppLocalizations.of(context).connectionError,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -235,7 +238,7 @@ class _ActiveChatsView extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => context.read<ActiveChatsCubit>().reload(),
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Tekrar Dene'),
+              label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1565C0),
                 foregroundColor: Colors.white,
@@ -284,7 +287,7 @@ class _ActiveChatsView extends StatelessWidget {
             ),
             const SizedBox(height: 28),
             Text(
-              'Henüz aktif sohbet yok',
+              AppLocalizations.of(context).noActiveChats,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 19,
                 fontWeight: FontWeight.bold,
@@ -293,7 +296,7 @@ class _ActiveChatsView extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Etkinliklere katılarak\ngrup sohbetlerine dahil ol!',
+              AppLocalizations.of(context).joinEventsForChats,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 14,
@@ -305,7 +308,7 @@ class _ActiveChatsView extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: () => Navigator.maybePop(context),
               icon: const Icon(Icons.explore_rounded, size: 18),
-              label: const Text('Etkinlikleri Keşfet'),
+              label: Text(AppLocalizations.of(context).discoverEvents),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1565C0),
                 foregroundColor: Colors.white,
@@ -349,7 +352,8 @@ class _ChatCard extends StatelessWidget {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kullanıcı bilgisi alınamadı.')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context).userInfoUnavailable)),
       );
     }
   }

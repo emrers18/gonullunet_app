@@ -20,10 +20,13 @@ class ManageApplicationsCubit extends Cubit<ManageApplicationsState> {
   // Başvuruları Listele
   Future<void> loadApplications() async {
     try {
+      if (isClosed) return;
       emit(ManageApplicationsLoading());
       final apps = await _eventRepository.getEventApplications(eventId);
+      if (isClosed) return;
       emit(ManageApplicationsLoaded(apps));
     } catch (e) {
+      if (isClosed) return;
       emit(ManageApplicationsError(FirebaseErrorTranslator.translate(e)));
     }
   }
@@ -36,7 +39,9 @@ class ManageApplicationsCubit extends Cubit<ManageApplicationsState> {
       // Listeyi güncel durumla yenile
       await loadApplications();
     } catch (e) {
+      if (isClosed) return;
       emit(ManageApplicationsError(FirebaseErrorTranslator.translate(e)));
+      if (isClosed) return;
       loadApplications();
     }
   }

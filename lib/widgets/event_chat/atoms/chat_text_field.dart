@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
 
 class ChatTextField extends StatelessWidget {
   final TextEditingController controller;
-  final String hintText;
+  final String? hintText;
   final Function(String)? onSubmitted;
   final FocusNode? focusNode;
 
   const ChatTextField({
     super.key,
     required this.controller,
-    this.hintText = 'Mesaj yazın...',
+    this.hintText,
     this.onSubmitted,
     this.focusNode,
   });
@@ -24,7 +25,7 @@ class ChatTextField extends StatelessWidget {
       keyboardType: TextInputType.multiline,
       onSubmitted: onSubmitted,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: hintText ?? AppLocalizations.of(context).messageHint,
         border: InputBorder.none,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16.0,

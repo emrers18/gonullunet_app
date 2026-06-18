@@ -6,6 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
@@ -132,7 +134,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
       backgroundColor: AppColors.kBackgroundColor,
       appBar: AppBar(
         title: Text(
-          'Profilini Düzenle',
+          AppLocalizations.of(context).editProfile,
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
@@ -151,8 +153,8 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
         listener: (context, state) {
           if (state is EditProfileSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Profil başarıyla güncellendi!'),
+              SnackBar(
+                content: Text(AppLocalizations.of(context).profileUpdatedSuccess),
                 backgroundColor: Colors.green,
               ),
             );
@@ -160,7 +162,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
           } else if (state is EditProfileError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                  content: Text(state.message), backgroundColor: Colors.red),
+                  content: Text(AppMessages.resolve(context, state.message)), backgroundColor: Colors.red),
             );
           }
         },
@@ -188,13 +190,13 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
             }
 
             if (state is EditProfileUpdating) {
-              return const Center(
+              return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    AppLoadingIndicator(),
-                    SizedBox(height: 16),
-                    Text("Profil güncelleniyor..."),
+                    const AppLoadingIndicator(),
+                    const SizedBox(height: 16),
+                    Text(AppLocalizations.of(context).profileUpdating),
                   ],
                 ),
               );
@@ -224,7 +226,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                           const SizedBox(width: 10),
                           Expanded(
                             child: Text(
-                              'Profil bilgileriniz başvuru yapacağınız etkinliğin sahibi STK tarafından görüntülenecektir.',
+                              AppLocalizations.of(context).profileVisibilityNote,
                               style: GoogleFonts.plusJakartaSans(
                                 fontSize: 13,
                                 color: Colors.orange.shade900,
@@ -313,17 +315,16 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     const SizedBox(height: 28),
 
                     // --- Hakkımda ---
-                    _buildLabel("Hakkımda"),
+                    _buildLabel(AppLocalizations.of(context).aboutMe),
                     _buildTextArea(
                       controller: _bioController,
-                      hint:
-                          "Kendinizi tanıtın, motivasyonunuzu ve neden gönüllülük yaptığınızı yazın...",
+                      hint: AppLocalizations.of(context).aboutMeHint,
                       maxLines: 4,
                     ),
                     const SizedBox(height: 20),
 
                     // --- İlgi Alanları ---
-                    _buildLabel("İlgi Alanları"),
+                    _buildLabel(AppLocalizations.of(context).interests),
                     _buildChipSelector(
                       available: AppConstants.volunteerInterests,
                       selected: _selectedInterests,
@@ -333,7 +334,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     const SizedBox(height: 20),
 
                     // --- Yetenekler ---
-                    _buildLabel("Yetenekler"),
+                    _buildLabel(AppLocalizations.of(context).skills),
                     _buildChipSelector(
                       available: AppConstants.volunteerSkills,
                       selected: _selectedSkills,
@@ -343,7 +344,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     const SizedBox(height: 20),
 
                     // --- Doğum Tarihi ---
-                    _buildLabel("Doğum Tarihi"),
+                    _buildLabel(AppLocalizations.of(context).birthDate),
                     GestureDetector(
                       onTap: _selectBirthDate,
                       child: Container(
@@ -361,9 +362,12 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                             const SizedBox(width: 12),
                             Text(
                               _birthDate != null
-                                  ? DateFormat('d MMMM yyyy', 'tr_TR')
+                                  ? DateFormat('d MMMM yyyy',
+                                          Localizations.localeOf(context)
+                                              .toString())
                                       .format(_birthDate!)
-                                  : 'Doğum tarihinizi seçin',
+                                  : AppLocalizations.of(context)
+                                      .selectBirthDate,
                                 style: GoogleFonts.plusJakartaSans(
                                   fontSize: 16,
                                   color: _birthDate != null
@@ -378,25 +382,26 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                     const SizedBox(height: 20),
 
                     // --- Eğitim Durumu ---
-                    _buildLabel("Eğitim Durumu / Meslek"),
+                    _buildLabel(AppLocalizations.of(context).educationProfession),
                     _buildInput(
                       controller: _educationController,
-                      hint: "Örn: Üniversite Öğrencisi, Psikoloji Bölümü",
+                      hint: AppLocalizations.of(context).educationHint,
                       icon: Icons.school_outlined,
                     ),
                     const SizedBox(height: 20),
 
                     // --- Konum ---
-                    _buildLabel("Konum (Şehir / İlçe)"),
+                    _buildLabel(
+                        AppLocalizations.of(context).locationCityDistrict),
                     _buildInput(
                       controller: _cityController,
-                      hint: "Örn: Kadıköy, İstanbul",
+                      hint: AppLocalizations.of(context).locationExampleHint,
                       icon: Icons.location_on_outlined,
                     ),
                     const SizedBox(height: 20),
 
                     // --- Telefon ---
-                    _buildLabel("Telefon Numarası"),
+                    _buildLabel(AppLocalizations.of(context).phoneNumber),
                     _buildInput(
                       controller: _phoneController,
                       hint: "05XX XXX XX XX",
@@ -424,7 +429,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                           const Icon(Icons.save_outlined, size: 22),
                           const SizedBox(width: 8),
                           Text(
-                            'Kaydet',
+                            AppLocalizations.of(context).save,
                             style: GoogleFonts.plusJakartaSans(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
@@ -441,7 +446,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                             borderRadius: BorderRadius.circular(30)),
                       ),
                       child: Text(
-                        'İptal',
+                        AppLocalizations.of(context).cancel,
                         style: GoogleFonts.plusJakartaSans(
                             fontSize: 16, fontWeight: FontWeight.w600),
                       ),

@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/validators/validators.dart';
@@ -70,6 +72,7 @@ class _SignUpViewState extends State<SignUpView> {
   }
 
   void _onSignUpPressed(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     String name = '', surname = '', email = '', password = '', userType = '';
     String? stkName;
 
@@ -80,7 +83,7 @@ class _SignUpViewState extends State<SignUpView> {
       password = _stkPasswordController.text;
       userType = 'ngo';
 
-      if (stkName.isEmpty) return _showError('STK adı boş bırakılamaz.');
+      if (stkName.isEmpty) return _showError(l10n.ngoNameEmpty);
     } else {
       // Gönüllü
       name = _volNameController.text.trim();
@@ -89,18 +92,17 @@ class _SignUpViewState extends State<SignUpView> {
       password = _volPasswordController.text;
       userType = 'volunteer';
 
-      if (name.isEmpty) return _showError('Ad boş bırakılamaz.');
-      if (surname.isEmpty) return _showError('Soyad boş bırakılamaz.');
+      if (name.isEmpty) return _showError(l10n.nameEmpty);
+      if (surname.isEmpty) return _showError(l10n.surnameEmpty);
     }
 
-    if (email.isEmpty) return _showError('E-posta boş bırakılamaz.');
+    if (email.isEmpty) return _showError(l10n.emailEmpty);
     if (!AppValidators.emailReg.hasMatch(email)) {
-      return _showError('Geçersiz e-posta adresi.');
+      return _showError(l10n.invalidEmail);
     }
-    if (password.isEmpty) return _showError('Şifre boş bırakılamaz.');
+    if (password.isEmpty) return _showError(l10n.passwordEmpty);
     if (!AppValidators.passwordReg.hasMatch(password)) {
-      return _showError(
-          'Şifre zayıf. En az 8 karakter, büyük/küçük harf, rakam ve özel karakter içermelidir.');
+      return _showError(l10n.passwordWeak);
     }
 
     context.read<SignUpCubit>().signUp(
@@ -115,6 +117,7 @@ class _SignUpViewState extends State<SignUpView> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.kBackgroundColor,
       body: BlocListener<SignUpCubit, SignUpState>(
@@ -128,7 +131,7 @@ class _SignUpViewState extends State<SignUpView> {
               (route) => false,
             );
           } else if (state is SignUpError) {
-            _showError(state.message);
+            _showError(AppMessages.resolve(context, state.message));
           }
         },
         child: SafeArea(
@@ -224,8 +227,8 @@ class _SignUpViewState extends State<SignUpView> {
                 ),
                 Text(
                   _selectedIndex == 0
-                      ? "Gönüllü Ol, Etkinliklere Katıl"
-                      : "Kurum Portalı",
+                      ? l10n.signupVolunteerTagline
+                      : l10n.signupNgoTagline,
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -255,7 +258,7 @@ class _SignUpViewState extends State<SignUpView> {
                     children: [
                       Expanded(
                         child: _buildToggleButton(
-                          text: "Gönüllü",
+                          text: l10n.roleVolunteer,
                           icon: Icons.person_outline,
                           isSelected: _selectedIndex == 0,
                           activeColor: AppColors.darkPrimaryColor,
@@ -264,7 +267,7 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                       Expanded(
                         child: _buildToggleButton(
-                          text: "STK",
+                          text: l10n.roleNgo,
                           icon: Icons.business_outlined, // corporate_fare
                           isSelected: _selectedIndex == 1,
                           activeColor: AppColors.darkPrimaryColor,
@@ -284,7 +287,7 @@ class _SignUpViewState extends State<SignUpView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Hesap Oluştur",
+                        l10n.createAccount,
                         style: GoogleFonts.inter(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -294,8 +297,8 @@ class _SignUpViewState extends State<SignUpView> {
                       const SizedBox(height: 4),
                       Text(
                         _selectedIndex == 0
-                            ? "Gönüllü olmak için bilgilerinizi giriniz."
-                            : "Gönüllülerle buluşmak için katılın.",
+                            ? l10n.signupVolunteerSubtitle
+                            : l10n.signupNgoSubtitle,
                         style: GoogleFonts.inter(
                           fontSize: 14,
                           color: Colors.grey.shade500,
@@ -314,7 +317,7 @@ class _SignUpViewState extends State<SignUpView> {
                       Expanded(
                         child: _buildModernInput(
                           controller: _volNameController,
-                          hint: "Ad",
+                          hint: l10n.firstName,
                           icon: Icons.badge_outlined,
                         ),
                       ),
@@ -322,7 +325,7 @@ class _SignUpViewState extends State<SignUpView> {
                       Expanded(
                         child: _buildModernInput(
                           controller: _volSurnameController,
-                          hint: "Soyad",
+                          hint: l10n.lastName,
                           icon: Icons.badge_outlined,
                         ),
                       ),
@@ -331,14 +334,14 @@ class _SignUpViewState extends State<SignUpView> {
                   const SizedBox(height: 16),
                   _buildModernInput(
                     controller: _volEmailController,
-                    hint: "E-posta Adresi",
+                    hint: l10n.emailAddress,
                     icon: Icons.mail_outline,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
                   _buildModernInput(
                     controller: _volPasswordController,
-                    hint: "Şifre",
+                    hint: l10n.passwordLabel,
                     icon: Icons.lock_outline,
                     isPassword: true,
                   ),
@@ -346,20 +349,20 @@ class _SignUpViewState extends State<SignUpView> {
                   // STK Formu
                   _buildModernInput(
                     controller: _stkNameController,
-                    hint: "STK Adı",
+                    hint: l10n.ngoName,
                     icon: Icons.business,
                   ),
                   const SizedBox(height: 16),
                   _buildModernInput(
                     controller: _stkEmailController,
-                    hint: "E-posta",
+                    hint: l10n.emailLabel,
                     icon: Icons.mail_outline,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
                   _buildModernInput(
                     controller: _stkPasswordController,
-                    hint: "Şifre",
+                    hint: l10n.passwordLabel,
                     icon: Icons.lock_outline,
                     isPassword: true,
                   ),
@@ -400,7 +403,7 @@ class _SignUpViewState extends State<SignUpView> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Kayıt Ol',
+                                    l10n.signUp,
                                     style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
@@ -423,7 +426,7 @@ class _SignUpViewState extends State<SignUpView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Zaten bir hesabın var mı?",
+                      l10n.alreadyHaveAccount,
                       style: GoogleFonts.inter(
                         color: Colors.grey.shade500,
                         fontWeight: FontWeight.w500,
@@ -433,7 +436,7 @@ class _SignUpViewState extends State<SignUpView> {
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(),
                       child: Text(
-                        "Giriş yap",
+                        l10n.loginAction,
                         style: GoogleFonts.inter(
                           color: AppColors.kSecondaryColor,
                           fontWeight: FontWeight.bold,

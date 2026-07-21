@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_bottom_navbar.dart';
-import 'ai/chat_history_page.dart';
 import 'events_page.dart';
 import 'home_page.dart';
 import 'ngos_page.dart';

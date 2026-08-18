@@ -120,6 +120,18 @@ class UserModel {
   bool get isNgo => userType == 'ngo';
   bool get isVolunteer => userType == 'volunteer';
 
+  /// STK profilinin anasayfaya (Kurumlar sekmesi dahil) erişebilmesi için
+  /// gerekli tüm alanların doldurulup doldurulmadığını kontrol eder.
+  /// Gönüllüler için her zaman true döner.
+  bool get isNgoProfileComplete {
+    if (!isNgo) return true;
+    return (description?.trim().isNotEmpty ?? false) &&
+        (location?.trim().isNotEmpty ?? false) &&
+        (phone?.trim().isNotEmpty ?? false) &&
+        (vision?.trim().isNotEmpty ?? false) &&
+        (mission?.trim().isNotEmpty ?? false);
+  }
+
   String get displayName {
     if (isNgo) {
       return stkName ?? 'STK Adı';

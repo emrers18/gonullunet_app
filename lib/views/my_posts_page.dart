@@ -7,6 +7,8 @@ import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/logic/post_state.dart';
+import 'package:gonullunet_app/logic/user_cubit.dart';
+import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/repo/post_repository.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
@@ -116,6 +118,10 @@ class _MyPostsView extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final userState = context.watch<UserCubit>().state;
+    final isNgo = userState is UserLoaded && userState.user.isNgo;
+    final l10n = AppLocalizations.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -134,7 +140,7 @@ class _MyPostsView extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            AppLocalizations.of(context).noPostsOwn,
+            l10n.noPostsOwn,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 17,
               fontWeight: FontWeight.bold,
@@ -143,7 +149,7 @@ class _MyPostsView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            AppLocalizations.of(context).shareFirstPost,
+            isNgo ? l10n.shareFirstPost : l10n.postingNgoOnly,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,

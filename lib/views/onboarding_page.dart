@@ -6,6 +6,7 @@ import 'package:gonullunet_app/l10n/app_localizations.dart';
 import '../logic/onboarding_cubit.dart';
 import '../logic/onboarding_state.dart';
 import '../utils/app_colors.dart';
+import '../utils/responsive.dart';
 import 'auth_gate.dart';
 
 class OnboardingPage extends StatelessWidget {
@@ -30,8 +31,6 @@ class OnboardingView extends StatefulWidget {
 class _OnboardingViewState extends State<OnboardingView>
     with TickerProviderStateMixin {
   final PageController _pageController = PageController();
-
-
 
   late final AnimationController _floatController1;
   late final AnimationController _floatController2;
@@ -116,11 +115,11 @@ class _OnboardingViewState extends State<OnboardingView>
               ),
             ),
             Positioned(
-              top: -50,
-              right: -50,
+              top: Responsive.scale(context, -50),
+              right: Responsive.scale(context, -50),
               child: Container(
-                width: 250,
-                height: 250,
+                width: Responsive.scale(context, 250),
+                height: Responsive.scale(context, 250),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.kPrimaryColor.withOpacity(0.1),
@@ -128,11 +127,11 @@ class _OnboardingViewState extends State<OnboardingView>
               ),
             ),
             Positioned(
-              top: 160,
-              left: -50,
+              top: Responsive.scale(context, 160),
+              left: Responsive.scale(context, -50),
               child: Container(
-                width: 200,
-                height: 200,
+                width: Responsive.scale(context, 200),
+                height: Responsive.scale(context, 200),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.kTealColor.withOpacity(0.1),
@@ -146,7 +145,7 @@ class _OnboardingViewState extends State<OnboardingView>
                 children: [
                   // Üst Bar: Atla Butonu
                   Padding(
-                    padding: const EdgeInsets.only(right: 16.0, top: 8.0),
+                    padding: Responsive.padding(context, right: 16.0, top: 8.0),
                     child: Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -158,7 +157,7 @@ class _OnboardingViewState extends State<OnboardingView>
                           style: GoogleFonts.dmSans(
                             color: Colors.grey.shade600,
                             fontWeight: FontWeight.w600,
-                            fontSize: 16,
+                            fontSize: Responsive.sp(context, 16),
                           ),
                         ),
                       ),
@@ -175,21 +174,22 @@ class _OnboardingViewState extends State<OnboardingView>
                       },
                       itemBuilder: (context, index) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                          padding:
+                              Responsive.padding(context, horizontal: 24.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // HERO RESİM ALANI (Animasyonlu ve Gölgeli)
                               SizedBox(
-                                height: 320,
-                                width: 320,
+                                height: Responsive.scale(context, 320),
+                                width: Responsive.scale(context, 320),
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
                                     // Beyaz Arkaplan Dairesi
                                     Container(
-                                      width: 260,
-                                      height: 260,
+                                      width: Responsive.scale(context, 260),
+                                      height: Responsive.scale(context, 260),
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         color: Colors.white,
@@ -208,15 +208,18 @@ class _OnboardingViewState extends State<OnboardingView>
 
                                     // Resim
                                     Padding(
-                                      padding: const EdgeInsets.all(40.0),
+                                      padding: Responsive.padding(context,
+                                          all: 40.0),
                                       child: Image.asset(
                                         contents[index]["image"]!,
                                         fit: BoxFit.contain,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(Icons.image,
-                                                    size: 80,
-                                                    color: AppColors.kSecondaryColor),
+                                        errorBuilder: (context, error,
+                                                stackTrace) =>
+                                            Icon(Icons.image,
+                                                size: Responsive.scale(
+                                                    context, 80),
+                                                color:
+                                                    AppColors.kSecondaryColor),
                                       ),
                                     ),
 
@@ -225,14 +228,14 @@ class _OnboardingViewState extends State<OnboardingView>
                                       animation: _floatController1,
                                       builder: (context, child) {
                                         return Positioned(
-                                          top: 40 +
+                                          top: Responsive.scale(context, 40) +
                                               (10 * _floatController1.value),
-                                          right: 20,
+                                          right: Responsive.scale(context, 20),
                                           child: child!,
                                         );
                                       },
-                                      child: _buildFloatingIcon(
-                                          Icons.favorite, AppColors.kPrimaryColor),
+                                      child: _buildFloatingIcon(Icons.favorite,
+                                          AppColors.kPrimaryColor),
                                     ),
 
                                     // Yüzen İkon 2 (Konum - Sadece ilk sayfada veya hepsinde olabilir)
@@ -240,32 +243,34 @@ class _OnboardingViewState extends State<OnboardingView>
                                       animation: _floatController2,
                                       builder: (context, child) {
                                         return Positioned(
-                                          bottom: 60 +
+                                          bottom: Responsive.scale(
+                                                  context, 60) +
                                               (10 * _floatController2.value),
-                                          left: 10,
+                                          left: Responsive.scale(context, 10),
                                           child: child!,
                                         );
                                       },
                                       child: _buildFloatingIcon(
-                                          Icons.location_on, AppColors.kSecondaryColor),
+                                          Icons.location_on,
+                                          AppColors.kSecondaryColor),
                                     ),
                                   ],
                                 ),
                               ),
 
-                              const SizedBox(height: 32),
+                              SizedBox(height: Responsive.scale(context, 32)),
 
                               // BAŞLIK
-                              _buildTitle(contents[index]["title"]!),
+                              _buildTitle(context, contents[index]["title"]!),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: Responsive.scale(context, 16)),
 
                               // AÇIKLAMA
                               Text(
                                 contents[index]["desc"]!,
                                 textAlign: TextAlign.center,
                                 style: GoogleFonts.dmSans(
-                                  fontSize: 18,
+                                  fontSize: Responsive.sp(context, 18),
                                   color:
                                       const Color(0xFF6B7280), // subtext-light
                                   height: 1.5,
@@ -282,7 +287,8 @@ class _OnboardingViewState extends State<OnboardingView>
                   BlocBuilder<OnboardingCubit, OnboardingState>(
                     builder: (context, state) {
                       return Padding(
-                        padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+                        padding: Responsive.padding(context,
+                            left: 24, right: 24, bottom: 40),
                         child: Column(
                           children: [
                             // Noktalar (Dots)
@@ -293,12 +299,13 @@ class _OnboardingViewState extends State<OnboardingView>
                                 (index) => _buildDot(index, state.currentIndex),
                               ),
                             ),
-                            const SizedBox(height: 32),
+                            SizedBox(height: Responsive.scale(context, 32)),
 
                             // Ana Buton
                             SizedBox(
                               width: double.infinity,
-                              height: 64, // Tasarımdaki büyük buton boyutu
+                              height: Responsive.scale(context,
+                                  64), // Tasarımdaki büyük buton boyutu
                               child: ElevatedButton(
                                 onPressed: () {
                                   if (state.currentIndex ==
@@ -322,7 +329,8 @@ class _OnboardingViewState extends State<OnboardingView>
                                   shadowColor: AppColors.kPrimaryColor
                                       .withOpacity(0.4), // Glow efekti
                                   shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(
+                                        Responsive.scale(context, 16)),
                                   ),
                                 ),
                                 child: Row(
@@ -333,11 +341,12 @@ class _OnboardingViewState extends State<OnboardingView>
                                           ? l10n.onboardStart
                                           : l10n.onboardContinue,
                                       style: GoogleFonts.dmSans(
-                                        fontSize: 18,
+                                        fontSize: Responsive.sp(context, 18),
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(width: 8),
+                                    SizedBox(
+                                        width: Responsive.scale(context, 8)),
                                     const Icon(Icons.arrow_forward),
                                   ],
                                 ),
@@ -360,10 +369,10 @@ class _OnboardingViewState extends State<OnboardingView>
   // Yüzen İkon Widget'ı
   Widget _buildFloatingIcon(IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: Responsive.padding(context, all: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -372,7 +381,7 @@ class _OnboardingViewState extends State<OnboardingView>
           ),
         ],
       ),
-      child: Icon(icon, color: color, size: 24),
+      child: Icon(icon, color: color, size: Responsive.scale(context, 24)),
     );
   }
 
@@ -381,20 +390,22 @@ class _OnboardingViewState extends State<OnboardingView>
     bool isActive = index == currentIndex;
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
-      height: 8,
-      width: isActive ? 32 : 8, // Aktifse geniş, pasifse kare
-      margin: const EdgeInsets.only(right: 6),
+      height: Responsive.scale(context, 8),
+      width: Responsive.scale(
+          context, isActive ? 32 : 8), // Aktifse geniş, pasifse kare
+      margin: Responsive.padding(context, right: 6),
       decoration: BoxDecoration(
         color: isActive ? AppColors.kPrimaryColor : Colors.grey.shade300,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 4)),
       ),
     );
   }
 }
 
-Widget _buildTitle(String title) {
+Widget _buildTitle(BuildContext context, String title) {
   // Başlığı '\n' karakterinden ikiye bölüyoruz
   final parts = title.split('\n');
+  final fontSize = Responsive.sp(context, 32);
 
   // Eğer başlıkta '\n' yoksa veya tek parça ise düz döndür
   if (parts.length < 2) {
@@ -402,7 +413,7 @@ Widget _buildTitle(String title) {
       title,
       textAlign: TextAlign.center,
       style: GoogleFonts.dmSans(
-        fontSize: 32,
+        fontSize: fontSize,
         fontWeight: FontWeight.bold,
         height: 1.2,
         color: const Color(0xFF1F2937),
@@ -415,7 +426,7 @@ Widget _buildTitle(String title) {
     textAlign: TextAlign.center,
     text: TextSpan(
       style: GoogleFonts.dmSans(
-        fontSize: 32,
+        fontSize: fontSize,
         fontWeight: FontWeight.bold,
         height: 1.2,
         color: const Color(0xFF1F2937), // Varsayılan renk (Siyah)

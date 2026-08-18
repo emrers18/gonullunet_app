@@ -8,6 +8,7 @@ import '../services/firebase_error_translator.dart';
 import '../utils/app_colors.dart';
 import '../widgets/app_loading_indicator.dart';
 import '../utils/validators/validators.dart';
+import '../utils/responsive.dart';
 import 'signUp_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -41,7 +42,8 @@ class _LoginPageState extends State<LoginPage> {
         content: Text(message, style: GoogleFonts.dmSans()),
         backgroundColor: Colors.redAccent,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 10))),
       ),
     );
   }
@@ -118,44 +120,45 @@ class _LoginPageState extends State<LoginPage> {
       enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: const EdgeInsets.all(32),
-        decoration: const BoxDecoration(
+        padding: Responsive.padding(context, all: 32),
+        decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32),
+            topLeft: Radius.circular(Responsive.scale(context, 32)),
+            topRight: Radius.circular(Responsive.scale(context, 32)),
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 4,
+              width: Responsive.scale(context, 40),
+              height: Responsive.scale(context, 4),
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 2)),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.scale(context, 24)),
             Text(
               AppLocalizations.of(context).almostReady,
               style: GoogleFonts.dmSans(
-                fontSize: 24,
+                fontSize: Responsive.sp(context, 24),
                 fontWeight: FontWeight.bold,
                 color: AppColors.kSecondaryColor,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.scale(context, 8)),
             Text(
               AppLocalizations.of(context).selectUserType,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                fontSize: 16,
+                fontSize: Responsive.sp(context, 16),
                 color: Colors.grey.shade600,
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: Responsive.scale(context, 32)),
             Row(
               children: [
                 Expanded(
@@ -176,7 +179,7 @@ class _LoginPageState extends State<LoginPage> {
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: Responsive.scale(context, 16)),
                 Expanded(
                   child: _roleOptionCard(
                     title: AppLocalizations.of(context).roleNgo,
@@ -197,7 +200,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.scale(context, 24)),
           ],
         ),
       ),
@@ -213,32 +216,32 @@ class _LoginPageState extends State<LoginPage> {
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: Responsive.padding(context, all: 20),
         decoration: BoxDecoration(
           border: Border.all(color: color.withOpacity(0.2), width: 2),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
           color: color.withOpacity(0.05),
         ),
         child: Column(
           children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 12),
+            Icon(icon, size: Responsive.scale(context, 40), color: color),
+            SizedBox(height: Responsive.scale(context, 12)),
             Text(
               title,
               style: GoogleFonts.dmSans(
-                fontSize: 18,
+                fontSize: Responsive.sp(context, 18),
                 fontWeight: FontWeight.bold,
                 color: color,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: Responsive.scale(context, 4)),
             Text(
               subtitle,
               textAlign: TextAlign.center,
               style: GoogleFonts.dmSans(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 color: color.withOpacity(0.7),
               ),
             ),
@@ -262,16 +265,16 @@ class _LoginPageState extends State<LoginPage> {
               ),
               child: IntrinsicHeight(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: Responsive.padding(context,
                       horizontal: 24.0, vertical: 24.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(height: MediaQuery.of(context).padding.top + 20),
                       Container(
-                        width: 175,
-                        height: 175,
-                        padding: const EdgeInsets.all(20),
+                        width: Responsive.scale(context, 175),
+                        height: Responsive.scale(context, 175),
+                        padding: Responsive.padding(context, all: 20),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: AppColors.kPrimaryColor.withOpacity(0.1),
@@ -279,43 +282,44 @@ class _LoginPageState extends State<LoginPage> {
                         child: Image.asset(
                           'lib/assets/images/logo.png',
                           fit: BoxFit.contain,
-                          errorBuilder: (c, o, s) => const Icon(
+                          errorBuilder: (c, o, s) => Icon(
                               Icons.volunteer_activism,
                               color: AppColors.kPrimaryColor,
-                              size: 40),
+                              size: Responsive.scale(context, 40)),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       Text(
                         l10n.welcomeBack,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.dmSans(
-                          fontSize: 28,
+                          fontSize: Responsive.sp(context, 28),
                           fontWeight: FontWeight.w800,
                           color: AppColors.kPrimaryColor,
                           height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: Responsive.scale(context, 8)),
                       Text(
                         l10n.loginSubtitle,
                         textAlign: TextAlign.center,
                         style: GoogleFonts.dmSans(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.w500,
                           color: AppColors.kTextMain.withOpacity(0.7),
                         ),
                       ),
-                      const SizedBox(height: 40),
+                      SizedBox(height: Responsive.scale(context, 40)),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 8),
+                            padding:
+                                Responsive.padding(context, left: 4, bottom: 8),
                             child: Text(
                               l10n.emailLabel,
                               style: GoogleFonts.dmSans(
-                                fontSize: 14,
+                                fontSize: Responsive.sp(context, 14),
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.kTextMain,
                               ),
@@ -334,13 +338,14 @@ class _LoginPageState extends State<LoginPage> {
                                   color: Colors.grey),
                             ),
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: Responsive.scale(context, 20)),
                           Padding(
-                            padding: const EdgeInsets.only(left: 4, bottom: 8),
+                            padding:
+                                Responsive.padding(context, left: 4, bottom: 8),
                             child: Text(
                               l10n.passwordLabel,
                               style: GoogleFonts.dmSans(
-                                fontSize: 14,
+                                fontSize: Responsive.sp(context, 14),
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.kTextMain,
                               ),
@@ -381,15 +386,15 @@ class _LoginPageState extends State<LoginPage> {
                             style: GoogleFonts.dmSans(
                               color: AppColors.kTextMain.withOpacity(0.7),
                               fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: Responsive.scale(context, 8)),
                       SizedBox(
                         width: double.infinity,
-                        height: 56,
+                        height: Responsive.scale(context, 56),
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _onLoginPressed,
                           style: ElevatedButton.styleFrom(
@@ -399,25 +404,27 @@ class _LoginPageState extends State<LoginPage> {
                             shadowColor:
                                 AppColors.kPrimaryColor.withOpacity(0.3),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(
+                                  Responsive.scale(context, 12)),
                             ),
                           ),
                           child: _isLoading
-                              ? const SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: AppLoadingIndicator(size: 24),
+                              ? SizedBox(
+                                  width: Responsive.scale(context, 24),
+                                  height: Responsive.scale(context, 24),
+                                  child: AppLoadingIndicator(
+                                      size: Responsive.scale(context, 24)),
                                 )
                               : Text(
                                   l10n.login,
                                   style: GoogleFonts.dmSans(
-                                    fontSize: 18,
+                                    fontSize: Responsive.sp(context, 18),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
                       // Row(
                       //   children: [
                       //     const Expanded(child: Divider()),
@@ -464,7 +471,8 @@ class _LoginPageState extends State<LoginPage> {
                       // ),
                       // const Spacer(),
                       Padding(
-                        padding: const EdgeInsets.only(top: 24, bottom: 16),
+                        padding:
+                            Responsive.padding(context, top: 24, bottom: 16),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -511,14 +519,14 @@ class _LoginPageState extends State<LoginPage> {
       hintStyle: GoogleFonts.dmSans(color: Colors.grey),
       filled: true,
       fillColor: Colors.white,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: Responsive.padding(context, horizontal: 16, vertical: 16),
       suffixIcon: suffixIcon,
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
         borderSide: BorderSide(color: Colors.grey.shade200),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
         borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2),
       ),
     );
@@ -534,10 +542,10 @@ class _LoginPageState extends State<LoginPage> {
     final isDisabled = _isLoading || _isSocialLoading;
 
     return Container(
-      height: 56,
+      height: Responsive.scale(context, 56),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(
           color: Colors.grey.shade200,
           width: 1.5,
@@ -547,24 +555,26 @@ class _LoginPageState extends State<LoginPage> {
         color: Colors.transparent,
         child: InkWell(
           onTap: (isDisabled || isLoading) ? null : onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
           child: Center(
             child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: AppLoadingIndicator(size: 20),
+                ? SizedBox(
+                    width: Responsive.scale(context, 20),
+                    height: Responsive.scale(context, 20),
+                    child: AppLoadingIndicator(
+                        size: Responsive.scale(context, 20)),
                   )
                 : Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(icon, color: color, size: 28),
-                      const SizedBox(width: 10),
+                      Icon(icon,
+                          color: color, size: Responsive.scale(context, 28)),
+                      SizedBox(width: Responsive.scale(context, 10)),
                       Text(
                         label,
                         style: GoogleFonts.dmSans(
                           fontWeight: FontWeight.w700,
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           color: AppColors.kSecondaryColor,
                         ),
                       ),

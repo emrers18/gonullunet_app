@@ -12,6 +12,7 @@ import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/repo/post_repository.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class AddPostModal extends StatefulWidget {
   const AddPostModal({super.key});
@@ -132,28 +133,30 @@ class _AddPostModalState extends State<AddPostModal> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.9,
       ),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Responsive.scale(context, 32))),
       ),
-      padding: EdgeInsets.fromLTRB(0, 12, 0, keyboardPadding),
+      padding: EdgeInsets.fromLTRB(
+          0, Responsive.scale(context, 12), 0, keyboardPadding),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Drag Handle
           Container(
-            width: 40,
-            height: 4,
+            width: Responsive.scale(context, 40),
+            height: Responsive.scale(context, 4),
             decoration: BoxDecoration(
               color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 2)),
             ),
           ),
-          const SizedBox(height: 12),
-          
+          SizedBox(height: Responsive.scale(context, 12)),
+
           // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: Responsive.padding(context, horizontal: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -170,22 +173,24 @@ class _AddPostModalState extends State<AddPostModal> {
                 Text(
                   l10n.newPost,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 17,
+                    fontSize: Responsive.sp(context, 17),
                     fontWeight: FontWeight.bold,
                     color: AppColors.primaryText,
                   ),
                 ),
                 _isSaving
-                    ? const AppLoadingIndicator(size: 28)
+                    ? AppLoadingIndicator(size: Responsive.scale(context, 28))
                     : ElevatedButton(
                         onPressed: _savePost,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: Responsive.padding(context,
+                              horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(
+                                Responsive.scale(context, 20)),
                           ),
                         ),
                         child: Text(
@@ -201,23 +206,23 @@ class _AddPostModalState extends State<AddPostModal> {
           const Divider(),
           if (_errorMessage != null)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+              padding: Responsive.padding(context, horizontal: 20, vertical: 8),
               color: Colors.red.shade50,
               width: double.infinity,
               child: Text(
                 _errorMessage!,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.red.shade700,
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          
+
           // Scrollable Content
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
+              padding: Responsive.padding(context, all: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -233,34 +238,35 @@ class _AddPostModalState extends State<AddPostModal> {
                       return Row(
                         children: [
                           CircleAvatar(
-                            radius: 20,
+                            radius: Responsive.scale(context, 20),
                             backgroundColor: AppColors.lightPrimaryColor,
-                            backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
-                                ? CachedNetworkImageProvider(imageUrl)
-                                : null,
+                            backgroundImage:
+                                (imageUrl != null && imageUrl.isNotEmpty)
+                                    ? CachedNetworkImageProvider(imageUrl)
+                                    : null,
                             child: (imageUrl == null || imageUrl.isEmpty)
                                 ? Text(displayName[0].toUpperCase())
                                 : null,
                           ),
-                          const SizedBox(width: 12),
+                          SizedBox(width: Responsive.scale(context, 12)),
                           Text(
                             displayName,
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
-                              fontSize: 15,
+                              fontSize: Responsive.sp(context, 15),
                             ),
                           ),
                         ],
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
-                  
+                  SizedBox(height: Responsive.scale(context, 24)),
+
                   // Title Input
                   TextField(
                     controller: _titleController,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 20,
+                      fontSize: Responsive.sp(context, 20),
                       fontWeight: FontWeight.bold,
                     ),
                     decoration: InputDecoration(
@@ -269,13 +275,13 @@ class _AddPostModalState extends State<AddPostModal> {
                       border: InputBorder.none,
                     ),
                   ),
-                  
+
                   // Description Input
                   TextField(
                     controller: _descriptionController,
                     maxLines: null,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                       color: Colors.black87,
                     ),
                     decoration: InputDecoration(
@@ -284,9 +290,9 @@ class _AddPostModalState extends State<AddPostModal> {
                       border: InputBorder.none,
                     ),
                   ),
-                  
-                  const SizedBox(height: 20),
-                  
+
+                  SizedBox(height: Responsive.scale(context, 20)),
+
                   // Image Selection / Preview
                   GestureDetector(
                     onTap: _pickImage,
@@ -294,14 +300,16 @@ class _AddPostModalState extends State<AddPostModal> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 16)),
                         border: Border.all(color: Colors.grey[200]!),
                       ),
                       child: _selectedImage != null
                           ? Stack(
                               children: [
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(16),
+                                  borderRadius: BorderRadius.circular(
+                                      Responsive.scale(context, 16)),
                                   child: Image.file(
                                     _selectedImage!,
                                     width: double.infinity,
@@ -309,8 +317,8 @@ class _AddPostModalState extends State<AddPostModal> {
                                   ),
                                 ),
                                 Positioned(
-                                  top: 10,
-                                  right: 10,
+                                  top: Responsive.scale(context, 10),
+                                  right: Responsive.scale(context, 10),
                                   child: GestureDetector(
                                     onTap: () {
                                       setState(() {
@@ -318,24 +326,31 @@ class _AddPostModalState extends State<AddPostModal> {
                                       });
                                     },
                                     child: Container(
-                                      padding: const EdgeInsets.all(4),
+                                      padding:
+                                          Responsive.padding(context, all: 4),
                                       decoration: const BoxDecoration(
                                         color: Colors.black54,
                                         shape: BoxShape.circle,
                                       ),
-                                      child: const Icon(Icons.close, color: Colors.white, size: 20),
+                                      child: Icon(Icons.close,
+                                          color: Colors.white,
+                                          size: Responsive.scale(context, 20)),
                                     ),
                                   ),
                                 ),
                               ],
                             )
                           : Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 40),
+                              padding:
+                                  Responsive.padding(context, vertical: 40),
                               child: Column(
                                 children: [
-                                  Icon(Icons.add_photo_alternate_rounded, 
-                                      size: 40, color: AppColors.primaryColor.withOpacity(0.5)),
-                                  const SizedBox(height: 8),
+                                  Icon(Icons.add_photo_alternate_rounded,
+                                      size: Responsive.scale(context, 40),
+                                      color: AppColors.primaryColor
+                                          .withOpacity(0.5)),
+                                  SizedBox(
+                                      height: Responsive.scale(context, 8)),
                                   Text(
                                     l10n.addPhoto,
                                     style: GoogleFonts.plusJakartaSans(
@@ -348,40 +363,46 @@ class _AddPostModalState extends State<AddPostModal> {
                             ),
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
+
+                  SizedBox(height: Responsive.scale(context, 24)),
                   const Divider(),
-                  const SizedBox(height: 12),
-                  
+                  SizedBox(height: Responsive.scale(context, 12)),
+
                   // Responsibility Checkbox
                   CheckboxListTile(
                     value: _isResponsibilityAccepted,
-                    onChanged: (val) => setState(() => _isResponsibilityAccepted = val ?? false),
+                    onChanged: (val) => setState(
+                        () => _isResponsibilityAccepted = val ?? false),
                     title: Text(
                       l10n.consentAccuracy,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: Responsive.sp(context, 13),
+                          color: Colors.grey[700]),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                     activeColor: AppColors.primaryColor,
                     dense: true,
                   ),
-                  
+
                   // Community Rules Checkbox
                   CheckboxListTile(
                     value: _isCommunityRulesAccepted,
-                    onChanged: (val) => setState(() => _isCommunityRulesAccepted = val ?? false),
+                    onChanged: (val) => setState(
+                        () => _isCommunityRulesAccepted = val ?? false),
                     title: Text(
                       l10n.consentRules,
-                      style: GoogleFonts.plusJakartaSans(fontSize: 13, color: Colors.grey[700]),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: Responsive.sp(context, 13),
+                          color: Colors.grey[700]),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,
                     contentPadding: EdgeInsets.zero,
                     activeColor: AppColors.primaryColor,
                     dense: true,
                   ),
-                  
-                  const SizedBox(height: 20),
+
+                  SizedBox(height: Responsive.scale(context, 20)),
                 ],
               ),
             ),

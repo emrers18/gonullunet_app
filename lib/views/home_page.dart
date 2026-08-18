@@ -28,6 +28,7 @@ import 'package:gonullunet_app/views/active_chats_page.dart';
 import 'package:gonullunet_app/views/event_detail_page.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/repo/event_repository.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
@@ -42,7 +43,6 @@ class _HomePageState extends State<HomePage> {
   final String? _currentUserId = FirebaseAuth.instance.currentUser?.uid;
   late NotificationRepository _notificationRepo;
   late PostCubit _ngoCubit;
-  late PostCubit _volunteerCubit;
 
   @override
   void initState() {
@@ -51,7 +51,6 @@ class _HomePageState extends State<HomePage> {
 
     final repo = context.read<PostRepository>();
     _ngoCubit = PostCubit(repo, publisherType: 'ngo')..loadPosts();
-    _volunteerCubit = PostCubit(repo, publisherType: 'volunteer')..loadPosts();
 
     NotificationService().initialize();
     context.read<UserCubit>().loadUser();
@@ -61,7 +60,6 @@ class _HomePageState extends State<HomePage> {
   void dispose() {
     _scrollController.dispose();
     _ngoCubit.close();
-    _volunteerCubit.close();
     super.dispose();
   }
 
@@ -85,7 +83,6 @@ class _HomePageState extends State<HomePage> {
     );
     if (result == true) {
       _ngoCubit.refresh();
-      _volunteerCubit.refresh();
     }
   }
 
@@ -95,70 +92,64 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: AppColors.kBackgroundColor,
-        body: NestedScrollView(
-          controller: _scrollController,
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _HomeHeaderDelegate(
-                  topPadding: MediaQuery.of(context).padding.top,
-                  onNavigate: _navigate,
-                  notificationRepo: _notificationRepo,
-                  scrollController: _scrollController,
-                  buildUserHeader: (isDark) => _buildUserHeader(isDark: isDark),
-                ),
+    return Scaffold(
+      backgroundColor: AppColors.kBackgroundColor,
+      body: NestedScrollView(
+        controller: _scrollController,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _HomeHeaderDelegate(
+                topPadding: MediaQuery.of(context).padding.top,
+                collapsedHeight: Responsive.scale(context, 72),
+                expandedHeight: Responsive.scale(context, 160),
+                onNavigate: _navigate,
+                notificationRepo: _notificationRepo,
+                scrollController: _scrollController,
+                buildUserHeader: (isDark) => _buildUserHeader(isDark: isDark),
               ),
-              SliverToBoxAdapter(
-                child: _EventPreviewSection(onNavigate: _navigate),
-              ),
-              SliverPersistentHeader(
-                pinned: true,
-                delegate: _SliverAppBarDelegate(
-                  TabBar(
-                    labelColor: AppColors.kPrimaryColor,
-                    unselectedLabelColor: Colors.grey,
-                    indicatorColor: AppColors.kPrimaryColor,
-                    indicatorWeight: 3,
-                    indicatorSize: TabBarIndicatorSize.label,
-                    labelStyle: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                    unselectedLabelStyle: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                    ),
-                    tabs: [
-                      Tab(text: AppLocalizations.of(context).navOrganizations),
-                      Tab(text: AppLocalizations.of(context).tabVolunteers),
-                    ],
+            ),
+            SliverToBoxAdapter(
+              child: _EventPreviewSection(onNavigate: _navigate),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: Responsive.padding(context,
+                    left: 16, right: 16, top: 24, bottom: 12),
+                child: Text(
+                  AppLocalizations.of(context).ngoPostsSection,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: Responsive.sp(context, 11),
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade600,
+                    letterSpacing: 1.2,
                   ),
                 ),
               ),
-            ];
-          },
-          body: TabBarView(
-            children: [
-              _PostListView(cubit: _ngoCubit),
-              _PostListView(cubit: _volunteerCubit),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: _showAddPostModal,
-          heroTag: 'add_post_fab',
-          backgroundColor: AppColors.headerEnd,
-          elevation: 4,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
-          ),
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
+            ),
+          ];
+        },
+        body: _PostListView(cubit: _ngoCubit),
+      ),
+      floatingActionButton: BlocBuilder<UserCubit, UserState>(
+        builder: (context, state) {
+          final isNgo = state is UserLoaded && state.user.isNgo;
+          if (!isNgo) return const SizedBox.shrink();
+
+          return FloatingActionButton(
+            onPressed: _showAddPostModal,
+            heroTag: 'add_post_fab',
+            backgroundColor: AppColors.headerEnd,
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(Responsive.scale(context, 32)),
+            ),
+            child: Icon(Icons.add,
+                color: Colors.white, size: Responsive.scale(context, 24)),
+          );
+        },
       ),
     );
   }
@@ -189,7 +180,8 @@ class _HomePageState extends State<HomePage> {
                 } else {
                   displayName =
                       "${data['name'] ?? ''} ${data['surname'] ?? ''}".trim();
-                  if (displayName.isEmpty) displayName = l10n.defaultVolunteerName;
+                  if (displayName.isEmpty)
+                    displayName = l10n.defaultVolunteerName;
                 }
                 imageUrl = data['imageUrl'];
               }
@@ -214,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                 color: AppColors.kPrimaryColor.withOpacity(0.2), width: 2),
           ),
           child: CircleAvatar(
-            radius: isCollapsed ? 16 : 24,
+            radius: Responsive.scale(context, isCollapsed ? 16 : 24),
             backgroundColor: AppColors.kPrimaryColor.withOpacity(0.1),
             backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
                 ? CachedNetworkImageProvider(imageUrl)
@@ -225,12 +217,13 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                         color: AppColors.kPrimaryColor,
                         fontWeight: FontWeight.bold,
-                        fontSize: isCollapsed ? 14 : 18),
+                        fontSize:
+                            Responsive.sp(context, isCollapsed ? 14 : 18)),
                   )
                 : null,
           ),
         ),
-        const SizedBox(width: 12),
+        SizedBox(width: Responsive.scale(context, 12)),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   AppLocalizations.of(context).homeGreeting,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: AppColors.kCardBackgroundColor.withOpacity(0.8),
                     fontWeight: FontWeight.w500,
                   ),
@@ -248,7 +241,7 @@ class _HomePageState extends State<HomePage> {
               Text(
                 displayName,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: isCollapsed ? 15 : 17,
+                  fontSize: Responsive.sp(context, isCollapsed ? 15 : 17),
                   color: AppColors.kCardBackgroundColor,
                   fontWeight: FontWeight.bold,
                 ),
@@ -260,31 +253,6 @@ class _HomePageState extends State<HomePage> {
         ),
       ],
     );
-  }
-}
-
-class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
-  _SliverAppBarDelegate(this._tabBar);
-
-  final TabBar _tabBar;
-
-  @override
-  double get minExtent => _tabBar.preferredSize.height;
-  @override
-  double get maxExtent => _tabBar.preferredSize.height;
-
-  @override
-  Widget build(
-      BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return Container(
-      color: AppColors.kBackgroundColor,
-      child: _tabBar,
-    );
-  }
-
-  @override
-  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
-    return false;
   }
 }
 
@@ -308,20 +276,20 @@ class _PostListView extends StatelessWidget {
           if (state is PostError && state.posts.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: Responsive.padding(context, all: 24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: Colors.red, size: 48),
-                    const SizedBox(height: 16),
+                    Icon(Icons.error_outline,
+                        color: Colors.red, size: Responsive.scale(context, 48)),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     Text(
                       AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                           color: Colors.grey.shade600),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     ElevatedButton(
                       onPressed: () => context.read<PostCubit>().refresh(),
                       child: Text(AppLocalizations.of(context).retry),
@@ -348,8 +316,9 @@ class _PostListView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.feed_outlined,
-                      size: 60, color: Colors.grey.shade400),
-                  const SizedBox(height: 16),
+                      size: Responsive.scale(context, 60),
+                      color: Colors.grey.shade400),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   Text(
                     AppLocalizations.of(context).noPostsYet,
                     textAlign: TextAlign.center,
@@ -365,12 +334,13 @@ class _PostListView extends StatelessWidget {
             onRefresh: () => context.read<PostCubit>().refresh(),
             color: AppColors.kPrimaryColor,
             child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 80),
+              padding: Responsive.padding(context,
+                  left: 16, right: 16, top: 16, bottom: 80),
               itemCount: posts.length + (hasMore ? 1 : 0),
               itemBuilder: (context, index) {
                 if (index < posts.length) {
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: Responsive.padding(context, bottom: 16),
                     child: PostCard(post: posts[index]),
                   );
                 }
@@ -380,10 +350,11 @@ class _PostListView extends StatelessWidget {
                   context.read<PostCubit>().loadPosts();
                 });
 
-                return const Center(
+                return Center(
                   child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: AppLoadingIndicator(size: 28),
+                    padding: Responsive.padding(context, all: 16),
+                    child: AppLoadingIndicator(
+                        size: Responsive.scale(context, 28)),
                   ),
                 );
               },
@@ -397,6 +368,8 @@ class _PostListView extends StatelessWidget {
 
 class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
   final double topPadding;
+  final double collapsedHeight;
+  final double expandedHeight;
   final void Function(Widget page) onNavigate;
   final NotificationRepository notificationRepo;
   final ScrollController scrollController;
@@ -404,6 +377,8 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
 
   _HomeHeaderDelegate({
     required this.topPadding,
+    required this.collapsedHeight,
+    required this.expandedHeight,
     required this.onNavigate,
     required this.notificationRepo,
     required this.scrollController,
@@ -411,16 +386,18 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
   });
 
   @override
-  double get minExtent => 72 + topPadding;
+  double get minExtent => collapsedHeight + topPadding;
 
   @override
-  double get maxExtent => 160 + topPadding;
+  double get maxExtent => expandedHeight + topPadding;
 
   @override
   Widget build(
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     final progress = (shrinkOffset / (maxExtent - minExtent)).clamp(0.0, 1.0);
     final isCollapsed = progress > 0.5;
+    final radius =
+        Responsive.scale(context, 32) * (1 - progress).clamp(0.5, 1.0);
 
     return Container(
       decoration: BoxDecoration(
@@ -430,8 +407,8 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32 * (1 - progress).clamp(0.5, 1.0)),
-          bottomRight: Radius.circular(32 * (1 - progress).clamp(0.5, 1.0)),
+          bottomLeft: Radius.circular(radius),
+          bottomRight: Radius.circular(radius),
         ),
         boxShadow: [
           BoxShadow(
@@ -447,15 +424,16 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
           children: [
             Padding(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  Responsive.padding(context, horizontal: 16.0, vertical: 4.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(child: buildUserHeader(true)),
                   if (isCollapsed)
                     IconButton(
-                      icon: const Icon(Icons.keyboard_arrow_up_rounded,
-                          color: Colors.white, size: 32),
+                      icon: Icon(Icons.keyboard_arrow_up_rounded,
+                          color: Colors.white,
+                          size: Responsive.scale(context, 32)),
                       onPressed: () {
                         scrollController.animateTo(0,
                             duration: const Duration(milliseconds: 500),
@@ -496,18 +474,19 @@ class _HomeHeaderDelegate extends SliverPersistentHeaderDelegate {
                                 right: 0,
                                 top: 0,
                                 child: Container(
-                                  padding: const EdgeInsets.all(4),
+                                  padding: Responsive.padding(context, all: 4),
                                   decoration: const BoxDecoration(
                                     color: Colors.redAccent,
                                     shape: BoxShape.circle,
                                   ),
-                                  constraints: const BoxConstraints(
-                                      minWidth: 18, minHeight: 18),
+                                  constraints: BoxConstraints(
+                                      minWidth: Responsive.scale(context, 18),
+                                      minHeight: Responsive.scale(context, 18)),
                                   child: Text(
                                     count > 9 ? '9+' : count.toString(),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 10,
+                                      fontSize: Responsive.sp(context, 10),
                                       fontWeight: FontWeight.bold,
                                     ),
                                     textAlign: TextAlign.center,
@@ -551,7 +530,8 @@ class _QuickNavSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 6, 16, 6),
+      padding:
+          Responsive.padding(context, left: 16, right: 16, top: 6, bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
@@ -646,10 +626,11 @@ class _NavButtonState extends State<_NavButton>
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: Responsive.scale(context, 48),
+              height: Responsive.scale(context, 48),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 14)),
                 gradient: LinearGradient(
                   colors: widget.gradientColors,
                   begin: Alignment.topLeft,
@@ -666,18 +647,18 @@ class _NavButtonState extends State<_NavButton>
               child: Center(
                 child: Icon(
                   widget.icon,
-                  size: 22,
+                  size: Responsive.scale(context, 22),
                   color: Colors.white,
                 ),
               ),
             ),
-            const SizedBox(height: 5),
+            SizedBox(height: Responsive.scale(context, 5)),
             Text(
               widget.label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 10,
+                fontSize: Responsive.sp(context, 10),
                 fontWeight: FontWeight.w700,
                 color: Colors.white.withOpacity(0.9),
               ),
@@ -703,14 +684,15 @@ class _EventPreviewSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+          padding: Responsive.padding(context,
+              left: 16, right: 16, top: 24, bottom: 12),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 AppLocalizations.of(context).upcomingEvents,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: Responsive.sp(context, 11),
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade600,
                   letterSpacing: 1.2,
@@ -721,7 +703,7 @@ class _EventPreviewSection extends StatelessWidget {
                 child: Text(
                   AppLocalizations.of(context).seeAll,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 12,
+                    fontSize: Responsive.sp(context, 12),
                     fontWeight: FontWeight.bold,
                     color: AppColors.kPrimaryColor,
                   ),
@@ -731,7 +713,7 @@ class _EventPreviewSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 190,
+          height: Responsive.scale(context, 190),
           child: FutureBuilder<List<Event>>(
             future: context
                 .read<EventRepository>()
@@ -739,7 +721,7 @@ class _EventPreviewSection extends StatelessWidget {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: Responsive.padding(context, horizontal: 16),
                   scrollDirection: Axis.horizontal,
                   itemCount: 3,
                   itemBuilder: (context, index) =>
@@ -751,7 +733,7 @@ class _EventPreviewSection extends StatelessWidget {
               if (events.isEmpty) return const SizedBox.shrink();
 
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: Responsive.padding(context, horizontal: 16),
                 scrollDirection: Axis.horizontal,
                 physics: const BouncingScrollPhysics(),
                 itemCount: events.length + 1,
@@ -793,9 +775,9 @@ class _EventPreviewCard extends StatelessWidget {
       },
       child: Container(
         width: cardWidth,
-        margin: const EdgeInsets.only(right: 16),
+        margin: Responsive.padding(context, right: 16),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.1),
@@ -805,7 +787,7 @@ class _EventPreviewCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
           child: Stack(
             children: [
               // Background Image
@@ -840,62 +822,65 @@ class _EventPreviewCard extends StatelessWidget {
               ),
               // Info
               Positioned(
-                left: 16,
-                right: 16,
-                bottom: 16,
+                left: Responsive.scale(context, 16),
+                right: Responsive.scale(context, 16),
+                bottom: Responsive.scale(context, 16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.kPrimaryColor,
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius:
+                            BorderRadius.circular(Responsive.scale(context, 8)),
                       ),
                       child: Text(
                         event.type.toUpperCase(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: Colors.white,
-                          fontSize: 10,
+                          fontSize: Responsive.sp(context, 10),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: Responsive.scale(context, 8)),
                     Text(
                       event.title,
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.white,
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                         fontWeight: FontWeight.bold,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: Responsive.scale(context, 4)),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today,
-                            color: Colors.white70, size: 12),
-                        const SizedBox(width: 4),
+                        Icon(Icons.calendar_today,
+                            color: Colors.white70,
+                            size: Responsive.scale(context, 12)),
+                        SizedBox(width: Responsive.scale(context, 4)),
                         Text(
                           dateString,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.white70,
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        const Icon(Icons.location_on,
-                            color: Colors.white70, size: 12),
-                        const SizedBox(width: 4),
+                        SizedBox(width: Responsive.scale(context, 12)),
+                        Icon(Icons.location_on,
+                            color: Colors.white70,
+                            size: Responsive.scale(context, 12)),
+                        SizedBox(width: Responsive.scale(context, 4)),
                         Expanded(
                           child: Text(
                             event.location,
                             style: GoogleFonts.plusJakartaSans(
                               color: Colors.white70,
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -923,31 +908,32 @@ class _SeeAllCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 120,
+        width: Responsive.scale(context, 120),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
           border: Border.all(color: Colors.grey.shade200),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: Responsive.padding(context, all: 12),
               decoration: BoxDecoration(
                 color: AppColors.kPrimaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.arrow_forward_rounded,
                 color: AppColors.kPrimaryColor,
+                size: Responsive.scale(context, 24),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Responsive.scale(context, 12)),
             Text(
               AppLocalizations.of(context).seeAllShort,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.bold,
                 color: AppColors.kTextColor,
               ),
@@ -966,10 +952,10 @@ class _EventLoadingPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: MediaQuery.of(context).size.width * 0.75,
-      margin: const EdgeInsets.only(right: 16),
+      margin: Responsive.padding(context, right: 16),
       decoration: BoxDecoration(
         color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
       ),
     );
   }

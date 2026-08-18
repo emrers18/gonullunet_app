@@ -13,9 +13,23 @@ class LocaleCubit extends Cubit<Locale> {
     Locale('en'),
   ];
 
-  LocaleCubit() : super(const Locale('tr'));
+  /// Desteklenmeyen bir sistem dili için varsayılan.
+  static const Locale _fallbackLocale = Locale('tr');
 
-  /// Kayıtlı dili yükler; yoksa varsayılan (Türkçe) kalır.
+  /// Kullanıcı daha önce manuel bir dil seçmediyse, telefonun sistem
+  /// diliyle açılır (desteklenmiyorsa Türkçe'ye düşer).
+  LocaleCubit() : super(_resolveSystemLocale());
+
+  static Locale _resolveSystemLocale() {
+    final systemCode = PlatformDispatcher.instance.locale.languageCode;
+    return supportedLocales.firstWhere(
+      (l) => l.languageCode == systemCode,
+      orElse: () => _fallbackLocale,
+    );
+  }
+
+  /// Kayıtlı (kullanıcının elle seçtiği) bir dil varsa onu yükler; bu her
+  /// zaman sistem diline göre yapılan varsayım tahmininin önüne geçer.
   Future<void> loadSavedLocale() async {
     final prefs = await SharedPreferences.getInstance();
     final code = prefs.getString(_prefsKey);

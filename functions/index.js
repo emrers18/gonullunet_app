@@ -604,7 +604,7 @@ exports.getChatResponse = onCall(async (request) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // createPost
 // İstemci Gönderir : { title, description, imageUrl }
-// Ne Yapar         : Gönüllüler için günde 1 post limiti kontrolü yapar,
+// Ne Yapar         : Sadece STK hesaplarının paylaşım yapmasına izin verir,
 //                    Firestore'a postu yazar ve XP ödülü verir.
 // ─────────────────────────────────────────────────────────────────────────────
 exports.createPost = onCall(async (request) => {
@@ -622,32 +622,19 @@ exports.createPost = onCall(async (request) => {
 
   const db = getFirestore();
 
-  // 2. Kullanıcı Türü ve Limit Kontrolü
+  // 2. Kullanıcı Türü Kontrolü — sadece STK'lar paylaşım yapabilir
   const userDoc = await db.collection("users").doc(uid).get();
   if (!userDoc.exists) {
     throw new HttpsError("not-found", "Kullanıcı profili bulunamadı.");
   }
 
   const userData = userDoc.data();
-  const isVolunteer = userData.userType === "volunteer";
 
-  if (isVolunteer) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    // Bugün paylaşılan postları say
-    const postsToday = await db.collection("posts")
-      .where("publisherId", "==", uid)
-      .where("createdAt", ">=", today)
-      .limit(1)
-      .get();
-
-    if (!postsToday.empty) {
-      throw new HttpsError(
-        "resource-exhausted",
-        "Günde sadece 1 gönderi paylaşabilirsiniz. Yarın tekrar bekleriz! ✨"
-      );
-    }
+  if (userData.userType !== "ngo") {
+    throw new HttpsError(
+      "permission-denied",
+      "Sadece STK hesapları gönderi paylaşabilir."
+    );
   }
 
   // 3. Postu Oluştur
@@ -659,7 +646,7 @@ exports.createPost = onCall(async (request) => {
     description,
     imageUrl: imageUrl || "",
     publisherId: uid,
-    publisherType: isVolunteer ? "volunteer" : "ngo",
+    publisherType: "ngo",
     createdAt: FieldValue.serverTimestamp(),
     likeCount: 0,
     commentCount: 0,

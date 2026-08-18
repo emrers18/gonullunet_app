@@ -9,6 +9,7 @@ import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 import 'package:gonullunet_app/widgets/gamification/level_badge.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../../models/post_model.dart';
 import 'comment_modal.dart';
 
@@ -46,10 +47,11 @@ class PostCard extends StatelessWidget {
         }
 
         return Container(
-          margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 2),
+          margin: Responsive.padding(context, vertical: 2, horizontal: 2),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16.0),
+            borderRadius:
+                BorderRadius.circular(Responsive.scale(context, 16.0)),
             border: Border.all(color: Colors.grey.shade200),
             boxShadow: [
               BoxShadow(
@@ -69,24 +71,26 @@ class PostCard extends StatelessWidget {
                       context, displayName, avatarUrl, isVolunteer, xp),
                   if (post.title.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 6),
+                      padding: Responsive.padding(context,
+                          left: 16, right: 16, bottom: 6),
                       child: Text(
                         post.title,
                         style: GoogleFonts.poppins(
                           color: AppColors.kTextColor,
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
                   if (post.description.isNotEmpty)
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      padding: Responsive.padding(context,
+                          left: 16, right: 16, bottom: 12),
                       child: Text(
                         post.description,
                         style: GoogleFonts.poppins(
                           color: AppColors.kTextColor,
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           height: 1.5,
                         ),
                       ),
@@ -100,14 +104,14 @@ class PostCard extends StatelessWidget {
               ),
               if (isVolunteer && snapshot.hasData)
                 Positioned(
-                  top: 16,
-                  right: 16,
+                  top: Responsive.scale(context, 16),
+                  right: Responsive.scale(context, 16),
                   child: LevelBadge(
                     xp: xp,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    fontSize: 10,
-                    iconSize: 12,
+                    padding: Responsive.padding(context,
+                        horizontal: 8, vertical: 4),
+                    fontSize: Responsive.sp(context, 10),
+                    iconSize: Responsive.scale(context, 12),
                   ),
                 ),
             ],
@@ -120,14 +124,14 @@ class PostCard extends StatelessWidget {
   Widget _buildHeader(BuildContext context, String displayName,
       String? avatarUrl, bool isVolunteer, int xp) {
     return Padding(
-      padding: const EdgeInsets.all(16.0),
+      padding: Responsive.padding(context, all: 16.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Avatar
           Container(
-            height: 40,
-            width: 40,
+            height: Responsive.scale(context, 40),
+            width: Responsive.scale(context, 40),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.grey.shade100,
@@ -150,7 +154,7 @@ class PostCard extends StatelessWidget {
                   )
                 : null,
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: Responsive.scale(context, 12)),
 
           Expanded(
             child: Column(
@@ -160,7 +164,7 @@ class PostCard extends StatelessWidget {
                   displayName,
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.w700,
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     color: AppColors.kTextColor,
                   ),
                   maxLines: 1,
@@ -170,7 +174,7 @@ class PostCard extends StatelessWidget {
                   post.timeAgo,
                   style: GoogleFonts.poppins(
                     color: Colors.grey.shade600,
-                    fontSize: 12,
+                    fontSize: Responsive.sp(context, 12),
                   ),
                 ),
               ],
@@ -190,8 +194,9 @@ class PostCard extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: post.imageUrl,
           fit: BoxFit.cover,
-          placeholder: (context, url) =>
-              const Center(child: AppLoadingIndicator(size: 32)),
+          placeholder: (context, url) => Center(
+              child: AppLoadingIndicator(
+                  size: Responsive.scale(context, 32))),
           errorWidget: (context, url, error) => Center(
               child: Icon(Icons.broken_image, color: Colors.grey.shade400)),
         ),
@@ -201,21 +206,22 @@ class PostCard extends StatelessWidget {
 
   Widget _buildStats(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding:
+          Responsive.padding(context, horizontal: 16.0, vertical: 12.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             AppLocalizations.of(context).likeCountLabel(post.likeCount),
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               color: Colors.grey.shade600,
             ),
           ),
           Text(
             AppLocalizations.of(context).commentCountLabel(post.commentCount),
             style: GoogleFonts.poppins(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               color: Colors.grey.shade600,
             ),
           ),
@@ -226,7 +232,7 @@ class PostCard extends StatelessWidget {
 
   Widget _buildActionButtons(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      padding: Responsive.padding(context, horizontal: 8.0, vertical: 4.0),
       child: Row(
         children: [
           // Beğen Butonu
@@ -273,18 +279,18 @@ class PostCard extends StatelessWidget {
     return Expanded(
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
+          padding: Responsive.padding(context, vertical: 12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 22, color: color),
-              const SizedBox(width: 8),
+              Icon(icon, size: Responsive.scale(context, 22), color: color),
+              SizedBox(width: Responsive.scale(context, 8)),
               Text(
                 label,
                 style: GoogleFonts.poppins(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.w500,
                   color: color,
                 ),

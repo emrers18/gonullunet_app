@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import '../utils/app_colors.dart';
+import '../utils/responsive.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex; //seçili olan sayfa
@@ -30,7 +31,7 @@ class CustomBottomNavBar extends StatelessWidget {
       child: SafeArea(
         top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          padding: Responsive.padding(context, horizontal: 6, vertical: 8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -105,11 +106,12 @@ class _NavItem extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        padding: Responsive.padding(context, horizontal: 10, vertical: 6),
         decoration: isActive
             ? BoxDecoration(
                 color: activeColor.withOpacity(0.08),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 16)),
               )
             : null,
         child: Column(
@@ -120,15 +122,15 @@ class _NavItem extends StatelessWidget {
               child: Icon(
                 isActive ? activeIcon : icon,
                 key: ValueKey(isActive),
-                size: isActive ? 24 : 22,
+                size: Responsive.scale(context, isActive ? 24 : 22),
                 color: isActive ? activeColor : inactiveColor,
               ),
             ),
-            const SizedBox(height: 3),
+            SizedBox(height: Responsive.scale(context, 3)),
             AnimatedDefaultTextStyle(
               duration: const Duration(milliseconds: 200),
               style: TextStyle(
-                fontSize: isActive ? 10.5 : 10,
+                fontSize: Responsive.sp(context, isActive ? 10.5 : 10),
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
                 color: isActive ? activeColor : inactiveColor,
                 letterSpacing: 0.1,

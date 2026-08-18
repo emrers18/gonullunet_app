@@ -11,6 +11,7 @@ import 'package:gonullunet_app/logic/ngo_cubit.dart';
 import 'package:gonullunet_app/logic/ngo_state.dart';
 import 'package:gonullunet_app/repo/ngo_repository.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class NgosPage extends StatelessWidget {
   const NgosPage({super.key});
@@ -72,15 +73,17 @@ class _NgosViewState extends State<NgosView> {
                 .toList();
 
             return Container(
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(Responsive.scale(context, 24))),
               ),
               padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 16,
-                bottom: MediaQuery.of(sheetContext).viewInsets.bottom + 32,
+                left: Responsive.scale(context, 24),
+                right: Responsive.scale(context, 24),
+                top: Responsive.scale(context, 16),
+                bottom: MediaQuery.of(sheetContext).viewInsets.bottom +
+                    Responsive.scale(context, 32),
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -89,22 +92,23 @@ class _NgosViewState extends State<NgosView> {
                   // Handle bar
                   Center(
                     child: Container(
-                      width: 40,
-                      height: 4,
+                      width: Responsive.scale(context, 40),
+                      height: Responsive.scale(context, 4),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(100),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 100)),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: Responsive.scale(context, 20)),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         AppLocalizations.of(context).filterByCity,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                         ),
@@ -126,13 +130,14 @@ class _NgosViewState extends State<NgosView> {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   // City Search Bar
                   Container(
-                    height: 50,
+                    height: Responsive.scale(context, 50),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                          BorderRadius.circular(Responsive.scale(context, 12)),
                     ),
                     child: TextField(
                       onChanged: (value) {
@@ -140,41 +145,43 @@ class _NgosViewState extends State<NgosView> {
                           citySearchQuery = value;
                         });
                       },
-                      style: GoogleFonts.plusJakartaSans(fontSize: 14),
+                      style: GoogleFonts.plusJakartaSans(
+                          fontSize: Responsive.sp(context, 14)),
                       decoration: InputDecoration(
                         hintText: AppLocalizations.of(context).searchCity,
                         hintStyle: const TextStyle(color: Colors.grey),
-                        prefixIcon: const Icon(Icons.search,
-                            size: 20, color: Colors.grey),
+                        prefixIcon: Icon(Icons.search,
+                            size: Responsive.scale(context, 20),
+                            color: Colors.grey),
                         border: InputBorder.none,
                         contentPadding:
-                            const EdgeInsets.symmetric(vertical: 15),
+                            Responsive.padding(context, vertical: 15),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: Responsive.scale(context, 20)),
                   if (allCities.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      padding: Responsive.padding(context, vertical: 24),
                       child: Center(
                         child: Text(
                           AppLocalizations.of(context).noCityInfo,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.grey,
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                           ),
                         ),
                       ),
                     )
                   else if (filteredCities.isEmpty)
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      padding: Responsive.padding(context, vertical: 24),
                       child: Center(
                         child: Text(
                           AppLocalizations.of(context).noCityMatch,
                           style: GoogleFonts.plusJakartaSans(
                             color: Colors.grey,
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                           ),
                         ),
                       ),
@@ -186,8 +193,8 @@ class _NgosViewState extends State<NgosView> {
                       ),
                       child: SingleChildScrollView(
                         child: Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
+                          spacing: Responsive.scale(context, 10),
+                          runSpacing: Responsive.scale(context, 10),
                           children: filteredCities.map((city) {
                             final isSelected = _activeCity == city;
                             return ChoiceChip(
@@ -206,24 +213,25 @@ class _NgosViewState extends State<NgosView> {
                                     ? Colors.white
                                     : AppColors.kTextColor,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                               ),
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
+                                borderRadius: BorderRadius.circular(
+                                    Responsive.scale(context, 30)),
                                 side: BorderSide(
                                   color: isSelected
                                       ? AppColors.kSecondaryColor
                                       : Colors.transparent,
                                 ),
                               ),
-                              padding: const EdgeInsets.symmetric(
+                              padding: Responsive.padding(context,
                                   horizontal: 14, vertical: 8),
                             );
                           }).toList(),
                         ),
                       ),
                     ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: Responsive.scale(context, 8)),
                 ],
               ),
             );
@@ -255,32 +263,34 @@ class _NgosViewState extends State<NgosView> {
               // ── Active Filter Badge & Counter ──
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                  padding: Responsive.padding(context,
+                      left: 20, right: 20, top: 20, bottom: 8),
                   child: Row(
                     children: [
                       Text(
                         AppLocalizations.of(context).allOrganizations,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 17,
+                          fontSize: Responsive.sp(context, 17),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                         ),
                       ),
-                      const SizedBox(width: 8),
+                      SizedBox(width: Responsive.scale(context, 8)),
                       if (state is NgoLoaded)
                         Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: Responsive.padding(context,
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
                             color: const Color(0xFF1565C0).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(
+                                Responsive.scale(context, 12)),
                           ),
                           child: Text(
                             '${state.ngos.length}',
-                            style: const TextStyle(
-                              fontSize: 12,
+                            style: TextStyle(
+                              fontSize: Responsive.sp(context, 12),
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1565C0),
+                              color: const Color(0xFF1565C0),
                             ),
                           ),
                         ),
@@ -294,7 +304,8 @@ class _NgosViewState extends State<NgosView> {
               // ── Grid Content ──
               _buildContent(context, state),
 
-              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+              SliverToBoxAdapter(
+                  child: SizedBox(height: Responsive.scale(context, 80))),
             ],
           );
         },
@@ -307,21 +318,21 @@ class _NgosViewState extends State<NgosView> {
     const Color headerEnd = Color(0xFF42A5F5);
 
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           colors: [headerStart, headerEnd],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(32),
-          bottomRight: Radius.circular(32),
+          bottomLeft: Radius.circular(Responsive.scale(context, 32)),
+          bottomRight: Radius.circular(Responsive.scale(context, 32)),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(24, 0, 24, 20),
+          padding: Responsive.padding(context, left: 24, right: 24, bottom: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -329,29 +340,30 @@ class _NgosViewState extends State<NgosView> {
                 AppLocalizations.of(context).navOrganizations,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
-                  fontSize: 28,
+                  fontSize: Responsive.sp(context, 28),
                   fontWeight: FontWeight.bold,
                   letterSpacing: -0.5,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: Responsive.scale(context, 4)),
               Text(
                 AppLocalizations.of(context).ngosSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                 ),
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.scale(context, 24)),
               // Search & Filter Row
               Row(
                 children: [
                   Expanded(
                     child: Container(
-                      height: 54,
+                      height: Responsive.scale(context, 54),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 16)),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.1),
@@ -364,33 +376,37 @@ class _NgosViewState extends State<NgosView> {
                         controller: _searchController,
                         onChanged: _onSearchChanged,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w500,
                           color: AppColors.kTextColor,
                         ),
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           hintText: "STK veya kategori ara...",
-                          hintStyle:
-                              TextStyle(color: Colors.grey, fontSize: 14),
-                          prefixIcon:
-                              Icon(Icons.search_rounded, color: Colors.grey),
+                          hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: Responsive.sp(context, 14)),
+                          prefixIcon: Icon(Icons.search_rounded,
+                              color: Colors.grey,
+                              size: Responsive.scale(context, 24)),
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(vertical: 16),
+                          contentPadding:
+                              Responsive.padding(context, vertical: 16),
                         ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: Responsive.scale(context, 12)),
                   GestureDetector(
                     onTap: _openCityFilterSheet,
                     child: Container(
-                      height: 54,
-                      width: 54,
+                      height: Responsive.scale(context, 54),
+                      width: Responsive.scale(context, 54),
                       decoration: BoxDecoration(
                         color: _activeCity != null
                             ? Colors.white
                             : Colors.white.withOpacity(0.2),
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 16)),
                         border: _activeCity == null
                             ? Border.all(color: Colors.white.withOpacity(0.3))
                             : null,
@@ -414,31 +430,34 @@ class _NgosViewState extends State<NgosView> {
 
   Widget _buildCityBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: Responsive.padding(context, horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFF1565C0).withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.location_on, size: 13, color: Colors.orange),
-          const SizedBox(width: 5),
+          Icon(Icons.location_on,
+              size: Responsive.scale(context, 13), color: Colors.orange),
+          SizedBox(width: Responsive.scale(context, 5)),
           Text(
             _activeCity!,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               color: const Color(0xFF1565C0),
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: Responsive.scale(context, 6)),
           GestureDetector(
             onTap: () {
               setState(() => _activeCity = null);
               context.read<NgoCubit>().filterByCity(null);
             },
-            child: const Icon(Icons.close, size: 14, color: Color(0xFF1565C0)),
+            child: Icon(Icons.close,
+                size: Responsive.scale(context, 14),
+                color: const Color(0xFF1565C0)),
           ),
         ],
       ),
@@ -466,8 +485,9 @@ class _NgosViewState extends State<NgosView> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(Icons.search_off_rounded,
-                    size: 64, color: Colors.grey.shade300),
-                const SizedBox(height: 16),
+                    size: Responsive.scale(context, 64),
+                    color: Colors.grey.shade300),
+                SizedBox(height: Responsive.scale(context, 16)),
                 Text(AppLocalizations.of(context).noResults,
                     style: TextStyle(color: Colors.grey.shade500)),
               ],
@@ -477,13 +497,14 @@ class _NgosViewState extends State<NgosView> {
       }
 
       return SliverPadding(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+        padding: Responsive.padding(context,
+            left: 20, right: 20, top: 12, bottom: 24),
         sliver: SliverGrid(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 0.72,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: Responsive.scale(context, 16),
+            mainAxisSpacing: Responsive.scale(context, 16),
           ),
           delegate: SliverChildBuilderDelegate(
             (context, index) => NgoCard(ngo: state.ngos[index]),

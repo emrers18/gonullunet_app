@@ -297,9 +297,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get navProfile => 'Profil';
 
   @override
-  String get tabVolunteers => 'Gönüllüler';
-
-  @override
   String get assistant => 'Asistan';
 
   @override
@@ -309,7 +306,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get retry => 'Tekrar Dene';
 
   @override
-  String get noPostsYet => 'Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!';
+  String get noPostsYet =>
+      'Henüz hiç gönderi yok.\nSTK\'lar burada paylaşım yapacak.';
+
+  @override
+  String get ngoPostsSection => 'STK PAYLAŞIMLARI';
 
   @override
   String get upcomingEvents => 'YAKLAŞAN ETKİNLİKLER';
@@ -984,6 +985,25 @@ class AppLocalizationsTr extends AppLocalizations {
   String get missionHint => 'Misyonunuz...';
 
   @override
+  String get locationEmptyError => 'Konum boş olamaz.';
+
+  @override
+  String get phoneEmptyError => 'Telefon boş olamaz.';
+
+  @override
+  String get visionEmptyError => 'Vizyon boş olamaz.';
+
+  @override
+  String get missionEmptyError => 'Misyon boş olamaz.';
+
+  @override
+  String get completeNgoProfileTitle => 'Profilinizi Tamamlayın';
+
+  @override
+  String get completeNgoProfileNotice =>
+      'Uygulamayı kullanmaya başlamadan önce STK profilinizi tamamlamanız gerekiyor. Devam etmek için aşağıdaki tüm bilgileri doldurup kaydedin.';
+
+  @override
   String get applicantProfile => 'Başvuran Profili';
 
   @override
@@ -1368,6 +1388,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get shareFirstPost =>
       'Anasayfadaki + butonunu kullanarak\nilk gönderinizi paylaşabilirsiniz.';
+
+  @override
+  String get postingNgoOnly =>
+      'Gönderi paylaşımı sadece STK hesapları için kullanılabilir.';
 
   @override
   String get editPost => 'Gönderiyi Düzenle';

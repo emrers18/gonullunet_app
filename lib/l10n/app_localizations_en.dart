@@ -298,9 +298,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
-  String get tabVolunteers => 'Volunteers';
-
-  @override
   String get assistant => 'Assistant';
 
   @override
@@ -310,7 +307,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get retry => 'Try Again';
 
   @override
-  String get noPostsYet => 'No posts yet.\nBe the first to share!';
+  String get noPostsYet => 'No posts yet.\nOrganizations will post here soon.';
+
+  @override
+  String get ngoPostsSection => 'ORGANIZATION POSTS';
 
   @override
   String get upcomingEvents => 'UPCOMING EVENTS';
@@ -981,6 +981,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missionHint => 'Your mission...';
 
   @override
+  String get locationEmptyError => 'Location cannot be empty.';
+
+  @override
+  String get phoneEmptyError => 'Phone cannot be empty.';
+
+  @override
+  String get visionEmptyError => 'Vision cannot be empty.';
+
+  @override
+  String get missionEmptyError => 'Mission cannot be empty.';
+
+  @override
+  String get completeNgoProfileTitle => 'Complete Your Profile';
+
+  @override
+  String get completeNgoProfileNotice =>
+      'You need to complete your organization profile before using the app. Fill in all the information below and save to continue.';
+
+  @override
   String get applicantProfile => 'Applicant Profile';
 
   @override
@@ -1362,6 +1381,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get shareFirstPost =>
       'You can share your first post using the + button on the home page.';
+
+  @override
+  String get postingNgoOnly =>
+      'Sharing posts is only available for organization accounts.';
 
   @override
   String get editPost => 'Edit Post';

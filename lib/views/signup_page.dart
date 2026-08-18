@@ -8,6 +8,7 @@ import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/utils/validators/validators.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import '../logic/signup_cubit.dart';
 import '../logic/signup_state.dart';
@@ -66,7 +67,8 @@ class _SignUpViewState extends State<SignUpView> {
         content: Text(message, style: GoogleFonts.inter()),
         backgroundColor: Colors.redAccent,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 10))),
       ),
     );
   }
@@ -137,7 +139,7 @@ class _SignUpViewState extends State<SignUpView> {
         child: SafeArea(
           child: SingleChildScrollView(
             padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                Responsive.padding(context, horizontal: 24.0, vertical: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -164,15 +166,15 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: Responsive.scale(context, 16)),
 
                 // Logo Alanı (Gradient ve Dönme Efekti)
                 Stack(
                   alignment: Alignment.center,
                   children: [
                     Container(
-                      width: 80,
-                      height: 80,
+                      width: Responsive.scale(context, 80),
+                      height: Responsive.scale(context, 80),
                       decoration: BoxDecoration(
                         color: AppColors.kPrimaryColor.withOpacity(0.2),
                         shape: BoxShape.circle,
@@ -187,8 +189,8 @@ class _SignUpViewState extends State<SignUpView> {
                     Transform.rotate(
                       angle: -0.05,
                       child: Container(
-                        width: 64,
-                        height: 64,
+                        width: Responsive.scale(context, 64),
+                        height: Responsive.scale(context, 64),
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
                             begin: Alignment.topLeft,
@@ -198,7 +200,8 @@ class _SignUpViewState extends State<SignUpView> {
                               Colors.orangeAccent
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(
+                              Responsive.scale(context, 16)),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.kPrimaryColor.withOpacity(0.3),
@@ -207,19 +210,20 @@ class _SignUpViewState extends State<SignUpView> {
                             ),
                           ],
                         ),
-                        child: const Icon(Icons.volunteer_activism,
-                            color: Colors.white, size: 32),
+                        child: Icon(Icons.volunteer_activism,
+                            color: Colors.white,
+                            size: Responsive.scale(context, 32)),
                       ),
                     ),
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: Responsive.scale(context, 16)),
 
                 Text(
                   "GönüllüNet",
                   style: GoogleFonts.inter(
-                    fontSize: 24,
+                    fontSize: Responsive.sp(context, 24),
                     fontWeight: FontWeight.bold,
                     color: AppColors.kPrimaryColor,
                     letterSpacing: -0.5,
@@ -230,21 +234,22 @@ class _SignUpViewState extends State<SignUpView> {
                       ? l10n.signupVolunteerTagline
                       : l10n.signupNgoTagline,
                   style: GoogleFonts.inter(
-                    fontSize: 12,
+                    fontSize: Responsive.sp(context, 12),
                     fontWeight: FontWeight.w600,
                     color: Colors.grey.shade500,
                     letterSpacing: 1.0,
                   ),
                 ),
 
-                const SizedBox(height: 32),
+                SizedBox(height: Responsive.scale(context, 32)),
 
                 // --- 2. TOGGLE (Gönüllü / STK Seçimi) ---
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: Responsive.padding(context, all: 6),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius:
+                        BorderRadius.circular(Responsive.scale(context, 16)),
                     border: Border.all(color: Colors.grey.shade100),
                     boxShadow: [
                       BoxShadow(
@@ -278,7 +283,7 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: Responsive.scale(context, 24)),
 
                 // --- 3. FORM ALANI ---
                 Align(
@@ -289,18 +294,18 @@ class _SignUpViewState extends State<SignUpView> {
                       Text(
                         l10n.createAccount,
                         style: GoogleFonts.inter(
-                          fontSize: 20,
+                          fontSize: Responsive.sp(context, 20),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: Responsive.scale(context, 4)),
                       Text(
                         _selectedIndex == 0
                             ? l10n.signupVolunteerSubtitle
                             : l10n.signupNgoSubtitle,
                         style: GoogleFonts.inter(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -308,7 +313,7 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(height: Responsive.scale(context, 20)),
 
                 if (_selectedIndex == 0) ...[
                   // Gönüllü Formu
@@ -321,7 +326,7 @@ class _SignUpViewState extends State<SignUpView> {
                           icon: Icons.badge_outlined,
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: Responsive.scale(context, 12)),
                       Expanded(
                         child: _buildModernInput(
                           controller: _volSurnameController,
@@ -331,14 +336,14 @@ class _SignUpViewState extends State<SignUpView> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   _buildModernInput(
                     controller: _volEmailController,
                     hint: l10n.emailAddress,
                     icon: Icons.mail_outline,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   _buildModernInput(
                     controller: _volPasswordController,
                     hint: l10n.passwordLabel,
@@ -352,14 +357,14 @@ class _SignUpViewState extends State<SignUpView> {
                     hint: l10n.ngoName,
                     icon: Icons.business,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   _buildModernInput(
                     controller: _stkEmailController,
                     hint: l10n.emailLabel,
                     icon: Icons.mail_outline,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   _buildModernInput(
                     controller: _stkPasswordController,
                     hint: l10n.passwordLabel,
@@ -368,14 +373,14 @@ class _SignUpViewState extends State<SignUpView> {
                   ),
                 ],
 
-                const SizedBox(height: 32),
+                SizedBox(height: Responsive.scale(context, 32)),
 
                 // --- 4. KAYIT OL BUTONU ---
                 BlocBuilder<SignUpCubit, SignUpState>(
                   builder: (context, state) {
                     return SizedBox(
                       width: double.infinity,
-                      height: 56,
+                      height: Responsive.scale(context, 56),
                       child: ElevatedButton(
                         onPressed: (state is SignUpLoading)
                             ? null
@@ -386,7 +391,8 @@ class _SignUpViewState extends State<SignUpView> {
                           elevation: 0,
                           shadowColor: AppColors.kPrimaryColor.withOpacity(0.5),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
+                            borderRadius: BorderRadius.circular(
+                                Responsive.scale(context, 16)),
                           ),
                         ).copyWith(
                           elevation: WidgetStateProperty.all(8),
@@ -394,10 +400,11 @@ class _SignUpViewState extends State<SignUpView> {
                               AppColors.kPrimaryColor.withOpacity(0.4)),
                         ),
                         child: (state is SignUpLoading)
-                            ? const SizedBox(
-                                height: 24,
-                                width: 24,
-                                child: AppLoadingIndicator(size: 24),
+                            ? SizedBox(
+                                height: Responsive.scale(context, 24),
+                                width: Responsive.scale(context, 24),
+                                child: AppLoadingIndicator(
+                                    size: Responsive.scale(context, 24)),
                               )
                             : Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -405,13 +412,13 @@ class _SignUpViewState extends State<SignUpView> {
                                   Text(
                                     l10n.signUp,
                                     style: GoogleFonts.inter(
-                                      fontSize: 16,
+                                      fontSize: Responsive.sp(context, 16),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(Icons.arrow_forward_rounded,
-                                      size: 20),
+                                  SizedBox(width: Responsive.scale(context, 8)),
+                                  Icon(Icons.arrow_forward_rounded,
+                                      size: Responsive.scale(context, 20)),
                                 ],
                               ),
                       ),
@@ -419,7 +426,7 @@ class _SignUpViewState extends State<SignUpView> {
                   },
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: Responsive.scale(context, 24)),
 
                 // --- 5. ALT BİLGİ (Giriş Yap) ---
                 Row(
@@ -430,7 +437,7 @@ class _SignUpViewState extends State<SignUpView> {
                       style: GoogleFonts.inter(
                         color: Colors.grey.shade500,
                         fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                       ),
                     ),
                     TextButton(
@@ -440,7 +447,7 @@ class _SignUpViewState extends State<SignUpView> {
                         style: GoogleFonts.inter(
                           color: AppColors.kSecondaryColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           decoration: TextDecoration.underline,
                         ),
                       ),
@@ -448,7 +455,7 @@ class _SignUpViewState extends State<SignUpView> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                SizedBox(height: Responsive.scale(context, 16)),
               ],
             ),
           ),
@@ -467,7 +474,7 @@ class _SignUpViewState extends State<SignUpView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -506,17 +513,17 @@ class _SignUpViewState extends State<SignUpView> {
           filled: true,
           fillColor: Colors.white,
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+              Responsive.padding(context, vertical: 18, horizontal: 16),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
             borderSide: BorderSide.none,
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
             borderSide: BorderSide(color: Colors.grey.shade200, width: 1),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
             borderSide:
                 const BorderSide(color: AppColors.kPrimaryColor, width: 2),
           ),
@@ -537,10 +544,10 @@ class _SignUpViewState extends State<SignUpView> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: Responsive.padding(context, vertical: 12),
         decoration: BoxDecoration(
           color: isSelected ? activeColor : Colors.transparent,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -556,16 +563,16 @@ class _SignUpViewState extends State<SignUpView> {
           children: [
             Icon(
               icon,
-              size: 20,
+              size: Responsive.scale(context, 20),
               color: isSelected ? Colors.white : Colors.grey.shade500,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: Responsive.scale(context, 8)),
             Text(
               text,
               style: GoogleFonts.inter(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                 color: isSelected ? Colors.white : Colors.grey.shade500,
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
               ),
             ),
           ],

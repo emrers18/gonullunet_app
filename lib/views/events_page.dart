@@ -16,6 +16,7 @@ import '../logic/event_cubit.dart';
 import '../logic/event_state.dart';
 import '../widgets/events/event_filter_modal.dart';
 import '../widgets/app_loading_indicator.dart';
+import '../utils/responsive.dart';
 import 'events_map_page.dart';
 
 class EventsPage extends StatefulWidget {
@@ -97,15 +98,15 @@ class _EventsPageState extends State<EventsPage> {
     final markers = eventsWithLocation.map((e) {
       return Marker(
         point: LatLng(e.geoPoint!.latitude, e.geoPoint!.longitude),
-        width: 36,
-        height: 44,
+        width: Responsive.scale(context, 36),
+        height: Responsive.scale(context, 44),
         alignment: Alignment.topCenter,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 30,
-              height: 30,
+              width: Responsive.scale(context, 30),
+              height: Responsive.scale(context, 30),
               decoration: BoxDecoration(
                 color: AppColors.kPrimaryColor,
                 shape: BoxShape.circle,
@@ -118,15 +119,17 @@ class _EventsPageState extends State<EventsPage> {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.event_rounded,
                 color: Colors.white,
-                size: 14,
+                size: Responsive.scale(context, 14),
               ),
             ),
-            const CustomPaint(
-              size: Size(10, 8),
-              painter: _MiniPinTailPainter(color: AppColors.kPrimaryColor),
+            CustomPaint(
+              size: Size(
+                  Responsive.scale(context, 10), Responsive.scale(context, 8)),
+              painter:
+                  const _MiniPinTailPainter(color: AppColors.kPrimaryColor),
             ),
           ],
         ),
@@ -136,10 +139,10 @@ class _EventsPageState extends State<EventsPage> {
     return GestureDetector(
       onTap: () => _openFullMap(eventsWithLocation),
       child: Container(
-        margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-        height: 240,
+        margin: Responsive.padding(context, horizontal: 16),
+        height: Responsive.scale(context, 240),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
@@ -149,7 +152,7 @@ class _EventsPageState extends State<EventsPage> {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(24),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
           child: Stack(
             children: [
               // Harita
@@ -177,7 +180,7 @@ class _EventsPageState extends State<EventsPage> {
                 top: 0,
                 left: 0,
                 right: 0,
-                height: 60,
+                height: Responsive.scale(context, 60),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -197,7 +200,7 @@ class _EventsPageState extends State<EventsPage> {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: 70,
+                height: Responsive.scale(context, 70),
                 child: Container(
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -214,18 +217,20 @@ class _EventsPageState extends State<EventsPage> {
 
               // Üst sağ: Genişlet etiketi
               Positioned(
-                top: 12,
-                right: 12,
+                top: Responsive.scale(context, 12),
+                right: Responsive.scale(context, 12),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius:
+                      BorderRadius.circular(Responsive.scale(context, 24)),
                   child: BackdropFilter(
                     filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 24)),
                         border: Border.all(
                             color: Colors.white.withOpacity(0.5), width: 1),
                       ),
@@ -234,16 +239,16 @@ class _EventsPageState extends State<EventsPage> {
                         children: [
                           Icon(
                             Icons.open_in_full_rounded,
-                            size: 14,
+                            size: Responsive.scale(context, 14),
                             color: eventsWithLocation.isNotEmpty
                                 ? AppColors.kPrimaryColor
                                 : Colors.grey,
                           ),
-                          const SizedBox(width: 5),
+                          SizedBox(width: Responsive.scale(context, 5)),
                           Text(
                             AppLocalizations.of(context).fullScreen,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.bold,
                               color: eventsWithLocation.isNotEmpty
                                   ? AppColors.primaryText
@@ -259,29 +264,32 @@ class _EventsPageState extends State<EventsPage> {
 
               // Alt sol: Etkinlik sayısı rozeti
               Positioned(
-                bottom: 12,
-                left: 12,
+                bottom: Responsive.scale(context, 12),
+                left: Responsive.scale(context, 12),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius:
+                      BorderRadius.circular(Responsive.scale(context, 20)),
                   child: BackdropFilter(
                     filter: ui.ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 12, vertical: 7),
                       decoration: BoxDecoration(
                         color: AppColors.kPrimaryColor.withOpacity(0.9),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(
+                            Responsive.scale(context, 20)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.location_on,
-                              size: 13, color: Colors.white),
-                          const SizedBox(width: 5),
+                          Icon(Icons.location_on,
+                              size: Responsive.scale(context, 13),
+                              color: Colors.white),
+                          SizedBox(width: Responsive.scale(context, 5)),
                           Text(
                             '${eventsWithLocation.length} etkinlik haritada',
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
@@ -318,30 +326,35 @@ class _EventsPageState extends State<EventsPage> {
     if (state is EventError) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding: Responsive.padding(context, all: 20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.wifi_off_rounded, size: 56, color: Colors.grey[300]),
-              const SizedBox(height: 16),
+              Icon(Icons.wifi_off_rounded,
+                  size: Responsive.scale(context, 56), color: Colors.grey[300]),
+              SizedBox(height: Responsive.scale(context, 16)),
               Text(
                 AppMessages.resolve(context, state.message),
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                style: TextStyle(
+                    color: Colors.grey[500],
+                    fontSize: Responsive.sp(context, 15)),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: Responsive.scale(context, 20)),
               ElevatedButton.icon(
                 onPressed: () => context.read<EventCubit>().refresh(),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius:
+                        BorderRadius.circular(Responsive.scale(context, 20)),
                   ),
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      Responsive.padding(context, horizontal: 24, vertical: 12),
                 ),
-                icon: const Icon(Icons.refresh_rounded, size: 18),
+                icon: Icon(Icons.refresh_rounded,
+                    size: Responsive.scale(context, 18)),
                 label: const Text("Tekrar Dene"),
               ),
             ],
@@ -380,31 +393,33 @@ class _EventsPageState extends State<EventsPage> {
           // ── Bölüm başlığı ──
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+              padding: Responsive.padding(context,
+                  left: 20, right: 20, top: 20, bottom: 8),
               child: Row(
                 children: [
                   Text(
                     AppLocalizations.of(context).allEvents,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 17,
+                      fontSize: Responsive.sp(context, 17),
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryText,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: Responsive.scale(context, 8)),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        Responsive.padding(context, horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1565C0).withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius:
+                          BorderRadius.circular(Responsive.scale(context, 12)),
                     ),
                     child: Text(
                       '${events.length}',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: Responsive.sp(context, 12),
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF1565C0),
+                        color: const Color(0xFF1565C0),
                       ),
                     ),
                   ),
@@ -418,21 +433,26 @@ class _EventsPageState extends State<EventsPage> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.only(top: 60),
+                padding: Responsive.padding(context, top: 60),
                 child: Column(
                   children: [
-                    Icon(Icons.event_busy, size: 60, color: Colors.grey[300]),
-                    const SizedBox(height: 16),
+                    Icon(Icons.event_busy,
+                        size: Responsive.scale(context, 60),
+                        color: Colors.grey[300]),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     Text(
                       AppLocalizations.of(context).noEventsFound,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.grey[500], fontSize: 15),
+                      style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: Responsive.sp(context, 15)),
                     ),
                     TextButton(
                       onPressed: () =>
                           context.read<EventCubit>().clearFilters(),
                       child: Text(AppLocalizations.of(context).clearFilters,
-                          style: const TextStyle(color: AppColors.primaryColor)),
+                          style:
+                              const TextStyle(color: AppColors.primaryColor)),
                     ),
                   ],
                 ),
@@ -442,19 +462,21 @@ class _EventsPageState extends State<EventsPage> {
           // ── Etkinlik listesi ──
           if (events.isNotEmpty)
             SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: Responsive.padding(context, horizontal: 16, vertical: 4),
               sliver: SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (context, index) {
                     if (index < events.length) {
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
+                        padding: Responsive.padding(context, bottom: 12),
                         child: EventCard(event: events[index]),
                       );
                     }
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Center(child: AppLoadingIndicator(size: 28)),
+                    return Padding(
+                      padding: Responsive.padding(context, vertical: 20),
+                      child: Center(
+                          child: AppLoadingIndicator(
+                              size: Responsive.scale(context, 28))),
                     );
                   },
                   childCount: events.length + (hasMore ? 1 : 0),
@@ -462,7 +484,8 @@ class _EventsPageState extends State<EventsPage> {
               ),
             ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 80)),
+          SliverToBoxAdapter(
+              child: SizedBox(height: Responsive.scale(context, 80))),
         ],
       ),
     );
@@ -482,21 +505,22 @@ class _EventsPageState extends State<EventsPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
               colors: [headerStart, headerEnd],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.only(
-              bottomLeft: Radius.circular(28),
-              bottomRight: Radius.circular(28),
+              bottomLeft: Radius.circular(Responsive.scale(context, 28)),
+              bottomRight: Radius.circular(Responsive.scale(context, 28)),
             ),
           ),
           child: SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+              padding: Responsive.padding(context,
+                  left: 20, right: 20, top: 12, bottom: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -513,17 +537,17 @@ class _EventsPageState extends State<EventsPage> {
                               AppLocalizations.of(context).events,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.white,
-                                fontSize: 28,
+                                fontSize: Responsive.sp(context, 28),
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: -0.5,
                               ),
                             ),
-                            const SizedBox(height: 3),
+                            SizedBox(height: Responsive.scale(context, 3)),
                             Text(
                               AppLocalizations.of(context).eventsSubtitle,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.white.withOpacity(0.8),
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                               ),
                             ),
                           ],
@@ -533,22 +557,24 @@ class _EventsPageState extends State<EventsPage> {
                       GestureDetector(
                         onTap: _showFilterModal,
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
+                          padding: Responsive.padding(context,
                               horizontal: 14, vertical: 9),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.2),
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius: BorderRadius.circular(
+                                Responsive.scale(context, 20)),
                           ),
                           child: Row(
                             children: [
-                              const Icon(Icons.tune_rounded,
-                                  color: Colors.white, size: 16),
-                              const SizedBox(width: 6),
+                              Icon(Icons.tune_rounded,
+                                  color: Colors.white,
+                                  size: Responsive.scale(context, 16)),
+                              SizedBox(width: Responsive.scale(context, 6)),
                               Text(
                                 AppLocalizations.of(context).filter,
                                 style: GoogleFonts.plusJakartaSans(
                                   color: Colors.white,
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
@@ -558,7 +584,7 @@ class _EventsPageState extends State<EventsPage> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   // İstatistik rozetleri
                   Row(
                     children: [
@@ -566,13 +592,13 @@ class _EventsPageState extends State<EventsPage> {
                           icon: Icons.event_rounded,
                           label: AppLocalizations.of(context)
                               .statUpcoming(upcoming)),
-                      const SizedBox(width: 10),
+                      SizedBox(width: Responsive.scale(context, 10)),
                       _buildStatBadge(
                           icon: Icons.location_on_rounded,
                           label: AppLocalizations.of(context).statOnMap(onMap)),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: Responsive.scale(context, 20)),
                   _buildMiniMap(typedEvents),
                 ],
               ),
@@ -585,22 +611,22 @@ class _EventsPageState extends State<EventsPage> {
 
   Widget _buildStatBadge({required IconData icon, required String label}) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: Responsive.padding(context, horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.18),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
         border: Border.all(color: Colors.white.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: Colors.white, size: 14),
-          const SizedBox(width: 6),
+          Icon(icon, color: Colors.white, size: Responsive.scale(context, 14)),
+          SizedBox(width: Responsive.scale(context, 6)),
           Text(
             label,
             style: GoogleFonts.plusJakartaSans(
               color: Colors.white,
-              fontSize: 12,
+              fontSize: Responsive.sp(context, 12),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -626,9 +652,11 @@ class _EventsPageState extends State<EventsPage> {
               backgroundColor: AppColors.primaryColor,
               elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(32),
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 32)),
               ),
-              child: const Icon(Icons.add, color: Colors.white),
+              child: Icon(Icons.add,
+                  color: Colors.white, size: Responsive.scale(context, 24)),
             );
           }
           return const SizedBox.shrink();

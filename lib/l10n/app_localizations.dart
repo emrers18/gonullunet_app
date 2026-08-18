@@ -644,12 +644,6 @@ abstract class AppLocalizations {
   /// **'Profil'**
   String get navProfile;
 
-  /// No description provided for @tabVolunteers.
-  ///
-  /// In tr, this message translates to:
-  /// **'Gönüllüler'**
-  String get tabVolunteers;
-
   /// No description provided for @assistant.
   ///
   /// In tr, this message translates to:
@@ -671,8 +665,14 @@ abstract class AppLocalizations {
   /// No description provided for @noPostsYet.
   ///
   /// In tr, this message translates to:
-  /// **'Henüz hiç gönderi yok.\nİlk paylaşımı sen yap!'**
+  /// **'Henüz hiç gönderi yok.\nSTK\'lar burada paylaşım yapacak.'**
   String get noPostsYet;
+
+  /// No description provided for @ngoPostsSection.
+  ///
+  /// In tr, this message translates to:
+  /// **'STK PAYLAŞIMLARI'**
+  String get ngoPostsSection;
 
   /// No description provided for @upcomingEvents.
   ///
@@ -1922,6 +1922,42 @@ abstract class AppLocalizations {
   /// **'Misyonunuz...'**
   String get missionHint;
 
+  /// No description provided for @locationEmptyError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Konum boş olamaz.'**
+  String get locationEmptyError;
+
+  /// No description provided for @phoneEmptyError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Telefon boş olamaz.'**
+  String get phoneEmptyError;
+
+  /// No description provided for @visionEmptyError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Vizyon boş olamaz.'**
+  String get visionEmptyError;
+
+  /// No description provided for @missionEmptyError.
+  ///
+  /// In tr, this message translates to:
+  /// **'Misyon boş olamaz.'**
+  String get missionEmptyError;
+
+  /// No description provided for @completeNgoProfileTitle.
+  ///
+  /// In tr, this message translates to:
+  /// **'Profilinizi Tamamlayın'**
+  String get completeNgoProfileTitle;
+
+  /// No description provided for @completeNgoProfileNotice.
+  ///
+  /// In tr, this message translates to:
+  /// **'Uygulamayı kullanmaya başlamadan önce STK profilinizi tamamlamanız gerekiyor. Devam etmek için aşağıdaki tüm bilgileri doldurup kaydedin.'**
+  String get completeNgoProfileNotice;
+
   /// No description provided for @applicantProfile.
   ///
   /// In tr, this message translates to:
@@ -2605,6 +2641,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Anasayfadaki + butonunu kullanarak\nilk gönderinizi paylaşabilirsiniz.'**
   String get shareFirstPost;
+
+  /// No description provided for @postingNgoOnly.
+  ///
+  /// In tr, this message translates to:
+  /// **'Gönderi paylaşımı sadece STK hesapları için kullanılabilir.'**
+  String get postingNgoOnly;
 
   /// No description provided for @editPost.
   ///

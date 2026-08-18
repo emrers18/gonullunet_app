@@ -25,6 +25,7 @@ import 'my_posts_page.dart';
 import 'joined_events_page.dart';
 import 'settings_page.dart';
 import '../widgets/app_loading_indicator.dart';
+import '../utils/responsive.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -54,8 +55,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
           content: Text(l10n.signOutConfirm,
               style: GoogleFonts.plusJakartaSans(color: AppColors.kTextColor)),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(Responsive.scale(context, 16))),
           actions: <Widget>[
             TextButton(
               child: Text(l10n.cancel,
@@ -90,8 +92,9 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text(l10n.selectLanguage,
               style: GoogleFonts.plusJakartaSans(
                   fontWeight: FontWeight.bold, color: AppColors.kTextColor)),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+              borderRadius:
+                  BorderRadius.circular(Responsive.scale(context, 16))),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -103,11 +106,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CountryFlag.fromCountryCode(
                       'TR',
-                      height: 22,
-                      width: 30,
+                      height: Responsive.scale(context, 22),
+                      width: Responsive.scale(context, 30),
                       shape: const RoundedRectangle(6),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: Responsive.scale(context, 12)),
                     Text(l10n.languageTurkish,
                         style: GoogleFonts.plusJakartaSans()),
                   ],
@@ -125,11 +128,11 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     CountryFlag.fromCountryCode(
                       'GB',
-                      height: 22,
-                      width: 30,
+                      height: Responsive.scale(context, 22),
+                      width: Responsive.scale(context, 30),
                       shape: const RoundedRectangle(6),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: Responsive.scale(context, 12)),
                     Text(l10n.languageEnglish,
                         style: GoogleFonts.plusJakartaSans()),
                   ],
@@ -169,7 +172,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
           ),
         ),
       ),
@@ -180,7 +183,8 @@ class _ProfilePageState extends State<ProfilePage> {
           }
 
           if (state is UserError) {
-            return Center(child: Text(AppMessages.resolve(context, state.message)));
+            return Center(
+                child: Text(AppMessages.resolve(context, state.message)));
           }
 
           if (state is UserLoaded) {
@@ -188,14 +192,14 @@ class _ProfilePageState extends State<ProfilePage> {
 
             return SingleChildScrollView(
               padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  Responsive.padding(context, horizontal: 16.0, vertical: 12.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // --- 1. PROFIL KARTI ---
                   _buildProfileCard(user),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: Responsive.scale(context, 24)),
 
                   // --- 2. GRUP: HESAP & İŞLEMLER ---
                   _buildSectionTitle(l10n.accountAndActions),
@@ -247,7 +251,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: Responsive.scale(context, 24)),
 
                   // --- 3. GRUP: ETKİNLİKLER (Kullanıcı Tipine Göre) ---
                   if (user.isNgo || user.isVolunteer) ...[
@@ -284,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                       ],
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.scale(context, 24)),
                   ],
 
                   _buildSectionTitle(l10n.application),
@@ -325,7 +329,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ],
                   ),
 
-                  const SizedBox(height: 24),
+                  SizedBox(height: Responsive.scale(context, 24)),
 
                   // --- ÇIKIŞ BUTONU ---
                   SizedBox(
@@ -336,21 +340,23 @@ class _ProfilePageState extends State<ProfilePage> {
                         backgroundColor: Colors.white,
                         foregroundColor: Colors.red.shade600,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: Responsive.padding(context, vertical: 16),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16)),
+                            borderRadius: BorderRadius.circular(
+                                Responsive.scale(context, 16))),
                         shadowColor: Colors.black.withOpacity(0.05),
                       ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.logout_rounded, size: 20),
-                          const SizedBox(width: 8),
+                          Icon(Icons.logout_rounded,
+                              size: Responsive.scale(context, 20)),
+                          SizedBox(width: Responsive.scale(context, 8)),
                           Text(
                             l10n.signOut,
                             style: GoogleFonts.plusJakartaSans(
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: Responsive.sp(context, 16),
                             ),
                           ),
                         ],
@@ -358,7 +364,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
+                  SizedBox(height: Responsive.scale(context, 16)),
 
                   // Versiyon
                   Center(
@@ -366,12 +372,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       l10n.version('1.0.4'),
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade600,
-                        fontSize: 12,
+                        fontSize: Responsive.sp(context, 12),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  SizedBox(height: Responsive.scale(context, 32)),
                 ],
               ),
             );
@@ -403,10 +409,10 @@ class _ProfilePageState extends State<ProfilePage> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: Responsive.padding(context, all: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -423,8 +429,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Stack(
                   children: [
                     Container(
-                      width: 64,
-                      height: 64,
+                      width: Responsive.scale(context, 64),
+                      height: Responsive.scale(context, 64),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(color: Colors.white, width: 2),
@@ -447,7 +453,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: Text(
                                 user.initials,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 24,
+                                  fontSize: Responsive.sp(context, 24),
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.kPrimaryColor,
                                 ),
@@ -459,19 +465,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       bottom: 0,
                       right: 0,
                       child: Container(
-                        padding: const EdgeInsets.all(4),
+                        padding: Responsive.padding(context, all: 4),
                         decoration: BoxDecoration(
                           color: AppColors.kPrimaryColor,
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 2),
                         ),
-                        child: const Icon(Icons.edit,
-                            size: 10, color: Colors.white),
+                        child: Icon(Icons.edit,
+                            size: Responsive.scale(context, 10),
+                            color: Colors.white),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: Responsive.scale(context, 16)),
                 // İsim ve Rol
                 Expanded(
                   child: Column(
@@ -480,18 +487,18 @@ class _ProfilePageState extends State<ProfilePage> {
                       Text(
                         user.displayName,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: Responsive.scale(context, 4)),
                       Text(
                         user.isNgo
                             ? AppLocalizations.of(context).corporateMember
                             : AppLocalizations.of(context).volunteerMember,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           color: Colors.grey.shade600,
                           fontWeight: FontWeight.w500,
                         ),
@@ -503,21 +510,21 @@ class _ProfilePageState extends State<ProfilePage> {
               ],
             ),
             if (user.isVolunteer) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: Responsive.scale(context, 16)),
               const Divider(height: 1, color: Color(0xFFEEEEEE)),
-              const SizedBox(height: 16),
+              SizedBox(height: Responsive.scale(context, 16)),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
                       LevelBadge(xp: user.xp),
-                      const SizedBox(width: 8),
+                      SizedBox(width: Responsive.scale(context, 8)),
                       Text(
                         "${user.xp} XP",
                         style: GoogleFonts.plusJakartaSans(
                           color: Colors.grey.shade600,
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -528,28 +535,29 @@ class _ProfilePageState extends State<ProfilePage> {
                       AppLocalizations.of(context).nextLevel(levelInfo.maxXp),
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade500,
-                        fontSize: 10,
+                        fontSize: Responsive.sp(context, 10),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                 ],
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: Responsive.scale(context, 8)),
               ClipRRect(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 10)),
                 child: LinearProgressIndicator(
                   value: progress,
-                  minHeight: 8,
+                  minHeight: Responsive.scale(context, 8),
                   backgroundColor: Colors.grey.shade200,
                   valueColor: AlwaysStoppedAnimation<Color>(levelInfo.color),
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: Responsive.scale(context, 12)),
               Text(
                 AppLocalizations.of(context).xpInfo,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 10,
+                  fontSize: Responsive.sp(context, 10),
                   color: Colors.grey.shade500,
                   height: 1.4,
                 ),
@@ -563,11 +571,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 8, bottom: 8),
+      padding: Responsive.padding(context, left: 8, bottom: 8),
       child: Text(
         title.toUpperCase(),
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 12,
+          fontSize: Responsive.sp(context, 12),
           fontWeight: FontWeight.bold,
           color: Colors.grey.shade600,
           letterSpacing: 1.0,
@@ -580,7 +588,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -604,34 +612,36 @@ class _ProfilePageState extends State<ProfilePage> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: Responsive.padding(context, horizontal: 16, vertical: 12),
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: Responsive.scale(context, 40),
+                height: Responsive.scale(context, 40),
                 decoration: BoxDecoration(
                   color: iconBg,
-                  borderRadius:
-                      BorderRadius.circular(10), // Yuvarlak kare (Squircle)
+                  borderRadius: BorderRadius.circular(Responsive.scale(
+                      context, 10)), // Yuvarlak kare (Squircle)
                 ),
-                child: Icon(icon, color: iconColor, size: 22),
+                child: Icon(icon,
+                    color: iconColor, size: Responsive.scale(context, 22)),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: Responsive.scale(context, 16)),
               Expanded(
                 child: Text(
                   title,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 16,
+                    fontSize: Responsive.sp(context, 16),
                     fontWeight: FontWeight.w600,
                     color: AppColors.kTextColor,
                   ),
                 ),
               ),
               Icon(Icons.chevron_right_rounded,
-                  color: Colors.grey.shade400, size: 20),
+                  color: Colors.grey.shade400,
+                  size: Responsive.scale(context, 20)),
             ],
           ),
         ),
@@ -640,7 +650,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildDivider() {
-    return const Divider(
-        height: 1, thickness: 1, color: Color(0xFFEEEEEE), indent: 70);
+    return Divider(
+        height: 1,
+        thickness: 1,
+        color: const Color(0xFFEEEEEE),
+        indent: Responsive.scale(context, 70));
   }
 }

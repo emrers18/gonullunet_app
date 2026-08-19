@@ -8,6 +8,7 @@ import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/models/comment_model.dart';
 import 'package:gonullunet_app/logic/post_cubit.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class CommentModal extends StatefulWidget {
@@ -32,15 +33,16 @@ class _CommentModalState extends State<CommentModal> {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Responsive.scale(context, 20))),
       ),
       child: Column(
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: Responsive.padding(context, all: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -48,7 +50,7 @@ class _CommentModalState extends State<CommentModal> {
                   "Yorumlar",
                   style: GoogleFonts.poppins(
                     fontWeight: FontWeight.bold,
-                    fontSize: 18,
+                    fontSize: Responsive.sp(context, 18),
                   ),
                 ),
                 IconButton(
@@ -82,10 +84,10 @@ class _CommentModalState extends State<CommentModal> {
 
                 final comments = snapshot.data!;
                 return ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: Responsive.padding(context, all: 16),
                   itemCount: comments.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                   itemBuilder: (context, index) {
                     final comment = comments[index];
                     return _buildCommentItem(comment);
@@ -99,10 +101,11 @@ class _CommentModalState extends State<CommentModal> {
           const Divider(height: 1),
           Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-              left: 16,
-              right: 16,
-              top: 8,
+              bottom: MediaQuery.of(context).viewInsets.bottom +
+                  Responsive.scale(context, 16),
+              left: Responsive.scale(context, 16),
+              right: Responsive.scale(context, 16),
+              top: Responsive.scale(context, 8),
             ),
             child: Row(
               children: [
@@ -112,19 +115,20 @@ class _CommentModalState extends State<CommentModal> {
                     decoration: InputDecoration(
                       hintText: AppLocalizations.of(context).commentHint,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 30)),
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: Responsive.padding(
+                        context,
                         horizontal: 20,
                         vertical: 10,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: Responsive.scale(context, 8)),
                 IconButton(
                   onPressed: () {
                     if (_commentController.text.trim().isNotEmpty) {
@@ -166,7 +170,7 @@ class _CommentModalState extends State<CommentModal> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              radius: 18,
+              radius: Responsive.scale(context, 18),
               backgroundColor: Colors.grey.shade200,
               backgroundImage: (imageUrl != null && imageUrl.isNotEmpty)
                   ? CachedNetworkImageProvider(imageUrl)
@@ -175,7 +179,7 @@ class _CommentModalState extends State<CommentModal> {
                   ? Text(name.isNotEmpty ? name[0].toUpperCase() : "?")
                   : null,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: Responsive.scale(context, 12)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +191,7 @@ class _CommentModalState extends State<CommentModal> {
                         name,
                         style: GoogleFonts.poppins(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                         ),
                       ),
                       Text(
@@ -195,16 +199,16 @@ class _CommentModalState extends State<CommentModal> {
                             locale:
                                 Localizations.localeOf(context).languageCode),
                         style: GoogleFonts.poppins(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: Colors.grey,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: Responsive.scale(context, 4)),
                   Text(
                     comment.content,
-                    style: GoogleFonts.poppins(fontSize: 14),
+                    style: GoogleFonts.poppins(fontSize: Responsive.sp(context, 14)),
                   ),
                 ],
               ),

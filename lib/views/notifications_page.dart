@@ -8,6 +8,7 @@ import '../logic/notidication_state.dart';
 import '../logic/notifications_cubit.dart';
 import '../repo/notification_repository.dart';
 import '../widgets/app_loading_indicator.dart';
+import '../utils/responsive.dart';
 
 class NotificationsPage extends StatelessWidget {
   const NotificationsPage({super.key});
@@ -76,13 +77,13 @@ class NotificationsView extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.notifications_off_outlined,
-                        size: 80, color: Colors.grey),
-                    const SizedBox(height: 16),
+                    Icon(Icons.notifications_off_outlined,
+                        size: Responsive.scale(context, 80), color: Colors.grey),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     Text(
                       AppLocalizations.of(context).noNotifications,
-                      style: const TextStyle(
-                          color: Colors.grey, fontSize: 16),
+                      style: TextStyle(
+                          color: Colors.grey, fontSize: Responsive.sp(context, 16)),
                     ),
                   ],
                 ),
@@ -90,7 +91,7 @@ class NotificationsView extends StatelessWidget {
             }
 
             return ListView.separated(
-              padding: const EdgeInsets.all(16),
+              padding: Responsive.padding(context, all: 16),
               itemCount: state.notifications.length,
               separatorBuilder: (context, index) => const Divider(height: 1),
               itemBuilder: (context, index) {
@@ -100,21 +101,21 @@ class NotificationsView extends StatelessWidget {
                   direction: DismissDirection.endToStart,
                   background: Container(
                     alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
+                    padding: Responsive.padding(context, right: 20),
                     decoration: BoxDecoration(
                       color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                     ),
-                    child: const Row(
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        Text(
+                        const Text(
                           "Sil",
                           style: TextStyle(
                               color: Colors.white, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(width: 8),
-                        Icon(Icons.delete, color: Colors.white),
+                        SizedBox(width: Responsive.scale(context, 8)),
+                        const Icon(Icons.delete, color: Colors.white),
                       ],
                     ),
                   ),
@@ -130,7 +131,7 @@ class NotificationsView extends StatelessWidget {
                   },
                   child: ListTile(
                     contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                        Responsive.padding(context, horizontal: 8, vertical: 8),
                     tileColor: notification.isRead
                         ? Colors.white
                         : AppColors.kPrimaryColor.withOpacity(0.1),
@@ -156,13 +157,13 @@ class NotificationsView extends StatelessWidget {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 4),
+                        SizedBox(height: Responsive.scale(context, 4)),
                         Text(notification.body),
-                        const SizedBox(height: 4),
+                        SizedBox(height: Responsive.scale(context, 4)),
                         Text(
                           notification.timeAgo,
-                          style: const TextStyle(
-                              color: Colors.grey, fontSize: 12),
+                          style: TextStyle(
+                              color: Colors.grey, fontSize: Responsive.sp(context, 12)),
                         ),
                       ],
                     ),
@@ -174,7 +175,7 @@ class NotificationsView extends StatelessWidget {
                     trailing: Icon(
                       Icons.chevron_left,
                       color: Colors.grey.withOpacity(0.3),
-                      size: 20,
+                      size: Responsive.scale(context, 20),
                     ),
                   ),
                 );

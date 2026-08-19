@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_chat_message_model.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../molecules/message_bubble.dart';
 
 class MessageListView extends StatefulWidget {
@@ -69,7 +70,7 @@ class _MessageListViewState extends State<MessageListView> {
 
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: Responsive.padding(context, vertical: 8.0),
       itemCount: widget.messages.length,
       itemBuilder: (context, index) {
         final message = widget.messages[index];

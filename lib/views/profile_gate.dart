@@ -7,6 +7,7 @@ import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/views/main_page.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class ProfileGate extends StatefulWidget {
   const ProfileGate({super.key});
@@ -35,27 +36,28 @@ class _ProfileGateState extends State<ProfileGate> {
           return Scaffold(
             body: Center(
               child: Padding(
-                padding: const EdgeInsets.all(32.0),
+                padding: Responsive.padding(context, all: 32.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline,
-                        color: Colors.red, size: 64),
-                    const SizedBox(height: 24),
+                    Icon(Icons.error_outline,
+                        color: Colors.red,
+                        size: Responsive.scale(context, 64)),
+                    SizedBox(height: Responsive.scale(context, 24)),
                     Text(
                       AppLocalizations.of(context).errorTitle,
                       style: GoogleFonts.dmSans(
-                        fontSize: 20,
+                        fontSize: Responsive.sp(context, 20),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: Responsive.scale(context, 8)),
                     Text(
                       AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.dmSans(color: Colors.grey),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.scale(context, 24)),
                     ElevatedButton(
                       onPressed: () => context.read<UserCubit>().loadUser(),
                       child: Text(AppLocalizations.of(context).retry),
@@ -73,8 +75,8 @@ class _ProfileGateState extends State<ProfileGate> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const AppLoadingIndicator(size: 48),
-                const SizedBox(height: 16),
+                AppLoadingIndicator(size: Responsive.scale(context, 48)),
+                SizedBox(height: Responsive.scale(context, 16)),
                 Text(AppLocalizations.of(context).checkingProfile),
               ],
             ),

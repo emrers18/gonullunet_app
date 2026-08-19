@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 Widget buildInfoCard(BuildContext context, String title, String content, IconData icon,
     Color iconColor, Color bgColor) {
   return Container(
-    padding: const EdgeInsets.all(20),
+    padding: Responsive.padding(context, all: 20),
     decoration: BoxDecoration(
       color: Colors.white,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
       border: Border.all(color: Colors.grey.shade100),
       boxShadow: [
         BoxShadow(
@@ -22,25 +23,27 @@ Widget buildInfoCard(BuildContext context, String title, String content, IconDat
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          width: 40,
-          height: 40,
+          width: Responsive.scale(context, 40),
+          height: Responsive.scale(context, 40),
           decoration: BoxDecoration(
             color: bgColor,
             shape: BoxShape.circle,
           ),
-          child: Icon(icon, color: iconColor, size: 20),
+          child: Icon(icon, color: iconColor, size: Responsive.scale(context, 20)),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: Responsive.scale(context, 12)),
         Text(title,
             style: GoogleFonts.plusJakartaSans(
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: AppColors.kTextColor)),
-        const SizedBox(height: 4),
+        SizedBox(height: Responsive.scale(context, 4)),
         Text(
           content,
-          style:
-              TextStyle(fontSize: 12, color: Colors.grey.shade500, height: 1.4),
+          style: TextStyle(
+              fontSize: Responsive.sp(context, 12),
+              color: Colors.grey.shade500,
+              height: 1.4),
         ),
       ],
     ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class TypingIndicator extends StatefulWidget {
   const TypingIndicator({super.key});
@@ -32,30 +33,30 @@ class _TypingIndicatorState extends State<TypingIndicator>
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.only(left: 8, top: 4, bottom: 4),
+        margin: Responsive.padding(context, left: 8, top: 4, bottom: 4),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const CircleAvatar(
-              radius: 16,
+            CircleAvatar(
+              radius: Responsive.scale(context, 16),
               backgroundColor: AppColors.darkPrimaryColor,
               child: Icon(
                 Icons.auto_awesome,
-                size: 18,
+                size: Responsive.scale(context, 18),
                 color: Colors.white,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: Responsive.scale(context, 8)),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: Responsive.padding(context, horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
                 color: AppColors.kCardBackgroundColor,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  topRight: Radius.circular(16),
-                  bottomLeft: Radius.circular(4),
-                  bottomRight: Radius.circular(16),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(Responsive.scale(context, 16)),
+                  topRight: Radius.circular(Responsive.scale(context, 16)),
+                  bottomLeft: Radius.circular(Responsive.scale(context, 4)),
+                  bottomRight: Radius.circular(Responsive.scale(context, 16)),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -75,12 +76,12 @@ class _TypingIndicatorState extends State<TypingIndicator>
                       final value = ((_controller.value + delay) % 1.0);
                       final opacity = 0.3 + 0.7 * (1 - (2 * value - 1).abs());
                       return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 2),
+                        margin: Responsive.padding(context, horizontal: 2),
                         child: Opacity(
                           opacity: opacity.clamp(0.3, 1.0),
                           child: Container(
-                            width: 8,
-                            height: 8,
+                            width: Responsive.scale(context, 8),
+                            height: Responsive.scale(context, 8),
                             decoration: const BoxDecoration(
                               color: AppColors.secondaryText,
                               shape: BoxShape.circle,

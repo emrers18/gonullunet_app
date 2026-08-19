@@ -10,6 +10,7 @@ import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:intl/intl.dart';
 
 import '../constants/app_constants.dart';
+import '../utils/responsive.dart';
 import 'event_detail_page.dart';
 
 class EventsMapPage extends StatefulWidget {
@@ -117,7 +118,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
     );
   }
 
-  List<Marker> _buildMarkers() {
+  List<Marker> _buildMarkers(BuildContext context) {
     return _filteredEvents.asMap().entries.map((entry) {
       final index = entry.key;
       final e = entry.value;
@@ -125,8 +126,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
       return Marker(
         point: LatLng(e.geoPoint!.latitude, e.geoPoint!.longitude),
-        width: isSelected ? 52 : 40,
-        height: isSelected ? 62 : 48,
+        width: Responsive.scale(context, isSelected ? 52 : 40),
+        height: Responsive.scale(context, isSelected ? 62 : 48),
         alignment: Alignment.topCenter,
         child: GestureDetector(
           onTap: () => _onMarkerTapped(index),
@@ -138,8 +139,8 @@ class _EventsMapPageState extends State<EventsMapPage> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: isSelected ? 42 : 34,
-                  height: isSelected ? 42 : 34,
+                  width: Responsive.scale(context, isSelected ? 42 : 34),
+                  height: Responsive.scale(context, isSelected ? 42 : 34),
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.kPrimaryColor
@@ -165,12 +166,13 @@ class _EventsMapPageState extends State<EventsMapPage> {
                         ? Icons.work_rounded
                         : Icons.event_rounded,
                     color: Colors.white,
-                    size: isSelected ? 20 : 16,
+                    size: Responsive.scale(context, isSelected ? 20 : 16),
                   ),
                 ),
                 // Pin tail
                 CustomPaint(
-                  size: Size(12, isSelected ? 10 : 8),
+                  size: Size(Responsive.scale(context, 12),
+                      Responsive.scale(context, isSelected ? 10 : 8)),
                   painter: _PinTailPainter(
                     color: isSelected
                         ? AppColors.kPrimaryColor
@@ -212,7 +214,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
                 userAgentPackageName: 'com.gonullunet.gonullunet_app',
               ),
               MarkerLayer(
-                markers: _buildMarkers(),
+                markers: _buildMarkers(context),
               ),
             ],
           ),
@@ -224,10 +226,10 @@ class _EventsMapPageState extends State<EventsMapPage> {
             right: 0,
             child: Container(
               padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 10,
-                  bottom: 10,
-                  left: 16,
-                  right: 16),
+                  top: MediaQuery.of(context).padding.top + Responsive.scale(context, 10),
+                  bottom: Responsive.scale(context, 10),
+                  left: Responsive.scale(context, 16),
+                  right: Responsive.scale(context, 16)),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -247,13 +249,13 @@ class _EventsMapPageState extends State<EventsMapPage> {
                       _buildCircleButton(
                           icon: Icons.arrow_back,
                           onTap: () => Navigator.pop(context)),
-                      const SizedBox(width: 12),
+                      SizedBox(width: Responsive.scale(context, 12)),
                       Expanded(
                         child: Container(
-                          height: 48,
+                          height: Responsive.scale(context, 48),
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 30)),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.08),
@@ -272,12 +274,12 @@ class _EventsMapPageState extends State<EventsMapPage> {
                                   color: AppColors.textSub),
                               border: InputBorder.none,
                               contentPadding:
-                                  const EdgeInsets.symmetric(vertical: 14),
+                                  Responsive.padding(context, vertical: 14),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: Responsive.scale(context, 12)),
                       _buildCircleButton(
                         icon: Icons.tune,
                         onTap: () {
@@ -290,7 +292,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
                     ],
                   ),
 
-                  const SizedBox(height: 12),
+                  SizedBox(height: Responsive.scale(context, 12)),
 
                   // Kategori Chips
                   SingleChildScrollView(
@@ -313,16 +315,16 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
           // 3. KATMAN: KÜÇÜLT BUTONU (Sağ Üst)
           Positioned(
-            top: 140,
-            right: 16,
+            top: Responsive.scale(context, 140),
+            right: Responsive.scale(context, 16),
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    Responsive.padding(context, horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 30)),
                   boxShadow: [
                     BoxShadow(
                         color: Colors.black.withOpacity(0.1),
@@ -332,9 +334,9 @@ class _EventsMapPageState extends State<EventsMapPage> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.close_fullscreen_rounded,
-                        color: AppColors.kPrimaryColor, size: 20),
-                    const SizedBox(width: 8),
+                    Icon(Icons.close_fullscreen_rounded,
+                        color: AppColors.kPrimaryColor, size: Responsive.scale(context, 20)),
+                    SizedBox(width: Responsive.scale(context, 8)),
                     Text(
                       l10n.shrink,
                       style: const TextStyle(
@@ -349,31 +351,31 @@ class _EventsMapPageState extends State<EventsMapPage> {
 
           // 4. KATMAN: KONUM BUTONU (Sağ Alt)
           Positioned(
-            bottom: 160,
-            right: 16,
+            bottom: Responsive.scale(context, 160),
+            right: Responsive.scale(context, 16),
             child: _buildCircleButton(
               icon: Icons.my_location,
               onTap: () {
                 // Konuma gitme: ileride eklenebilir
               },
-              size: 50,
+              size: Responsive.scale(context, 50),
             ),
           ),
 
           // 5. KATMAN: ALT ETKİNLİK KARTLARI
           Positioned(
-            bottom: 20,
+            bottom: Responsive.scale(context, 20),
             left: 0,
             right: 0,
-            height: 140,
+            height: Responsive.scale(context, 140),
             child: _filteredEvents.isEmpty
                 ? Center(
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 24, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                         boxShadow: [
                           BoxShadow(
                               color: Colors.black.withOpacity(0.1),
@@ -410,11 +412,11 @@ class _EventsMapPageState extends State<EventsMapPage> {
         DateFormat('dd MMM, HH:mm', localeName).format(event.date);
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      padding: const EdgeInsets.all(12),
+      margin: Responsive.padding(context, horizontal: 8),
+      padding: Responsive.padding(context, all: 12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -426,17 +428,17 @@ class _EventsMapPageState extends State<EventsMapPage> {
       child: Row(
         children: [
           Container(
-            width: 100,
+            width: Responsive.scale(context, 100),
             height: double.infinity,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
               image: DecorationImage(
                 image: CachedNetworkImageProvider(event.imageUrl),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: Responsive.scale(context, 12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,29 +452,29 @@ class _EventsMapPageState extends State<EventsMapPage> {
                         event.title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
+                        style: TextStyle(
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.bold,
                           color: AppColors.primaryText,
                         ),
                       ),
                     ),
                     Container(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.kPrimaryColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.group,
-                              size: 12, color: AppColors.kPrimaryColor),
-                          const SizedBox(width: 2),
+                          Icon(Icons.group,
+                              size: Responsive.scale(context, 12), color: AppColors.kPrimaryColor),
+                          SizedBox(width: Responsive.scale(context, 2)),
                           Text(
                             "${event.participants.length}",
-                            style: const TextStyle(
-                              fontSize: 10,
+                            style: TextStyle(
+                              fontSize: Responsive.sp(context, 10),
                               fontWeight: FontWeight.bold,
                               color: AppColors.kPrimaryColor,
                             ),
@@ -485,7 +487,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
                 Column(
                   children: [
                     _buildInfoRow(Icons.calendar_month, formattedDate),
-                    const SizedBox(height: 4),
+                    SizedBox(height: Responsive.scale(context, 4)),
                     _buildInfoRow(Icons.location_on, event.location),
                   ],
                 ),
@@ -506,16 +508,16 @@ class _EventsMapPageState extends State<EventsMapPage> {
                         backgroundColor: AppColors.kPrimaryColor,
                         foregroundColor: Colors.white,
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(
+                        padding: Responsive.padding(context,
                             horizontal: 16, vertical: 0),
-                        minimumSize: const Size(0, 32),
+                        minimumSize: Size(0, Responsive.scale(context, 32)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                         ),
                       ),
                       child: Text(l10n.examine,
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.bold)),
                     )
                   ],
                 )
@@ -532,17 +534,17 @@ class _EventsMapPageState extends State<EventsMapPage> {
     if (count == 0) {
       return Text(
         l10n.beFirstToJoin,
-        style: TextStyle(color: Colors.grey[500], fontSize: 11),
+        style: TextStyle(color: Colors.grey[500], fontSize: Responsive.sp(context, 11)),
       );
     }
     return Row(
       children: [
-        Icon(Icons.people, size: 16, color: Colors.grey[500]),
-        const SizedBox(width: 4),
+        Icon(Icons.people, size: Responsive.scale(context, 16), color: Colors.grey[500]),
+        SizedBox(width: Responsive.scale(context, 4)),
         Text(
           l10n.participantCount(count),
           style: TextStyle(
-            fontSize: 11,
+            fontSize: Responsive.sp(context, 11),
             color: Colors.grey[600],
             fontWeight: FontWeight.w500,
           ),
@@ -554,14 +556,14 @@ class _EventsMapPageState extends State<EventsMapPage> {
   Widget _buildInfoRow(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: AppColors.textSub),
-        const SizedBox(width: 4),
+        Icon(icon, size: Responsive.scale(context, 14), color: AppColors.textSub),
+        SizedBox(width: Responsive.scale(context, 4)),
         Expanded(
           child: Text(
             text,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 12, color: AppColors.textSub),
+            style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.textSub),
           ),
         ),
       ],
@@ -586,18 +588,18 @@ class _EventsMapPageState extends State<EventsMapPage> {
             ),
           ],
         ),
-        child: Icon(icon, color: AppColors.primaryText, size: 22),
+        child: Icon(icon, color: AppColors.primaryText, size: Responsive.scale(context, 22)),
       ),
     );
   }
 
   Widget _buildCategoryChip(String label, bool isSelected) {
     return Container(
-      margin: const EdgeInsets.only(right: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      margin: Responsive.padding(context, right: 8),
+      padding: Responsive.padding(context, horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: isSelected ? AppColors.kPrimaryColor : Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
         boxShadow: [
           BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -610,7 +612,7 @@ class _EventsMapPageState extends State<EventsMapPage> {
         style: TextStyle(
           color: isSelected ? Colors.white : AppColors.primaryText,
           fontWeight: FontWeight.bold,
-          fontSize: 13,
+          fontSize: Responsive.sp(context, 13),
         ),
       ),
     );

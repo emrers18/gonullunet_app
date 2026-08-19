@@ -6,6 +6,7 @@ import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/events/event_card.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class JoinedEventsPage extends StatelessWidget {
   const JoinedEventsPage({super.key});
@@ -53,8 +54,8 @@ class JoinedEventsPage extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(Icons.event_available,
-                            size: 80, color: Colors.grey[300]),
-                        const SizedBox(height: 16),
+                            size: Responsive.scale(context, 80), color: Colors.grey[300]),
+                        SizedBox(height: Responsive.scale(context, 16)),
                         Text(
                           l10n.noEventsJoined,
                           style: TextStyle(color: Colors.grey[500]),
@@ -66,10 +67,10 @@ class JoinedEventsPage extends StatelessWidget {
 
                 final docs = snapshot.data!.docs;
                 return ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: Responsive.padding(context, all: 16),
                   itemCount: docs.length,
                   separatorBuilder: (context, index) =>
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                   itemBuilder: (context, index) {
                     final event = Event.fromFirestore(docs[index]);
                     return EventCard(event: event);

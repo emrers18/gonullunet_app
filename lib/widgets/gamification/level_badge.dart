@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/category_localizer.dart';
 import '../../utils/gamification_utils.dart';
+import '../../utils/responsive.dart';
 
 class LevelBadge extends StatelessWidget {
   final int xp;
@@ -28,7 +29,7 @@ class LevelBadge extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: level.color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
         border: Border.all(color: level.color.withOpacity(0.3), width: 1),
         boxShadow: [
           BoxShadow(
@@ -47,7 +48,7 @@ class LevelBadge extends StatelessWidget {
             color: level.color,
           ),
           if (showTitle) ...[
-            const SizedBox(width: 4),
+            SizedBox(width: Responsive.scale(context, 4)),
             Text(
               CategoryLocalizer.level(
                   AppLocalizations.of(context), level.title),

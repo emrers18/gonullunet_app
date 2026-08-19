@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import '../logic/profile_cubit.dart';
 import '../logic/profile_state.dart';
@@ -160,7 +161,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
             style: GoogleFonts.plusJakartaSans(
               color: AppColors.kTextColor,
               fontWeight: FontWeight.bold,
-              fontSize: 18,
+              fontSize: Responsive.sp(context, 18),
             ),
           ),
           centerTitle: true,
@@ -231,7 +232,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const AppLoadingIndicator(),
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                       Text(AppLocalizations.of(context).profileUpdating,
                           style: GoogleFonts.plusJakartaSans(
                               color: AppColors.kTextColor)),
@@ -242,14 +243,14 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
 
               return SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
+                  padding: Responsive.padding(context,
                       horizontal: 16.0, vertical: 24.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       if (widget.forceComplete) ...[
                         _buildCompleteProfileNotice(context),
-                        const SizedBox(height: 24),
+                        SizedBox(height: Responsive.scale(context, 24)),
                       ],
                       // --- Profil Resmi Alanı ---
                       Center(
@@ -260,8 +261,8 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                               child: Stack(
                                 children: [
                                   Container(
-                                    width: 128,
-                                    height: 128,
+                                    width: Responsive.scale(context, 128),
+                                    height: Responsive.scale(context, 128),
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
@@ -292,38 +293,43 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                                     bottom: 0,
                                     right: 0,
                                     child: Container(
-                                      padding: const EdgeInsets.all(8),
+                                      padding:
+                                          Responsive.padding(context, all: 8),
                                       decoration: BoxDecoration(
                                         color: AppColors.kPrimaryColor,
                                         shape: BoxShape.circle,
                                         border: Border.all(
                                             color: Colors.white, width: 2),
                                       ),
-                                      child: const Icon(Icons.edit,
-                                          color: Colors.white, size: 20),
+                                      child: Icon(Icons.edit,
+                                          color: Colors.white,
+                                          size: Responsive.scale(context, 20)),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: Responsive.scale(context, 12)),
                             Text(
                               AppLocalizations.of(context).tapToChangeLogo,
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.grey,
-                                fontSize: 14,
+                                fontSize: Responsive.sp(context, 14),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
 
-                      _buildLabel(AppLocalizations.of(context).ngoName),
-                      _buildInput(controller: _stkNameController, hint: ""),
+                      _buildLabel(context, AppLocalizations.of(context).ngoName),
+                      _buildInput(
+                          context: context,
+                          controller: _stkNameController,
+                          hint: ""),
 
-                      const SizedBox(height: 20),
+                      SizedBox(height: Responsive.scale(context, 20)),
 
                       Row(
                         children: [
@@ -331,9 +337,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildLabel(
+                                _buildLabel(context,
                                     AppLocalizations.of(context).emailLabel),
                                 _buildInput(
+                                  context: context,
                                   controller: _emailController,
                                   hint: "",
                                   icon: Icons.mail_outline,
@@ -344,129 +351,151 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-                      _buildLabel(AppLocalizations.of(context).phone),
+                      SizedBox(height: Responsive.scale(context, 20)),
+                      _buildLabel(context, AppLocalizations.of(context).phone),
                       _buildInput(
+                          context: context,
                           controller: _phoneController,
                           hint: "",
                           icon: Icons.call,
                           inputType: TextInputType.phone),
 
-                      const SizedBox(height: 20),
-                      _buildLabel(AppLocalizations.of(context).location),
+                      SizedBox(height: Responsive.scale(context, 20)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).location),
                       _buildInput(
+                          context: context,
                           controller: _locationController,
                           hint: AppLocalizations.of(context).cityExampleHint,
                           icon: Icons.location_on_outlined),
 
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       const Divider(), // default divider uses dividerColor
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
 
-                      _buildLabel(AppLocalizations.of(context).aboutUs),
+                      _buildLabel(context, AppLocalizations.of(context).aboutUs),
                       _buildTextArea(
+                          context: context,
                           controller: _descriptionController,
                           hint: AppLocalizations.of(context).ngoDescriptionHint,
                           maxLines: 4),
 
-                      const SizedBox(height: 20),
-                      _buildLabel(AppLocalizations.of(context).visionLabel),
+                      SizedBox(height: Responsive.scale(context, 20)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).visionLabel),
                       _buildTextArea(
+                          context: context,
                           controller: _visionController,
                           hint: AppLocalizations.of(context).visionHint,
                           maxLines: 3),
 
-                      const SizedBox(height: 20),
-                      _buildLabel(AppLocalizations.of(context).missionLabel),
+                      SizedBox(height: Responsive.scale(context, 20)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).missionLabel),
                       _buildTextArea(
+                          context: context,
                           controller: _missionController,
                           hint: AppLocalizations.of(context).missionHint,
                           maxLines: 3),
 
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       const Divider(),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
 
                       _buildLabel(
-                          AppLocalizations.of(context).socialMediaLinks),
-                      const SizedBox(height: 12),
-                      _buildLabel(AppLocalizations.of(context).facebookLabel),
+                          context, AppLocalizations.of(context).socialMediaLinks),
+                      SizedBox(height: Responsive.scale(context, 12)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).facebookLabel),
                       _buildInput(
+                        context: context,
                         controller: _facebookController,
                         hint: AppLocalizations.of(context).facebookHint,
                         icon: Icons.facebook_outlined,
                         inputType: TextInputType.url,
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                       _buildLabel(
-                          AppLocalizations.of(context).instagramLabel),
+                          context, AppLocalizations.of(context).instagramLabel),
                       _buildInput(
+                        context: context,
                         controller: _instagramController,
                         hint: AppLocalizations.of(context).instagramHint,
                         icon: Icons.camera_alt_outlined,
                         inputType: TextInputType.url,
                       ),
-                      const SizedBox(height: 16),
-                      _buildLabel(AppLocalizations.of(context).twitterLabel),
+                      SizedBox(height: Responsive.scale(context, 16)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).twitterLabel),
                       _buildInput(
+                        context: context,
                         controller: _twitterController,
                         hint: AppLocalizations.of(context).twitterHint,
                         icon: Icons.alternate_email,
                         inputType: TextInputType.url,
                       ),
-                      const SizedBox(height: 16),
-                      _buildLabel(AppLocalizations.of(context).linkedinLabel),
+                      SizedBox(height: Responsive.scale(context, 16)),
+                      _buildLabel(
+                          context, AppLocalizations.of(context).linkedinLabel),
                       _buildInput(
+                        context: context,
                         controller: _linkedinController,
                         hint: AppLocalizations.of(context).linkedinHint,
                         icon: Icons.business_center_outlined,
                         inputType: TextInputType.url,
                       ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
 
                       ElevatedButton(
                         onPressed: () => _onSavePressed(context),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.kPrimaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding:
+                              Responsive.padding(context, vertical: 16),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                              borderRadius: BorderRadius.circular(
+                                  Responsive.scale(context, 30))),
                           elevation: 4,
                           shadowColor: AppColors.kPrimaryColor.withOpacity(0.3),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.save_outlined, size: 22),
-                            const SizedBox(width: 8),
+                            Icon(Icons.save_outlined,
+                                size: Responsive.scale(context, 22)),
+                            SizedBox(width: Responsive.scale(context, 8)),
                             Text(
                               AppLocalizations.of(context).save,
                               style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: Responsive.sp(context, 18),
+                                  fontWeight: FontWeight.bold),
                             ),
                           ],
                         ),
                       ),
                       if (!widget.forceComplete) ...[
-                        const SizedBox(height: 12),
+                        SizedBox(height: Responsive.scale(context, 12)),
                         TextButton(
                           onPressed: () => Navigator.pop(context),
                           style: TextButton.styleFrom(
                             foregroundColor: Colors.grey,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding:
+                                Responsive.padding(context, vertical: 16),
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                                borderRadius: BorderRadius.circular(
+                                    Responsive.scale(context, 30))),
                           ),
                           child: Text(
                             AppLocalizations.of(context).cancel,
                             style: GoogleFonts.plusJakartaSans(
-                                fontSize: 16, fontWeight: FontWeight.w600),
+                                fontSize: Responsive.sp(context, 16),
+                                fontWeight: FontWeight.w600),
                           ),
                         ),
                       ],
-                      const SizedBox(height: 40),
+                      SizedBox(height: Responsive.scale(context, 40)),
                     ],
                   ),
                 ),
@@ -480,10 +509,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
 
   Widget _buildCompleteProfileNotice(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: AppColors.kPrimaryColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: AppColors.kPrimaryColor.withOpacity(0.25)),
       ),
       child: Row(
@@ -491,7 +520,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
         children: [
           const Icon(Icons.info_outline_rounded,
               color: AppColors.kPrimaryColor),
-          const SizedBox(width: 12),
+          SizedBox(width: Responsive.scale(context, 12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -500,15 +529,15 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                   AppLocalizations.of(context).completeNgoProfileTitle,
                   style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.bold,
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     color: AppColors.kTextColor,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: Responsive.scale(context, 4)),
                 Text(
                   AppLocalizations.of(context).completeNgoProfileNotice,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: AppColors.kTextColor.withOpacity(0.7),
                     height: 1.5,
                   ),
@@ -521,14 +550,14 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
     );
   }
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: Responsive.padding(context, left: 4, bottom: 8),
       child: Text(
         text,
         style: GoogleFonts.plusJakartaSans(
           color: AppColors.kTextColor,
-          fontSize: 14,
+          fontSize: Responsive.sp(context, 14),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -536,6 +565,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   }
 
   Widget _buildInput({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     IconData? icon,
@@ -545,7 +575,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
@@ -553,7 +583,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
         readOnly: readOnly,
         keyboardType: inputType,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
+          fontSize: Responsive.sp(context, 16),
           color: AppColors.kTextColor,
         ),
         decoration: InputDecoration(
@@ -563,15 +593,18 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
           ),
           border: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          prefixIcon:
-              icon != null ? Icon(icon, color: Colors.grey, size: 20) : null,
+              Responsive.padding(context, horizontal: 16, vertical: 14),
+          prefixIcon: icon != null
+              ? Icon(icon,
+                  color: Colors.grey, size: Responsive.scale(context, 20))
+              : null,
         ),
       ),
     );
   }
 
   Widget _buildTextArea({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     required int maxLines,
@@ -579,14 +612,14 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
+          fontSize: Responsive.sp(context, 16),
           color: AppColors.kTextColor,
         ),
         decoration: InputDecoration(
@@ -595,7 +628,7 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
             color: Colors.grey,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: Responsive.padding(context, all: 16),
         ),
       ),
     );

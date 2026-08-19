@@ -11,6 +11,7 @@ import 'package:gonullunet_app/views/event_chat_page.dart';
 import 'package:gonullunet_app/logic/user_cubit.dart';
 import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/models/user_model.dart' as app_user;
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:intl/intl.dart';
 
 class ActiveChatsPage extends StatelessWidget {
@@ -43,7 +44,7 @@ class _ActiveChatsView extends StatelessWidget {
               builder: (context, state) {
                 if (state is ActiveChatsLoading ||
                     state is ActiveChatsInitial) {
-                  return _buildShimmer();
+                  return _buildShimmer(context);
                 }
 
                 if (state is ActiveChatsError) {
@@ -61,7 +62,8 @@ class _ActiveChatsView extends StatelessWidget {
                       context.read<ActiveChatsCubit>().reload();
                     },
                     child: ListView.builder(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                      padding: Responsive.padding(context,
+                          left: 16, top: 16, right: 16, bottom: 24),
                       itemCount: chats.length,
                       itemBuilder: (context, index) {
                         final event = chats[index];
@@ -82,21 +84,22 @@ class _ActiveChatsView extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
           colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
+          bottomLeft: Radius.circular(Responsive.scale(context, 28)),
+          bottomRight: Radius.circular(Responsive.scale(context, 28)),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+          padding: Responsive.padding(context,
+              left: 20, top: 16, right: 20, bottom: 28),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -107,32 +110,32 @@ class _ActiveChatsView extends StatelessWidget {
                     AppLocalizations.of(context).navMessages,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
-                      fontSize: 28,
+                      fontSize: Responsive.sp(context, 28),
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
                     ),
                   ),
                   Container(
-                    width: 40,
-                    height: 40,
+                    width: Responsive.scale(context, 40),
+                    height: Responsive.scale(context, 40),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.mark_chat_read_rounded,
                       color: Colors.white,
-                      size: 20,
+                      size: Responsive.scale(context, 20),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: Responsive.scale(context, 6)),
               Text(
                 AppLocalizations.of(context).groupChatsSubtitle,
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
-                  fontSize: 13,
+                  fontSize: Responsive.sp(context, 13),
                 ),
               ),
             ],
@@ -142,55 +145,56 @@ class _ActiveChatsView extends StatelessWidget {
     );
   }
 
-  Widget _buildShimmer() {
+  Widget _buildShimmer(BuildContext context) {
     return ListView.builder(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: Responsive.padding(context,
+          left: 16, top: 16, right: 16, bottom: 24),
       itemCount: 5,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
+          padding: Responsive.padding(context, bottom: 12),
           child: Container(
-            height: 88,
+            height: Responsive.scale(context, 88),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 18)),
             ),
             child: Row(
               children: [
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
                 Container(
-                  width: 56,
-                  height: 56,
+                  width: Responsive.scale(context, 56),
+                  height: Responsive.scale(context, 56),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 14)),
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                          height: 14,
+                          height: Responsive.scale(context, 14),
                           width: double.infinity,
                           decoration: BoxDecoration(
                             color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
                           )),
-                      const SizedBox(height: 8),
+                      SizedBox(height: Responsive.scale(context, 8)),
                       Container(
-                          height: 11,
-                          width: 120,
+                          height: Responsive.scale(context, 11),
+                          width: Responsive.scale(context, 120),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
                           )),
                     ],
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
               ],
             ),
           ),
@@ -202,50 +206,49 @@ class _ActiveChatsView extends StatelessWidget {
   Widget _buildError(String message, BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: Responsive.padding(context, all: 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              padding: Responsive.padding(context, all: 20),
               decoration: BoxDecoration(
                 color: Colors.red.shade50,
                 shape: BoxShape.circle,
               ),
               child: Icon(Icons.cloud_off_rounded,
-                  size: 44, color: Colors.red.shade300),
+                  size: Responsive.scale(context, 44), color: Colors.red.shade300),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: Responsive.scale(context, 20)),
             Text(
               AppLocalizations.of(context).connectionError,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 17,
+                fontSize: Responsive.sp(context, 17),
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.scale(context, 8)),
             Text(
               message,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.grey.shade500,
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.scale(context, 24)),
             ElevatedButton.icon(
               onPressed: () => context.read<ActiveChatsCubit>().reload(),
-              icon: const Icon(Icons.refresh_rounded, size: 18),
+              icon: Icon(Icons.refresh_rounded, size: Responsive.scale(context, 18)),
               label: Text(AppLocalizations.of(context).retry),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1565C0),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: Responsive.padding(context, horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14)),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 14))),
               ),
             ),
           ],
@@ -257,13 +260,13 @@ class _ActiveChatsView extends StatelessWidget {
   Widget _buildEmpty(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: Responsive.padding(context, all: 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 100,
-              height: 100,
+              width: Responsive.scale(context, 100),
+              height: Responsive.scale(context, 100),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF1565C0), Color(0xFF42A5F5)],
@@ -279,43 +282,42 @@ class _ActiveChatsView extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.forum_rounded,
-                size: 44,
+                size: Responsive.scale(context, 44),
                 color: Colors.white,
               ),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: Responsive.scale(context, 28)),
             Text(
               AppLocalizations.of(context).noActiveChats,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 19,
+                fontSize: Responsive.sp(context, 19),
                 fontWeight: FontWeight.bold,
                 color: const Color(0xFF1A1A2E),
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: Responsive.scale(context, 10)),
             Text(
               AppLocalizations.of(context).joinEventsForChats,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: Colors.grey.shade500,
                 height: 1.6,
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: Responsive.scale(context, 32)),
             ElevatedButton.icon(
               onPressed: () => Navigator.maybePop(context),
-              icon: const Icon(Icons.explore_rounded, size: 18),
+              icon: Icon(Icons.explore_rounded, size: Responsive.scale(context, 18)),
               label: Text(AppLocalizations.of(context).discoverEvents),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF1565C0),
                 foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                padding: Responsive.padding(context, horizontal: 28, vertical: 14),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 16))),
                 elevation: 0,
               ),
             ),
@@ -365,17 +367,17 @@ class _ChatCard extends StatelessWidget {
     final isProject = event.type == 'Proje';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: Responsive.padding(context, bottom: 12),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 18)),
         child: InkWell(
           onTap: () => _openChat(context),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 18)),
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 18)),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.05),
@@ -388,27 +390,27 @@ class _ChatCard extends StatelessWidget {
               children: [
                 // Sol renk şeridi
                 Container(
-                  width: 4,
-                  height: 80,
+                  width: Responsive.scale(context, 4),
+                  height: Responsive.scale(context, 80),
                   decoration: BoxDecoration(
                     color: isProject
                         ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(18),
-                      bottomLeft: Radius.circular(18),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(Responsive.scale(context, 18)),
+                      bottomLeft: Radius.circular(Responsive.scale(context, 18)),
                     ),
                   ),
                 ),
 
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
 
                 // Etkinlik resmi / ikon
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 14)),
                   child: Container(
-                    width: 56,
-                    height: 56,
+                    width: Responsive.scale(context, 56),
+                    height: Responsive.scale(context, 56),
                     color: isProject
                         ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0).withOpacity(0.08),
@@ -423,7 +425,7 @@ class _ChatCard extends StatelessWidget {
                               color: isProject
                                   ? AppColors.kPrimaryColor
                                   : const Color(0xFF1565C0),
-                              size: 26,
+                              size: Responsive.scale(context, 26),
                             ),
                           )
                         : Icon(
@@ -433,12 +435,12 @@ class _ChatCard extends StatelessWidget {
                             color: isProject
                                 ? AppColors.kPrimaryColor
                                 : const Color(0xFF1565C0),
-                            size: 26,
+                            size: Responsive.scale(context, 26),
                           ),
                   ),
                 ),
 
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
 
                 // Bilgi
                 Expanded(
@@ -454,24 +456,24 @@ class _ChatCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
                                 fontWeight: FontWeight.w700,
-                                fontSize: 14,
+                                fontSize: Responsive.sp(context, 14),
                                 color: const Color(0xFF1A1A2E),
                               ),
                             ),
                           ),
                           if (isProject)
                             Container(
-                              margin: const EdgeInsets.only(left: 6),
-                              padding: const EdgeInsets.symmetric(
+                              margin: Responsive.padding(context, left: 6),
+                              padding: Responsive.padding(context,
                                   horizontal: 7, vertical: 2),
                               decoration: BoxDecoration(
                                 color: AppColors.accentColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
                               ),
                               child: Text(
                                 'Proje',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
+                                  fontSize: Responsive.sp(context, 10),
                                   fontWeight: FontWeight.w700,
                                   color: AppColors.kPrimaryColor,
                                 ),
@@ -479,30 +481,30 @@ class _ChatCard extends StatelessWidget {
                             ),
                         ],
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: Responsive.scale(context, 5)),
                       Row(
                         children: [
                           Icon(Icons.calendar_today_rounded,
-                              size: 11, color: Colors.grey.shade400),
-                          const SizedBox(width: 4),
+                              size: Responsive.scale(context, 11), color: Colors.grey.shade400),
+                          SizedBox(width: Responsive.scale(context, 4)),
                           Text(
                             dateStr,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12,
+                              fontSize: Responsive.sp(context, 12),
                               color: Colors.grey.shade500,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          SizedBox(width: Responsive.scale(context, 10)),
                           Icon(Icons.location_on_outlined,
-                              size: 11, color: Colors.grey.shade400),
-                          const SizedBox(width: 3),
+                              size: Responsive.scale(context, 11), color: Colors.grey.shade400),
+                          SizedBox(width: Responsive.scale(context, 3)),
                           Expanded(
                             child: Text(
                               event.location ?? '',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 color: Colors.grey.shade500,
                               ),
                             ),
@@ -513,12 +515,12 @@ class _ChatCard extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(width: 12),
+                SizedBox(width: Responsive.scale(context, 12)),
 
                 // Ok ikonu
                 Container(
-                  width: 34,
-                  height: 34,
+                  width: Responsive.scale(context, 34),
+                  height: Responsive.scale(context, 34),
                   decoration: BoxDecoration(
                     color: isProject
                         ? AppColors.accentColor.withOpacity(0.1)
@@ -527,14 +529,14 @@ class _ChatCard extends StatelessWidget {
                   ),
                   child: Icon(
                     Icons.chevron_right_rounded,
-                    size: 20,
+                    size: Responsive.scale(context, 20),
                     color: isProject
                         ? AppColors.kPrimaryColor
                         : const Color(0xFF1565C0),
                   ),
                 ),
 
-                const SizedBox(width: 14),
+                SizedBox(width: Responsive.scale(context, 14)),
               ],
             ),
           ),

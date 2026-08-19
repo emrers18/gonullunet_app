@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class SendButton extends StatelessWidget {
   final VoidCallback onPressed;
@@ -18,8 +19,8 @@ class SendButton extends StatelessWidget {
       onTap: isLoading ? null : onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        width: 46,
-        height: 46,
+        width: Responsive.scale(context, 46),
+        height: Responsive.scale(context, 46),
         decoration: BoxDecoration(
           color:
               isLoading ? AppColors.primaryColor.withOpacity(0.6) : AppColors.primaryColor,
@@ -35,8 +36,9 @@ class SendButton extends StatelessWidget {
                 ],
         ),
         child: isLoading
-            ? const AppLoadingIndicator(size: 22)
-            : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
+            ? AppLoadingIndicator(size: Responsive.scale(context, 22))
+            : Icon(Icons.send_rounded,
+                color: Colors.white, size: Responsive.scale(context, 20)),
       ),
     );
   }

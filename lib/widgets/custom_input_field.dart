@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../utils/app_colors.dart';
+import '../utils/responsive.dart';
 
 class CustomInputField extends StatefulWidget {
   final String hintText;
@@ -43,14 +44,15 @@ class _CustomInputFieldState extends State<CustomInputField> {
       controller: widget.controller,
       keyboardType: widget.keyboardType,
       obscureText: _obscureText,
-      style: const TextStyle(color: AppColors.kTextColor, fontSize: 16),
+      style: TextStyle(
+          color: AppColors.kTextColor, fontSize: Responsive.sp(context, 16)),
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(color: Colors.grey.shade500),
         filled: true,
         fillColor: Colors.white,
         contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            Responsive.padding(context, horizontal: 20, vertical: 16),
         suffixIcon: widget.isPassword
             ? IconButton(
                 icon: Icon(
@@ -61,15 +63,15 @@ class _CustomInputFieldState extends State<CustomInputField> {
               )
             : null,
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 12.0)),
           borderSide: BorderSide(color: Colors.grey.shade200, width: 1.0),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 12.0)),
           borderSide: const BorderSide(color: AppColors.kPrimaryColor, width: 2.0),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 12.0)),
           borderSide: const BorderSide(color: Colors.red, width: 1.0),
         ),
       ),

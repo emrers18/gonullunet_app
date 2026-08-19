@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -26,15 +27,15 @@ class AboutPage extends StatelessWidget {
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        padding: Responsive.padding(context, horizontal: 24, vertical: 32),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // --- Logo ---
             Container(
-              width: 110,
-              height: 110,
-              padding: const EdgeInsets.all(18),
+              width: Responsive.scale(context, 110),
+              height: Responsive.scale(context, 110),
+              padding: Responsive.padding(context, all: 18),
               decoration: BoxDecoration(
                 color: AppColors.kPrimaryColor.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -42,87 +43,89 @@ class AboutPage extends StatelessWidget {
               child: Image.asset(
                 'lib/assets/images/logo.png',
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
+                errorBuilder: (_, __, ___) => Icon(
                   Icons.volunteer_activism,
-                  size: 48,
+                  size: Responsive.scale(context, 48),
                   color: AppColors.kPrimaryColor,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Responsive.scale(context, 16)),
 
             // --- App name & tagline ---
             Text(
               l10n.aboutAppName,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 24,
+                fontSize: Responsive.sp(context, 24),
                 fontWeight: FontWeight.bold,
                 color: AppColors.kPrimaryColor,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: Responsive.scale(context, 4)),
             Text(
               l10n.aboutTagline,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: Colors.grey.shade600,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.scale(context, 8)),
             Text(
               l10n.version(_appVersion),
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 fontWeight: FontWeight.w600,
                 color: Colors.grey.shade500,
               ),
             ),
-            const SizedBox(height: 28),
+            SizedBox(height: Responsive.scale(context, 28)),
 
             // --- Description card ---
             _buildCard(
+              context: context,
               child: Text(
                 l10n.aboutDescription,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   height: 1.6,
                   color: AppColors.kTextColor.withOpacity(0.8),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Responsive.scale(context, 16)),
 
             // --- Contact card ---
             _buildCard(
+              context: context,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     l10n.aboutContact,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
+                      fontSize: Responsive.sp(context, 13),
                       fontWeight: FontWeight.bold,
                       color: Colors.grey.shade500,
                       letterSpacing: 0.8,
                     ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: Responsive.scale(context, 10)),
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: Responsive.padding(context, all: 8),
                         decoration: BoxDecoration(
                           color: AppColors.kPrimaryColor.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
                         ),
-                        child: const Icon(Icons.mail_outline,
-                            size: 18, color: AppColors.kPrimaryColor),
+                        child: Icon(Icons.mail_outline,
+                            size: Responsive.scale(context, 18), color: AppColors.kPrimaryColor),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: Responsive.scale(context, 12)),
                       Text(
                         l10n.aboutContactEmail,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w600,
                           color: AppColors.kTextColor,
                         ),
@@ -132,22 +135,22 @@ class AboutPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: Responsive.scale(context, 32)),
 
             // --- Footer ---
             Text(
               l10n.aboutMadeWith,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 color: Colors.grey.shade500,
               ),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: Responsive.scale(context, 6)),
             Text(
               l10n.aboutRights,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 11,
+                fontSize: Responsive.sp(context, 11),
                 color: Colors.grey.shade400,
               ),
             ),
@@ -157,13 +160,13 @@ class AboutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCard({required Widget child}) {
+  Widget _buildCard({required BuildContext context, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),

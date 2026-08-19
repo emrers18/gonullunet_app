@@ -9,6 +9,7 @@ import '../models/user_model.dart';
 import '../repo/user_repository.dart';
 import '../utils/app_colors.dart';
 import '../utils/gamification_utils.dart';
+import '../utils/responsive.dart';
 import '../widgets/app_loading_indicator.dart';
 import '../widgets/gamification/level_badge.dart';
 
@@ -68,7 +69,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
           style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFF181210),
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
           ),
         ),
         centerTitle: true,
@@ -86,17 +87,17 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                   child: Text(
                     AppLocalizations.of(context).userNotFound,
                     style: GoogleFonts.plusJakartaSans(
-                        color: Colors.grey, fontSize: 16),
+                        color: Colors.grey, fontSize: Responsive.sp(context, 16)),
                   ),
                 )
               : SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: Responsive.padding(context, all: 20),
                   child: Column(
                     children: [
                       // --- Avatar & Name ---
                       Container(
-                        width: 96,
-                        height: 96,
+                        width: Responsive.scale(context, 96),
+                        height: Responsive.scale(context, 96),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           border: Border.all(color: Colors.white, width: 3),
@@ -122,7 +123,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                                 child: Text(
                                   _user!.initials,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 32,
+                                    fontSize: Responsive.sp(context, 32),
                                     fontWeight: FontWeight.bold,
                                     color: AppColors.kPrimaryColor,
                                   ),
@@ -130,20 +131,20 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                               )
                             : null,
                       ),
-                      const SizedBox(height: 14),
+                      SizedBox(height: Responsive.scale(context, 14)),
                       Text(
                         _user!.displayName,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 22,
+                          fontSize: Responsive.sp(context, 22),
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF181210),
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: Responsive.scale(context, 8)),
                       LevelBadge(xp: _user!.xp),
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                       _buildXpProgressBar(context, _user!.xp),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
 
                       // --- Info Cards ---
                       if (widget.coverLetter != null &&
@@ -154,7 +155,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                           child: Text(
                             widget.coverLetter!,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                               color: const Color(0xFF4B4B4B),
                               height: 1.5,
                             ),
@@ -168,7 +169,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                           child: Text(
                             _user!.bio!,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                               color: const Color(0xFF4B4B4B),
                               height: 1.5,
                             ),
@@ -180,8 +181,8 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                           icon: Icons.interests_outlined,
                           title: AppLocalizations.of(context).interests,
                           child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                            spacing: Responsive.scale(context, 8),
+                            runSpacing: Responsive.scale(context, 8),
                             children: _user!.interests
                                 .map((e) => _buildTag(e, Colors.blue))
                                 .toList(),
@@ -193,8 +194,8 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                           icon: Icons.build_outlined,
                           title: AppLocalizations.of(context).skills,
                           child: Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
+                            spacing: Responsive.scale(context, 8),
+                            runSpacing: Responsive.scale(context, 8),
                             children: _user!.skills
                                 .map((e) => _buildTag(e, Colors.teal))
                                 .toList(),
@@ -235,7 +236,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                                 : AppLocalizations.of(context).notSpecified,
                       ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
                     ],
                   ),
                 ),
@@ -249,11 +250,11 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
   }) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      margin: Responsive.padding(context, bottom: 16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -267,19 +268,19 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
         children: [
           Row(
             children: [
-              Icon(icon, size: 18, color: AppColors.kPrimaryColor),
-              const SizedBox(width: 8),
+              Icon(icon, size: Responsive.scale(context, 18), color: AppColors.kPrimaryColor),
+              SizedBox(width: Responsive.scale(context, 8)),
               Text(
                 title,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                   fontWeight: FontWeight.bold,
                   color: const Color(0xFF181210),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: Responsive.scale(context, 10)),
           child,
         ],
       ),
@@ -293,11 +294,11 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
   }) {
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      margin: Responsive.padding(context, bottom: 12),
+      padding: Responsive.padding(context, horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -308,8 +309,8 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.kPrimaryColor),
-          const SizedBox(width: 12),
+          Icon(icon, size: Responsive.scale(context, 20), color: AppColors.kPrimaryColor),
+          SizedBox(width: Responsive.scale(context, 12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -317,17 +318,17 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                 Text(
                   label,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: Responsive.sp(context, 11),
                     fontWeight: FontWeight.w600,
                     color: const Color(0xFF8D6A5E),
                     letterSpacing: 0.5,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: Responsive.scale(context, 2)),
                 Text(
                   value,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.w500,
                     color: const Color(0xFF181210),
                   ),
@@ -342,16 +343,16 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
 
   Widget _buildTag(String text, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: Responsive.padding(context, horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
         border: Border.all(color: color.withOpacity(0.2)),
       ),
       child: Text(
         text,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 13,
+          fontSize: Responsive.sp(context, 13),
           fontWeight: FontWeight.w600,
           color: color,
         ),
@@ -372,7 +373,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
             Text(
               AppLocalizations.of(context).volunteerLevel,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 fontWeight: FontWeight.w600,
                 color: const Color(0xFF8D6A5E),
               ),
@@ -380,28 +381,28 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
             Text(
               '$xp XP',
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 12,
+                fontSize: Responsive.sp(context, 12),
                 fontWeight: FontWeight.bold,
                 color: level.color,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: Responsive.scale(context, 8)),
         Stack(
           children: [
             Container(
-              height: 10,
+              height: Responsive.scale(context, 10),
               width: double.infinity,
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 5)),
               ),
             ),
             LayoutBuilder(
               builder: (context, constraints) {
                 return Container(
-                  height: 10,
+                  height: Responsive.scale(context, 10),
                   width: constraints.maxWidth * progress,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -410,7 +411,7 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
                         level.color,
                       ],
                     ),
-                    borderRadius: BorderRadius.circular(5),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 5)),
                     boxShadow: [
                       BoxShadow(
                         color: level.color.withOpacity(0.3),
@@ -424,12 +425,12 @@ class _ApplicantProfilePageState extends State<ApplicantProfilePage> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: Responsive.scale(context, 12)),
         Text(
           AppLocalizations.of(context).xpInfo,
           textAlign: TextAlign.center,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
+            fontSize: Responsive.sp(context, 10),
             color: Colors.grey.shade500,
             height: 1.4,
           ),

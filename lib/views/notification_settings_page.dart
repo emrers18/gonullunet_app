@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 /// Bildirim tercihleri ekranı. Tercihler yerel olarak SharedPreferences'ta
 /// saklanır.
@@ -72,7 +73,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       body: _loading
           ? const AppLoadingCenter()
           : ListView(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: Responsive.padding(context, vertical: 16),
               children: [
                 _buildTile(
                   title: l10n.notifPushTitle,
@@ -130,11 +131,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                  padding: Responsive.padding(context,
+                      left: 20, top: 16, right: 20, bottom: 0),
                   child: Text(
                     l10n.notifSavedHint,
                     style: GoogleFonts.inter(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       color: Colors.grey.shade500,
                     ),
                   ),
@@ -156,14 +158,14 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       value: value && enabled,
       onChanged: enabled ? onChanged : null,
       activeColor: AppColors.kPrimaryColor,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      contentPadding: Responsive.padding(context, horizontal: 20, vertical: 4),
       secondary: Container(
-        padding: const EdgeInsets.all(8),
+        padding: Responsive.padding(context, all: 8),
         decoration: BoxDecoration(
           color: AppColors.kPrimaryColor.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
         ),
-        child: Icon(icon, color: AppColors.kPrimaryColor, size: 20),
+        child: Icon(icon, color: AppColors.kPrimaryColor, size: Responsive.scale(context, 20)),
       ),
       title: Text(
         title,
@@ -174,7 +176,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
       ),
       subtitle: Text(
         subtitle,
-        style: GoogleFonts.inter(fontSize: 12, color: Colors.grey.shade500),
+        style: GoogleFonts.inter(fontSize: Responsive.sp(context, 12), color: Colors.grey.shade500),
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'package:gonullunet_app/logic/user_state.dart';
 import 'package:gonullunet_app/models/post_model.dart';
 import 'package:gonullunet_app/repo/post_repository.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 
 class MyPostsPage extends StatelessWidget {
@@ -40,8 +41,8 @@ class _MyPostsView extends StatelessWidget {
         scrolledUnderElevation: 0,
         centerTitle: false,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.kTextColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.kTextColor, size: Responsive.scale(context, 20)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Text(
@@ -49,7 +50,7 @@ class _MyPostsView extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: Responsive.sp(context, 20),
           ),
         ),
       ),
@@ -62,7 +63,7 @@ class _MyPostsView extends StatelessWidget {
                 backgroundColor: Colors.red.shade600,
                 behavior: SnackBarBehavior.floating,
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 10))),
               ),
             );
           }
@@ -82,7 +83,8 @@ class _MyPostsView extends StatelessWidget {
                   .loadMyPosts(FirebaseAuth.instance.currentUser?.uid ?? ''),
               color: AppColors.kPrimaryColor,
               child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                padding: Responsive.padding(context,
+                    left: 16, top: 8, right: 16, bottom: 32),
                 itemCount: state.posts.length,
                 itemBuilder: (context, index) {
                   return _MyPostCard(post: state.posts[index]);
@@ -97,8 +99,8 @@ class _MyPostsView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.cloud_off_rounded,
-                      size: 52, color: Colors.grey.shade300),
-                  const SizedBox(height: 16),
+                      size: Responsive.scale(context, 52), color: Colors.grey.shade300),
+                  SizedBox(height: Responsive.scale(context, 16)),
                   Text(
                     AppMessages.resolve(context, state.message),
                     textAlign: TextAlign.center,
@@ -127,32 +129,32 @@ class _MyPostsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            padding: const EdgeInsets.all(22),
+            padding: Responsive.padding(context, all: 22),
             decoration: BoxDecoration(
               color: AppColors.kPrimaryColor.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
-            child: const Icon(
+            child: Icon(
               Icons.feed_outlined,
-              size: 48,
+              size: Responsive.scale(context, 48),
               color: AppColors.kPrimaryColor,
             ),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: Responsive.scale(context, 20)),
           Text(
             l10n.noPostsOwn,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 17,
+              fontSize: Responsive.sp(context, 17),
               fontWeight: FontWeight.bold,
               color: AppColors.kTextColor,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: Responsive.scale(context, 8)),
           Text(
             isNgo ? l10n.shareFirstPost : l10n.postingNgoOnly,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
+              fontSize: Responsive.sp(context, 13),
               color: Colors.grey,
               height: 1.6,
             ),
@@ -176,7 +178,8 @@ class _MyPostCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 20))),
         title: Text(
           AppLocalizations.of(context).editPost,
           style: GoogleFonts.plusJakartaSans(
@@ -196,9 +199,9 @@ class _MyPostCard extends StatelessWidget {
                   labelStyle: GoogleFonts.plusJakartaSans(
                       color: Colors.grey),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                     borderSide: const BorderSide(color: AppColors.kPrimaryColor),
                   ),
                 ),
@@ -207,7 +210,7 @@ class _MyPostCard extends StatelessWidget {
                     ? AppLocalizations.of(context).titleCannotBeEmpty
                     : null,
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: Responsive.scale(context, 12)),
               TextFormField(
                 controller: descController,
                 maxLines: 4,
@@ -217,9 +220,9 @@ class _MyPostCard extends StatelessWidget {
                   labelStyle: GoogleFonts.plusJakartaSans(
                       color: Colors.grey),
                   border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                     borderSide: const BorderSide(color: AppColors.kPrimaryColor),
                   ),
                 ),
@@ -249,7 +252,7 @@ class _MyPostCard extends StatelessWidget {
               backgroundColor: AppColors.kPrimaryColor,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
             ),
             child: Text(AppLocalizations.of(context).save,
                 style:
@@ -264,7 +267,8 @@ class _MyPostCard extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 20))),
         title: Text(
           AppLocalizations.of(context).deletePost,
           style: GoogleFonts.plusJakartaSans(
@@ -291,7 +295,7 @@ class _MyPostCard extends StatelessWidget {
               backgroundColor: Colors.red.shade600,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
             ),
             child: Text('Sil',
                 style:
@@ -305,10 +309,10 @@ class _MyPostCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: Responsive.padding(context, bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -322,7 +326,8 @@ class _MyPostCard extends StatelessWidget {
         children: [
           // Header
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 14, 8, 0),
+            padding: Responsive.padding(context,
+                left: 16, top: 14, right: 8, bottom: 0),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -334,15 +339,15 @@ class _MyPostCard extends StatelessWidget {
                         post.title,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           color: AppColors.kTextColor,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      SizedBox(height: Responsive.scale(context, 3)),
                       Text(
                         post.timeAgo,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: Colors.grey.shade500,
                         ),
                       ),
@@ -354,7 +359,7 @@ class _MyPostCard extends StatelessWidget {
                   icon: Icon(Icons.more_vert_rounded,
                       color: Colors.grey.shade400),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
                   onSelected: (value) {
                     if (value == 'edit') {
                       _showEditDialog(context);
@@ -367,9 +372,9 @@ class _MyPostCard extends StatelessWidget {
                       value: 'edit',
                       child: Row(
                         children: [
-                          const Icon(Icons.edit_outlined,
-                               size: 18, color: Colors.blue),
-                          const SizedBox(width: 10),
+                          Icon(Icons.edit_outlined,
+                               size: Responsive.scale(context, 18), color: Colors.blue),
+                          SizedBox(width: Responsive.scale(context, 10)),
                           Text(AppLocalizations.of(context).edit,
                               style: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.w500)),
@@ -381,8 +386,8 @@ class _MyPostCard extends StatelessWidget {
                       child: Row(
                         children: [
                           Icon(Icons.delete_outline,
-                              size: 18, color: Colors.red.shade500),
-                          const SizedBox(width: 10),
+                              size: Responsive.scale(context, 18), color: Colors.red.shade500),
+                          SizedBox(width: Responsive.scale(context, 10)),
                           Text(AppLocalizations.of(context).delete,
                               style: GoogleFonts.plusJakartaSans(
                                   fontWeight: FontWeight.w500,
@@ -398,14 +403,15 @@ class _MyPostCard extends StatelessWidget {
           // Description
           if (post.description.isNotEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              padding: Responsive.padding(context,
+                  left: 16, top: 8, right: 16, bottom: 12),
               child: Text(
                 post.description,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: GoogleFonts.plusJakartaSans(
                   color: AppColors.kTextColor.withOpacity(0.7),
-                  fontSize: 13.5,
+                  fontSize: Responsive.sp(context, 13.5),
                   height: 1.5,
                 ),
               ),
@@ -413,24 +419,24 @@ class _MyPostCard extends StatelessWidget {
           // Image
           if (post.imageUrl.isNotEmpty)
             ClipRRect(
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(16),
-                bottomRight: Radius.circular(16),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(Responsive.scale(context, 16)),
+                bottomRight: Radius.circular(Responsive.scale(context, 16)),
               ),
               child: CachedNetworkImage(
                 imageUrl: post.imageUrl,
                 width: double.infinity,
-                height: 200,
+                height: Responsive.scale(context, 200),
                 fit: BoxFit.cover,
                 placeholder: (_, __) => Container(
-                  height: 200,
+                  height: Responsive.scale(context, 200),
                   color: Colors.grey.shade100,
-                  child: const Center(
-                    child: AppLoadingIndicator(size: 32),
+                  child: Center(
+                    child: AppLoadingIndicator(size: Responsive.scale(context, 32)),
                   ),
                 ),
                 errorWidget: (_, __, ___) => Container(
-                  height: 120,
+                  height: Responsive.scale(context, 120),
                   color: Colors.grey.shade100,
                   child: const Center(
                       child: Icon(Icons.broken_image, color: Colors.grey)),
@@ -440,27 +446,28 @@ class _MyPostCard extends StatelessWidget {
           // Stats row
           if (post.imageUrl.isEmpty)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              padding: Responsive.padding(context,
+                  left: 16, top: 0, right: 16, bottom: 14),
               child: Row(
                 children: [
                   Icon(Icons.favorite_border_rounded,
-                      size: 15, color: Colors.grey.shade400),
-                  const SizedBox(width: 4),
+                      size: Responsive.scale(context, 15), color: Colors.grey.shade400),
+                  SizedBox(width: Responsive.scale(context, 4)),
                   Text(
                     AppLocalizations.of(context).likeCountLabel(post.likeCount),
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       color: Colors.grey.shade400,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: Responsive.scale(context, 16)),
                   Icon(Icons.chat_bubble_outline_rounded,
-                      size: 15, color: Colors.grey.shade400),
-                  const SizedBox(width: 4),
+                      size: Responsive.scale(context, 15), color: Colors.grey.shade400),
+                  SizedBox(width: Responsive.scale(context, 4)),
                   Text(
                     AppLocalizations.of(context).commentCountLabel(post.commentCount),
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       color: Colors.grey.shade400,
                     ),
                   ),
@@ -469,27 +476,28 @@ class _MyPostCard extends StatelessWidget {
             ),
           if (post.imageUrl.isNotEmpty) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 10, 16, 14),
+              padding: Responsive.padding(context,
+                  left: 16, top: 10, right: 16, bottom: 14),
               child: Row(
                 children: [
                   Icon(Icons.favorite_border_rounded,
-                      size: 15, color: Colors.grey.shade400),
-                  const SizedBox(width: 4),
+                      size: Responsive.scale(context, 15), color: Colors.grey.shade400),
+                  SizedBox(width: Responsive.scale(context, 4)),
                   Text(
                     AppLocalizations.of(context).likeCountLabel(post.likeCount),
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       color: Colors.grey.shade400,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: Responsive.scale(context, 16)),
                   Icon(Icons.chat_bubble_outline_rounded,
-                      size: 15, color: Colors.grey.shade400),
-                  const SizedBox(width: 4),
+                      size: Responsive.scale(context, 15), color: Colors.grey.shade400),
+                  SizedBox(width: Responsive.scale(context, 4)),
                   Text(
                     AppLocalizations.of(context).commentCountLabel(post.commentCount),
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       color: Colors.grey.shade400,
                     ),
                   ),
@@ -502,4 +510,3 @@ class _MyPostCard extends StatelessWidget {
     );
   }
 }
-

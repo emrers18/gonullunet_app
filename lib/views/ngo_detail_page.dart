@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../logic/user_cubit.dart';
 import '../logic/user_state.dart';
 import 'package:gonullunet_app/models/event_model.dart';
@@ -113,7 +114,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                     style: GoogleFonts.plusJakartaSans(
                       color: AppColors.kTextColor,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                     ),
                   ),
                   actions: [
@@ -129,15 +130,16 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                 SliverToBoxAdapter(
                   child: Container(
                     color: Colors.white, // surface-light
-                    padding: const EdgeInsets.fromLTRB(24, 10, 24, 24),
+                    padding: Responsive.padding(context,
+                        left: 24, top: 10, right: 24, bottom: 24),
                     child: Column(
                       children: [
                         // Logo (Yuvarlak ve Gölgeli)
                         Hero(
                           tag: 'ngo_image_${widget.ngo.id}',
                           child: Container(
-                            width: 112,
-                            height: 112,
+                            width: Responsive.scale(context, 112),
+                            height: Responsive.scale(context, 112),
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
                               border: Border.all(
@@ -158,9 +160,9 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                             child: Align(
                               alignment: Alignment.bottomRight,
                               child: Container(
-                                width: 20,
-                                height: 20,
-                                margin: const EdgeInsets.all(6),
+                                width: Responsive.scale(context, 20),
+                                height: Responsive.scale(context, 20),
+                                margin: Responsive.padding(context, all: 6),
                                 decoration: BoxDecoration(
                                   color: Colors.green,
                                   shape: BoxShape.circle,
@@ -171,39 +173,39 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: Responsive.scale(context, 16)),
 
                         // İsim ve Kategori
                         Text(
                           name,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 24,
+                            fontSize: Responsive.sp(context, 24),
                             fontWeight: FontWeight.w800,
                             color: AppColors.kTextColor,
                             letterSpacing: -0.5,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: Responsive.scale(context, 4)),
                         Text(
                           AppLocalizations.of(context).civilSocietyOrg,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey.shade500,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        SizedBox(height: Responsive.scale(context, 6)),
                         Text(
                           location,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             fontWeight: FontWeight.w500,
                             color: Colors.grey.shade500,
                           ),
                         ),
 
-                        const SizedBox(height: 24),
+                        SizedBox(height: Responsive.scale(context, 24)),
 
                         // Butonlar (Takip Et / İletişim)
                         BlocBuilder<UserCubit, UserState>(
@@ -234,9 +236,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                       shadowColor: AppColors.kPrimaryColor
                                           .withOpacity(0.3),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
+                                        borderRadius: BorderRadius.circular(
+                                            Responsive.scale(context, 30)),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
+                                      padding: Responsive.padding(context,
                                           vertical: 12),
                                     ),
                                     child: Text(
@@ -249,12 +252,12 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                             fontWeight: FontWeight.bold)),
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                SizedBox(width: Responsive.scale(context, 12)),
                                 Expanded(
                                   child: OutlinedButton.icon(
                                     onPressed: () {},
-                                    icon: const Icon(Icons.chat_bubble_outline,
-                                        size: 18),
+                                    icon: Icon(Icons.chat_bubble_outline,
+                                        size: Responsive.scale(context, 18)),
                                     label: Text(
                                         AppLocalizations.of(context).contact,
                                         style: const TextStyle(
@@ -264,9 +267,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                       side: BorderSide(
                                           color: Colors.grey.shade200),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
+                                        borderRadius: BorderRadius.circular(
+                                            Responsive.scale(context, 30)),
                                       ),
-                                      padding: const EdgeInsets.symmetric(
+                                      padding: Responsive.padding(context,
                                           vertical: 12),
                                     ),
                                   ),
@@ -276,9 +280,11 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                           },
                         ),
 
-                        const SizedBox(height: 24),
-                        Divider(color: Colors.grey.shade200, height: 1),
-                        const SizedBox(height: 16),
+                        SizedBox(height: Responsive.scale(context, 24)),
+                        Divider(
+                            color: Colors.grey.shade200,
+                            height: Responsive.scale(context, 1)),
+                        SizedBox(height: Responsive.scale(context, 16)),
 
                         // İstatistikler (Hızlı Bakış)
                         Row(
@@ -320,7 +326,8 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                       indicatorWeight: 3,
                       indicatorSize: TabBarIndicatorSize.label,
                       labelStyle: GoogleFonts.plusJakartaSans(
-                          fontWeight: FontWeight.bold, fontSize: 14),
+                          fontWeight: FontWeight.bold,
+                          fontSize: Responsive.sp(context, 14)),
                       tabs: [
                         Tab(text: AppLocalizations.of(context).tabDescription),
                         Tab(text: AppLocalizations.of(context).events),
@@ -336,18 +343,19 @@ class _NgoDetailPageState extends State<NgoDetailPage>
               controller: _tabController,
               children: [
                 SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: Responsive.padding(context, all: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       buildSectionTitle(context, Icons.info_outline,
                           AppLocalizations.of(context).aboutUs),
-                      const SizedBox(height: 12),
+                      SizedBox(height: Responsive.scale(context, 12)),
                       Container(
-                        padding: const EdgeInsets.all(20),
+                        padding: Responsive.padding(context, all: 20),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius:
+                              BorderRadius.circular(Responsive.scale(context, 16)),
                           border: Border.all(color: Colors.grey.shade200),
                           boxShadow: [
                             BoxShadow(
@@ -364,12 +372,12 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                               style: TextStyle(
                                   color: AppColors.kTextColor.withOpacity(0.7),
                                   height: 1.6,
-                                  fontSize: 14),
+                                  fontSize: Responsive.sp(context, 14)),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       if (mission != null || vision != null)
                         Row(
                           children: [
@@ -383,7 +391,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                       Colors.blue.shade600,
                                       Colors.blue.shade50)),
                             if (mission != null && vision != null)
-                              const SizedBox(width: 16),
+                              SizedBox(width: Responsive.scale(context, 16)),
                             if (vision != null)
                               Expanded(
                                   child: buildInfoCard(
@@ -395,14 +403,15 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                                       Colors.orange.shade50)),
                           ],
                         ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       buildSectionTitle(context, Icons.contact_support_outlined,
                           AppLocalizations.of(context).contactInfo),
-                      const SizedBox(height: 12),
+                      SizedBox(height: Responsive.scale(context, 12)),
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius:
+                              BorderRadius.circular(Responsive.scale(context, 16)),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Column(
@@ -418,7 +427,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       _buildSocialButtonsRow(
                         context,
                         facebookUrl: facebookUrl,
@@ -426,7 +435,7 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         twitterUrl: twitterUrl,
                         linkedinUrl: linkedinUrl,
                       ),
-                      const SizedBox(height: 80),
+                      SizedBox(height: Responsive.scale(context, 80)),
                     ],
                   ),
                 ),
@@ -450,7 +459,9 @@ class _NgoDetailPageState extends State<NgoDetailPage>
     final buttons = <Widget>[];
 
     void addButton(Widget button) {
-      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 12));
+      if (buttons.isNotEmpty) {
+        buttons.add(SizedBox(width: Responsive.scale(context, 12)));
+      }
       buttons.add(button);
     }
 
@@ -553,9 +564,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
         final events = [...active, ...expired];
 
         return ListView.separated(
-          padding: const EdgeInsets.all(16.0),
+          padding: Responsive.padding(context, all: 16.0),
           itemCount: events.length,
-          separatorBuilder: (ctx, index) => const SizedBox(height: 16),
+          separatorBuilder: (ctx, index) =>
+              SizedBox(height: Responsive.scale(ctx, 16)),
           itemBuilder: (ctx, index) {
             return EventCard(event: events[index]);
           },
@@ -587,9 +599,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
               .toList();
 
           return ListView.separated(
-            padding: const EdgeInsets.all(16.0),
+            padding: Responsive.padding(context, all: 16.0),
             itemCount: posts.length,
-            separatorBuilder: (ctx, index) => const SizedBox(height: 16),
+            separatorBuilder: (ctx, index) =>
+                SizedBox(height: Responsive.scale(ctx, 16)),
             itemBuilder: (ctx, index) {
               return _NgoPostCard(post: posts[index]);
             },

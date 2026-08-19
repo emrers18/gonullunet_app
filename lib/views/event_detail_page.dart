@@ -15,6 +15,7 @@ import '../repo/event_repository.dart';
 import '../repo/notification_repository.dart';
 import '../widgets/events/build_glass_button_widget.dart';
 import '../widgets/events/build_info_card_widget.dart';
+import '../utils/responsive.dart';
 import 'manage_applications_page.dart';
 
 class EventDetailPage extends StatelessWidget {
@@ -104,7 +105,7 @@ class _EventBodyState extends State<_EventBody> {
           duration: const Duration(seconds: 5),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
           ),
           action: SnackBarAction(
             label: AppLocalizations.of(context).yes,
@@ -180,8 +181,8 @@ class _EventBodyState extends State<_EventBody> {
                   constraints: BoxConstraints(minHeight: size.height * 0.62),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius:
-                        const BorderRadius.vertical(top: Radius.circular(40)),
+                    borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(Responsive.scale(context, 40))),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withOpacity(0.05),
@@ -190,30 +191,32 @@ class _EventBodyState extends State<_EventBody> {
                       ),
                     ],
                   ),
-                  padding: EdgeInsets.fromLTRB(24, 40, 24, _isNgo ? 40 : 120),
+                  padding: Responsive.padding(context,
+                      left: 24, top: 40, right: 24, bottom: _isNgo ? 40 : 120),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Center(
                         child: Container(
-                          width: 48,
-                          height: 6,
+                          width: Responsive.scale(context, 48),
+                          height: Responsive.scale(context, 6),
                           decoration: BoxDecoration(
                             color: Colors.grey.shade300,
-                            borderRadius: BorderRadius.circular(3),
+                            borderRadius:
+                                BorderRadius.circular(Responsive.scale(context, 3)),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: Responsive.padding(context,
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: AppColors.kPrimaryColor.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                             ),
                             child: Text(
                               CategoryLocalizer.type(l10n, event.type)
@@ -221,45 +224,46 @@ class _EventBodyState extends State<_EventBody> {
                               style: GoogleFonts.plusJakartaSans(
                                 color: AppColors.kPrimaryColor,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 letterSpacing: 1,
                               ),
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: Responsive.padding(context,
                                 horizontal: 12, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                             ),
                             child: Text(
                               CategoryLocalizer.category(l10n, event.category),
                               style: GoogleFonts.plusJakartaSans(
                                 color: Colors.grey.shade600,
                                 fontWeight: FontWeight.w600,
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: Responsive.scale(context, 16)),
                       Text(
                         event.title,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 28,
+                          fontSize: Responsive.sp(context, 28),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                           height: 1.2,
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: Responsive.scale(context, 12)),
                       Row(
                         children: [
-                          const Icon(Icons.location_on,
-                              color: AppColors.kPrimaryColor, size: 20),
-                          const SizedBox(width: 8),
+                          Icon(Icons.location_on,
+                              color: AppColors.kPrimaryColor,
+                              size: Responsive.scale(context, 20)),
+                          SizedBox(width: Responsive.scale(context, 8)),
                           Expanded(
                             child: Text(
                               event.location,
@@ -274,12 +278,13 @@ class _EventBodyState extends State<_EventBody> {
                         ],
                       ),
                       if (event.lastApplyDate != null) ...[
-                        const SizedBox(height: 8),
+                        SizedBox(height: Responsive.scale(context, 8)),
                         Row(
                           children: [
-                            const Icon(Icons.timer_outlined,
-                                color: Colors.orange, size: 20),
-                            const SizedBox(width: 8),
+                            Icon(Icons.timer_outlined,
+                                color: Colors.orange,
+                                size: Responsive.scale(context, 20)),
+                            SizedBox(width: Responsive.scale(context, 8)),
                             Expanded(
                               child: Text(
                                 l10n.lastApplyPrefix(DateFormat(
@@ -288,27 +293,27 @@ class _EventBodyState extends State<_EventBody> {
                                 style: GoogleFonts.plusJakartaSans(
                                   color: Colors.orange.shade900,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                                  fontSize: Responsive.sp(context, 13),
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ],
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
                       Container(
-                        padding: const EdgeInsets.all(16),
+                        padding: Responsive.padding(context, all: 16),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade100.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                         ),
                         child: Row(
                           children: [
-                            const CircleAvatar(
-                              radius: 24,
-                              child: Icon(Icons.business),
+                            CircleAvatar(
+                              radius: Responsive.scale(context, 24),
+                              child: const Icon(Icons.business),
                             ),
-                            const SizedBox(width: 16),
+                            SizedBox(width: Responsive.scale(context, 16)),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -316,7 +321,7 @@ class _EventBodyState extends State<_EventBody> {
                                   Text(
                                     l10n.organizer,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
+                                      fontSize: Responsive.sp(context, 12),
                                       color: Colors.grey.shade600,
                                     ),
                                   ),
@@ -332,7 +337,7 @@ class _EventBodyState extends State<_EventBody> {
                                       return Text(
                                         orgName,
                                         style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 16,
+                                          fontSize: Responsive.sp(context, 16),
                                           fontWeight: FontWeight.bold,
                                           color: AppColors.kTextColor,
                                         ),
@@ -345,7 +350,7 @@ class _EventBodyState extends State<_EventBody> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      SizedBox(height: Responsive.scale(context, 24)),
                       Row(
                         children: [
                           Expanded(
@@ -356,7 +361,7 @@ class _EventBodyState extends State<_EventBody> {
                                   formattedDate,
                                   "$dayName, $formattedTime",
                                   AppColors.kPrimaryColor)),
-                          const SizedBox(width: 16),
+                          SizedBox(width: Responsive.scale(context, 16)),
                           Expanded(child:
                               BlocBuilder<EventDetailCubit, EventDetailState>(
                             builder: (context, state) {
@@ -379,17 +384,17 @@ class _EventBodyState extends State<_EventBody> {
                           )),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                      SizedBox(height: Responsive.scale(context, 32)),
                       Text(l10n.details,
                           style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
+                              fontSize: Responsive.sp(context, 18),
                               fontWeight: FontWeight.bold,
                               color: AppColors.kTextColor)),
-                      const SizedBox(height: 12),
+                      SizedBox(height: Responsive.scale(context, 12)),
                       Text(
                         event.description,
                         style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                             color: Colors.grey.shade600,
                             height: 1.6),
                       ),
@@ -406,28 +411,28 @@ class _EventBodyState extends State<_EventBody> {
           right: 0,
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: Responsive.padding(context, horizontal: 20, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   buildGlassButton(
-                      Icons.arrow_back, () => Navigator.pop(context)),
+                      context, Icons.arrow_back, () => Navigator.pop(context)),
                 ],
               ),
             ),
           ),
         ),
         Positioned(
-          bottom: 30,
-          left: 20,
-          right: 20,
+          bottom: Responsive.scale(context, 30),
+          left: Responsive.scale(context, 20),
+          right: Responsive.scale(context, 20),
           child: BlocBuilder<EventDetailCubit, EventDetailState>(
             builder: (context, state) {
               final currentUser = FirebaseAuth.instance.currentUser;
 
               if (currentUser != null && event.organizerId == currentUser.uid) {
                 return SizedBox(
-                  height: 64,
+                  height: Responsive.scale(context, 64),
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.push(
@@ -448,7 +453,7 @@ class _EventBodyState extends State<_EventBody> {
                       foregroundColor: AppColors.kPrimaryColor,
                       elevation: 10,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                         side: const BorderSide(
                             color: AppColors.kPrimaryColor, width: 2),
                       ),
@@ -457,11 +462,12 @@ class _EventBodyState extends State<_EventBody> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(Icons.admin_panel_settings_outlined),
-                        const SizedBox(width: 10),
+                        SizedBox(width: Responsive.scale(context, 10)),
                         Text(
                           l10n.manageApplications,
                           style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                              fontSize: Responsive.sp(context, 18),
+                              fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -476,23 +482,24 @@ class _EventBodyState extends State<_EventBody> {
               // --- Süresi dolmuşsa buton gösterme ---
               if (isExpired) {
                 return Container(
-                  height: 64,
+                  height: Responsive.scale(context, 64),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.event_busy,
-                            color: Colors.grey, size: 22),
-                        const SizedBox(width: 10),
+                        Icon(Icons.event_busy,
+                            color: Colors.grey,
+                            size: Responsive.scale(context, 22)),
+                        SizedBox(width: Responsive.scale(context, 10)),
                         Text(
                           l10n.eventExpired,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: Responsive.sp(context, 16),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey,
                           ),
@@ -517,23 +524,24 @@ class _EventBodyState extends State<_EventBody> {
               // Son başvuru süresi dolmuşsa ve başvuru yoksa
               if (isApplyExpired && applicationStatus == null) {
                 return Container(
-                  height: 64,
+                  height: Responsive.scale(context, 64),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Center(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.timer_off_outlined,
-                            color: Colors.grey, size: 22),
-                        const SizedBox(width: 10),
+                        Icon(Icons.timer_off_outlined,
+                            color: Colors.grey,
+                            size: Responsive.scale(context, 22)),
+                        SizedBox(width: Responsive.scale(context, 10)),
                         Text(
                           l10n.applicationClosed,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16,
+                            fontSize: Responsive.sp(context, 16),
                             fontWeight: FontWeight.w600,
                             color: Colors.grey,
                           ),
@@ -571,7 +579,7 @@ class _EventBodyState extends State<_EventBody> {
               }
 
               return SizedBox(
-                height: 64,
+                height: Responsive.scale(context, 64),
                 child: ElevatedButton(
                   onPressed: isButtonEnabled
                       ? () {
@@ -616,7 +624,8 @@ class _EventBodyState extends State<_EventBody> {
                                           behavior: SnackBarBehavior.floating,
                                           shape: RoundedRectangleBorder(
                                             borderRadius:
-                                                BorderRadius.circular(12),
+                                                BorderRadius.circular(
+                                                    Responsive.scale(context, 12)),
                                           ),
                                         ),
                                       );
@@ -637,7 +646,8 @@ class _EventBodyState extends State<_EventBody> {
                                     backgroundColor: Colors.orange,
                                     behavior: SnackBarBehavior.floating,
                                     shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
+                                      borderRadius:
+                                          BorderRadius.circular(Responsive.scale(context, 12)),
                                     ),
                                   ),
                                 );
@@ -654,18 +664,18 @@ class _EventBodyState extends State<_EventBody> {
                             .withOpacity(0.4),
                     elevation: 10,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                     ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Icon(buttonIcon),
-                      const SizedBox(width: 10),
+                      SizedBox(width: Responsive.scale(context, 10)),
                       Text(
                         buttonText,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -721,90 +731,90 @@ class _CoverLetterDialogState extends State<_CoverLetterDialog> {
 
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
       ),
       elevation: 16,
       backgroundColor: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: Responsive.padding(context, all: 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.description_outlined,
                   color: AppColors.kPrimaryColor,
-                  size: 28,
+                  size: Responsive.scale(context, 28),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: Responsive.scale(context, 12)),
                 Text(
                   l10n.intentLetter,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 20,
+                    fontSize: Responsive.sp(context, 20),
                     fontWeight: FontWeight.bold,
                     color: AppColors.kTextColor,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Responsive.scale(context, 16)),
             Text(
               l10n.projectLetterPrompt,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: Colors.grey.shade600,
                 height: 1.5,
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: Responsive.scale(context, 16)),
             TextField(
               controller: _controller,
               minLines: 4,
               maxLines: 6,
               keyboardType: TextInputType.multiline,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 color: AppColors.kTextColor,
               ),
               decoration: InputDecoration(
                 hintText: l10n.letterHint,
                 hintStyle: GoogleFonts.plusJakartaSans(
                   color: Colors.grey.shade400,
-                  fontSize: 14,
+                  fontSize: Responsive.sp(context, 14),
                 ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
-                contentPadding: const EdgeInsets.all(16),
+                contentPadding: Responsive.padding(context, all: 16),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                   borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                   borderSide: BorderSide(color: Colors.grey.shade200),
                 ),
                 focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                   borderSide: const BorderSide(
                       color: AppColors.kPrimaryColor, width: 2),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.scale(context, 8)),
             Align(
               alignment: Alignment.centerRight,
               child: Text(
                 l10n.charCountLabel(_charCount, _minLength),
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
+                  fontSize: Responsive.sp(context, 12),
                   color: isValid ? Colors.green : Colors.grey.shade500,
                   fontWeight: isValid ? FontWeight.bold : FontWeight.normal,
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.scale(context, 24)),
             Row(
               children: [
                 Expanded(
@@ -813,9 +823,9 @@ class _CoverLetterDialogState extends State<_CoverLetterDialog> {
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(color: Colors.grey.shade300),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: Responsive.padding(context, vertical: 14),
                     ),
                     child: Text(
                       l10n.cancel,
@@ -826,7 +836,7 @@ class _CoverLetterDialogState extends State<_CoverLetterDialog> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: Responsive.scale(context, 12)),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: isValid
@@ -841,9 +851,9 @@ class _CoverLetterDialogState extends State<_CoverLetterDialog> {
                       disabledBackgroundColor: Colors.grey.shade300,
                       disabledForegroundColor: Colors.grey.shade500,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                       ),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      padding: Responsive.padding(context, vertical: 14),
                       elevation: isValid ? 4 : 0,
                     ),
                     child: Text(

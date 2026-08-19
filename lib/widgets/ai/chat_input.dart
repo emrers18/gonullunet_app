@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class ChatInput extends StatefulWidget {
   final Function(String) onSend;
@@ -48,10 +49,10 @@ class _ChatInputState extends State<ChatInput> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        left: 12,
-        right: 8,
-        top: 8,
-        bottom: MediaQuery.of(context).padding.bottom + 8,
+        left: Responsive.scale(context, 12),
+        right: Responsive.scale(context, 8),
+        top: Responsive.scale(context, 8),
+        bottom: MediaQuery.of(context).padding.bottom + Responsive.scale(context, 8),
       ),
       decoration: BoxDecoration(
         color: AppColors.kSurfaceColor,
@@ -72,47 +73,48 @@ class _ChatInputState extends State<ChatInput> {
               textCapitalization: TextCapitalization.sentences,
               maxLines: 4,
               minLines: 1,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 15),
                 color: AppColors.primaryText,
               ),
               decoration: InputDecoration(
                 hintText: AppLocalizations.of(context).messageHint,
                 hintStyle: TextStyle(
                   color: AppColors.secondaryText.withOpacity(0.6),
-                  fontSize: 15,
+                  fontSize: Responsive.sp(context, 15),
                 ),
                 filled: true,
                 fillColor: AppColors.kBackgroundColor,
-                contentPadding: const EdgeInsets.symmetric(
+                contentPadding: Responsive.padding(
+                  context,
                   horizontal: 16,
                   vertical: 10,
                 ),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
                   borderSide: BorderSide.none,
                 ),
               ),
               onSubmitted: (_) => _handleSend(),
             ),
           ),
-          const SizedBox(width: 6),
+          SizedBox(width: Responsive.scale(context, 6)),
           Material(
             color: _hasText && widget.enabled
                 ? AppColors.accentColor
                 : AppColors.dividerColor,
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
             child: InkWell(
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
               onTap: _hasText && widget.enabled ? _handleSend : null,
               child: Container(
-                padding: const EdgeInsets.all(10),
+                padding: Responsive.padding(context, all: 10),
                 child: Icon(
                   Icons.send_rounded,
                   color: _hasText && widget.enabled
                       ? Colors.white
                       : AppColors.secondaryText,
-                  size: 22,
+                  size: Responsive.scale(context, 22),
                 ),
               ),
             ),

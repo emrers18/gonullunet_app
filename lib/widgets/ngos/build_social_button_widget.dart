@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:gonullunet_app/utils/responsive.dart';
+
 Widget buildSocialButton(
   BuildContext context,
   String label,
@@ -13,8 +15,8 @@ Widget buildSocialButton(
       onTap: onTap,
       customBorder: const CircleBorder(),
       child: Container(
-        width: 40,
-        height: 40,
+        width: Responsive.scale(context, 40),
+        height: Responsive.scale(context, 40),
         decoration: BoxDecoration(
           color: gradient == null ? color : null,
           gradient: gradient,
@@ -28,10 +30,10 @@ Widget buildSocialButton(
         ),
         child: Center(
           child: Text(label,
-              style: const TextStyle(
+              style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
-                  fontSize: 16)),
+                  fontSize: Responsive.sp(context, 16))),
         ),
       ),
     ),

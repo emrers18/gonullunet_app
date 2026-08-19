@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/models/event_chat_message_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../atoms/timestamp_text.dart';
 import '../atoms/user_avatar.dart';
 
@@ -18,7 +19,8 @@ class MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(
+      padding: Responsive.padding(
+        context,
         left: isMe ? 64.0 : 12.0,
         right: isMe ? 12.0 : 64.0,
         top: 4,
@@ -30,12 +32,15 @@ class MessageBubble extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (!isMe) ...[
-            UserAvatar(avatarUrl: message.senderAvatarUrl, radius: 16),
-            const SizedBox(width: 8),
+            UserAvatar(
+                avatarUrl: message.senderAvatarUrl,
+                radius: Responsive.scale(context, 16)),
+            SizedBox(width: Responsive.scale(context, 8)),
           ],
           Flexible(
             child: Container(
-              padding: const EdgeInsets.symmetric(
+              padding: Responsive.padding(
+                context,
                 horizontal: 14.0,
                 vertical: 10.0,
               ),
@@ -52,10 +57,10 @@ class MessageBubble extends StatelessWidget {
                     : null,
                 color: isMe ? null : Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(18),
-                  topRight: const Radius.circular(18),
-                  bottomLeft: Radius.circular(isMe ? 18 : 4),
-                  bottomRight: Radius.circular(isMe ? 4 : 18),
+                  topLeft: Radius.circular(Responsive.scale(context, 18)),
+                  topRight: Radius.circular(Responsive.scale(context, 18)),
+                  bottomLeft: Radius.circular(Responsive.scale(context, isMe ? 18 : 4)),
+                  bottomRight: Radius.circular(Responsive.scale(context, isMe ? 4 : 18)),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -73,26 +78,26 @@ class MessageBubble extends StatelessWidget {
                     Text(
                       message.senderName,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 12,
+                        fontSize: Responsive.sp(context, 12),
                         fontWeight: FontWeight.w700,
                         color: AppColors.primaryColor,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    SizedBox(height: Responsive.scale(context, 3)),
                   ],
                   Text(
                     message.content,
                     style: GoogleFonts.plusJakartaSans(
                       color: isMe ? Colors.white : AppColors.primaryText,
-                      fontSize: 14.5,
+                      fontSize: Responsive.sp(context, 14.5),
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: Responsive.scale(context, 4)),
                   TimestampText(
                     timestamp: message.createdAt,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 10,
+                      fontSize: Responsive.sp(context, 10),
                       color: isMe
                           ? Colors.white.withOpacity(0.75)
                           : Colors.black38,

@@ -14,6 +14,7 @@ import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/utils/category_localizer.dart';
 import 'package:gonullunet_app/constants/app_constants.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import '../../logic/add_event_cubit.dart';
 import '../../logic/add_event_state.dart';
@@ -291,28 +292,30 @@ class _AddEventViewState extends State<AddEventView> {
         constraints: BoxConstraints(
           maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(Responsive.scale(context, 32))),
         ),
-        padding: EdgeInsets.fromLTRB(0, 12, 0, bottomInset),
+        padding: EdgeInsets.fromLTRB(
+            0, Responsive.scale(context, 12), 0, bottomInset),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // Drag Handle
             Container(
-              width: 40,
-              height: 4,
+              width: Responsive.scale(context, 40),
+              height: Responsive.scale(context, 4),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 2)),
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: Responsive.scale(context, 12)),
 
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: Responsive.padding(context, horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -329,7 +332,7 @@ class _AddEventViewState extends State<AddEventView> {
                   Text(
                     l10n.newEvent,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 17,
+                      fontSize: Responsive.sp(context, 17),
                       fontWeight: FontWeight.bold,
                       color: AppColors.primaryText,
                     ),
@@ -337,7 +340,8 @@ class _AddEventViewState extends State<AddEventView> {
                   BlocBuilder<AddEventCubit, AddEventState>(
                     builder: (context, state) {
                       if (state is AddEventLoading) {
-                        return const AppLoadingIndicator(size: 28);
+                        return AppLoadingIndicator(
+                            size: Responsive.scale(context, 28));
                       }
                       return ElevatedButton(
                         onPressed: _saveEvent,
@@ -345,10 +349,11 @@ class _AddEventViewState extends State<AddEventView> {
                           backgroundColor: AppColors.kPrimaryColor,
                           foregroundColor: Colors.white,
                           elevation: 0,
-                          padding: const EdgeInsets.symmetric(
+                          padding: Responsive.padding(context,
                               horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                            borderRadius:
+                                BorderRadius.circular(Responsive.scale(context, 20)),
                           ),
                         ),
                         child: Text(
@@ -367,15 +372,15 @@ class _AddEventViewState extends State<AddEventView> {
 
             if (_errorMessage != null)
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                padding: Responsive.padding(context,
+                    horizontal: 20, vertical: 8),
                 color: Colors.red.shade50,
                 width: double.infinity,
                 child: Text(
                   _errorMessage!,
                   style: GoogleFonts.plusJakartaSans(
                     color: Colors.red.shade700,
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -383,7 +388,7 @@ class _AddEventViewState extends State<AddEventView> {
 
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
+                padding: Responsive.padding(context, all: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -399,7 +404,7 @@ class _AddEventViewState extends State<AddEventView> {
                         return Row(
                           children: [
                             CircleAvatar(
-                              radius: 20,
+                              radius: Responsive.scale(context, 20),
                               backgroundColor: AppColors.lightPrimaryColor,
                               backgroundImage:
                                   (imageUrl != null && imageUrl.isNotEmpty)
@@ -409,25 +414,25 @@ class _AddEventViewState extends State<AddEventView> {
                                   ? Text(displayName[0].toUpperCase())
                                   : null,
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: Responsive.scale(context, 12)),
                             Text(
                               displayName,
                               style: GoogleFonts.plusJakartaSans(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                                fontSize: Responsive.sp(context, 15),
                               ),
                             ),
                           ],
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.scale(context, 24)),
 
                     // Title Input
                     TextField(
                       controller: _titleController,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 20,
+                        fontSize: Responsive.sp(context, 20),
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
@@ -442,7 +447,7 @@ class _AddEventViewState extends State<AddEventView> {
                       controller: _descController,
                       maxLines: null,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                         color: Colors.black87,
                       ),
                       decoration: InputDecoration(
@@ -451,7 +456,7 @@ class _AddEventViewState extends State<AddEventView> {
                         border: InputBorder.none,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // Type & Category Selection
                     Row(
@@ -467,7 +472,7 @@ class _AddEventViewState extends State<AddEventView> {
                                 setState(() => _selectedType = val!),
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: Responsive.scale(context, 12)),
                         Expanded(
                           child: _buildDropdown(
                             label: l10n.category,
@@ -481,52 +486,55 @@ class _AddEventViewState extends State<AddEventView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
 
                     // Quota Input
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      padding: Responsive.padding(context, horizontal: 16),
                       decoration: BoxDecoration(
                         color: Colors.grey[50],
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                         border: Border.all(color: Colors.grey[200]!),
                       ),
                       child: TextField(
                         controller: _quotaController,
                         keyboardType: TextInputType.number,
-                        style: GoogleFonts.plusJakartaSans(fontSize: 15),
+                        style: GoogleFonts.plusJakartaSans(
+                            fontSize: Responsive.sp(context, 15)),
                         decoration: InputDecoration(
                           hintText: l10n.quotaOptional,
                           hintStyle: GoogleFonts.plusJakartaSans(
                             color: Colors.grey[400],
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                           ),
                           border: InputBorder.none,
                           icon: Icon(Icons.people_outline,
-                              color: Colors.grey[400], size: 20),
+                              color: Colors.grey[400],
+                              size: Responsive.scale(context, 20)),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
 
                     // Location Picker & Preview
                     Text(
                       l10n.location,
                       style: GoogleFonts.plusJakartaSans(
-                        fontSize: 14,
+                        fontSize: Responsive.sp(context, 14),
                         fontWeight: FontWeight.bold,
                         color: Colors.grey[700],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: Responsive.scale(context, 8)),
                     GestureDetector(
                       onTap: _pickLocation,
                       child: Container(
-                        height: _selectedCoordinates != null ? 200 : 80,
+                        height: Responsive.scale(
+                            context, _selectedCoordinates != null ? 200 : 80),
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                           border: Border.all(
                             color: _selectedCoordinates != null
                                 ? AppColors.primaryColor.withOpacity(0.3)
@@ -537,7 +545,7 @@ class _AddEventViewState extends State<AddEventView> {
                             ? Stack(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                                     child: FlutterMap(
                                       options: MapOptions(
                                         initialCenter: _selectedCoordinates!,
@@ -564,15 +572,15 @@ class _AddEventViewState extends State<AddEventView> {
                                           markers: [
                                             Marker(
                                               point: _selectedCoordinates!,
-                                              width: 50,
-                                              height: 60,
+                                              width: Responsive.scale(context, 50),
+                                              height: Responsive.scale(context, 60),
                                               alignment: Alignment.topCenter,
                                               child: Column(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Container(
-                                                    width: 40,
-                                                    height: 40,
+                                                    width: Responsive.scale(context, 40),
+                                                    height: Responsive.scale(context, 40),
                                                     decoration: BoxDecoration(
                                                       color: AppColors
                                                           .kPrimaryColor,
@@ -596,12 +604,14 @@ class _AddEventViewState extends State<AddEventView> {
                                                           ? Icons.work_rounded
                                                           : Icons.event_rounded,
                                                       color: Colors.white,
-                                                      size: 20,
+                                                      size: Responsive.scale(context, 20),
                                                     ),
                                                   ),
-                                                  const CustomPaint(
-                                                    size: Size(12, 10),
-                                                    painter: _PinTailPainter(
+                                                  CustomPaint(
+                                                    size: Size(
+                                                        Responsive.scale(context, 12),
+                                                        Responsive.scale(context, 10)),
+                                                    painter: const _PinTailPainter(
                                                         color: AppColors
                                                             .kPrimaryColor),
                                                   ),
@@ -618,19 +628,18 @@ class _AddEventViewState extends State<AddEventView> {
                                     left: 0,
                                     right: 0,
                                     child: Container(
-                                      padding: const EdgeInsets.all(8),
+                                      padding: Responsive.padding(context, all: 8),
                                       decoration: BoxDecoration(
                                         color: Colors.black.withOpacity(0.6),
-                                        borderRadius:
-                                            const BorderRadius.vertical(
-                                          bottom: Radius.circular(16),
+                                        borderRadius: BorderRadius.vertical(
+                                          bottom: Radius.circular(Responsive.scale(context, 16)),
                                         ),
                                       ),
                                       child: Text(
                                         _selectedAddress ?? '',
                                         style: GoogleFonts.plusJakartaSans(
                                           color: Colors.white,
-                                          fontSize: 12,
+                                          fontSize: Responsive.sp(context, 12),
                                         ),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -638,14 +647,14 @@ class _AddEventViewState extends State<AddEventView> {
                                     ),
                                   ),
                                   Positioned(
-                                    top: 8,
-                                    right: 8,
+                                    top: Responsive.scale(context, 8),
+                                    right: Responsive.scale(context, 8),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(
+                                      padding: Responsive.padding(context,
                                           horizontal: 8, vertical: 4),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(Responsive.scale(context, 8)),
                                         boxShadow: [
                                           BoxShadow(
                                             color:
@@ -657,15 +666,15 @@ class _AddEventViewState extends State<AddEventView> {
                                       child: Row(
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          const Icon(
+                                          Icon(
                                               Icons.edit_location_alt_outlined,
-                                              size: 14,
+                                              size: Responsive.scale(context, 14),
                                               color: AppColors.kPrimaryColor),
-                                          const SizedBox(width: 4),
+                                          SizedBox(width: Responsive.scale(context, 4)),
                                           Text(
                                             l10n.change,
                                             style: GoogleFonts.plusJakartaSans(
-                                              fontSize: 11,
+                                              fontSize: Responsive.sp(context, 11),
                                               fontWeight: FontWeight.bold,
                                               color: AppColors.kPrimaryColor,
                                             ),
@@ -682,7 +691,7 @@ class _AddEventViewState extends State<AddEventView> {
                                   Icon(Icons.add_location_alt_outlined,
                                       color: AppColors.kPrimaryColor
                                           .withOpacity(0.6)),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: Responsive.scale(context, 8)),
                                   Text(
                                     l10n.selectLocationFromMap,
                                     style: GoogleFonts.plusJakartaSans(
@@ -694,7 +703,7 @@ class _AddEventViewState extends State<AddEventView> {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // Date & Time Selectors
                     Row(
@@ -708,7 +717,7 @@ class _AddEventViewState extends State<AddEventView> {
                             icon: Icons.calendar_today_outlined,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: Responsive.scale(context, 12)),
                         Expanded(
                           child: _buildDateTimePicker(
                             label: l10n.endLabel,
@@ -719,7 +728,7 @@ class _AddEventViewState extends State<AddEventView> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
 
                     _buildDateTimePicker(
                       label: l10n.lastApplyDateLabel,
@@ -727,24 +736,24 @@ class _AddEventViewState extends State<AddEventView> {
                       onTap: () => _pickDateTime(type: 'lastApply'),
                       icon: Icons.timer_outlined,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // Image Selection
                     GestureDetector(
                       onTap: _pickImage,
                       child: Container(
                         width: double.infinity,
-                        height: 160,
+                        height: Responsive.scale(context, 160),
                         decoration: BoxDecoration(
                           color: Colors.grey[50],
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                           border: Border.all(color: Colors.grey[200]!),
                         ),
                         child: _selectedImage != null
                             ? Stack(
                                 children: [
                                   ClipRRect(
-                                    borderRadius: BorderRadius.circular(16),
+                                    borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                                     child: Image.file(
                                       _selectedImage!,
                                       width: double.infinity,
@@ -752,19 +761,20 @@ class _AddEventViewState extends State<AddEventView> {
                                     ),
                                   ),
                                   Positioned(
-                                    top: 10,
-                                    right: 10,
+                                    top: Responsive.scale(context, 10),
+                                    right: Responsive.scale(context, 10),
                                     child: GestureDetector(
                                       onTap: () =>
                                           setState(() => _selectedImage = null),
                                       child: Container(
-                                        padding: const EdgeInsets.all(4),
+                                        padding: Responsive.padding(context, all: 4),
                                         decoration: const BoxDecoration(
                                           color: Colors.black54,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: const Icon(Icons.close,
-                                            color: Colors.white, size: 20),
+                                        child: Icon(Icons.close,
+                                            color: Colors.white,
+                                            size: Responsive.scale(context, 20)),
                                       ),
                                     ),
                                   ),
@@ -774,8 +784,9 @@ class _AddEventViewState extends State<AddEventView> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.add_photo_alternate_outlined,
-                                      size: 32, color: Colors.grey[400]),
-                                  const SizedBox(height: 8),
+                                      size: Responsive.scale(context, 32),
+                                      color: Colors.grey[400]),
+                                  SizedBox(height: Responsive.scale(context, 8)),
                                   Text(
                                     l10n.addImageOptional,
                                     style: GoogleFonts.plusJakartaSans(
@@ -787,7 +798,7 @@ class _AddEventViewState extends State<AddEventView> {
                               ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
                   ],
                 ),
               ),
@@ -811,17 +822,17 @@ class _AddEventViewState extends State<AddEventView> {
         Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             fontWeight: FontWeight.bold,
             color: Colors.grey[700],
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: Responsive.scale(context, 6)),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: Responsive.padding(context, horizontal: 12),
           decoration: BoxDecoration(
             color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
             border: Border.all(color: Colors.grey[200]!),
           ),
           child: DropdownButtonHideUnderline(
@@ -831,7 +842,7 @@ class _AddEventViewState extends State<AddEventView> {
               icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[400]),
               style: GoogleFonts.plusJakartaSans(
                 color: Colors.black87,
-                fontSize: 14,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w500,
               ),
               items: items.map((String item) {
@@ -860,32 +871,33 @@ class _AddEventViewState extends State<AddEventView> {
         Text(
           label,
           style: GoogleFonts.plusJakartaSans(
-            fontSize: 13,
+            fontSize: Responsive.sp(context, 13),
             fontWeight: FontWeight.bold,
             color: Colors.grey[700],
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: Responsive.scale(context, 6)),
         InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: Responsive.padding(context, all: 12),
             decoration: BoxDecoration(
               color: Colors.grey[50],
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
               border: Border.all(color: Colors.grey[200]!),
             ),
             child: Row(
               children: [
                 Icon(icon,
-                    size: 16, color: AppColors.kPrimaryColor.withOpacity(0.7)),
-                const SizedBox(width: 8),
+                    size: Responsive.scale(context, 16),
+                    color: AppColors.kPrimaryColor.withOpacity(0.7)),
+                SizedBox(width: Responsive.scale(context, 8)),
                 Expanded(
                   child: Text(
                     dateTimeText,
                     style: GoogleFonts.plusJakartaSans(
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                       fontWeight: FontWeight.w600,
                       color: dateTimeText ==
                               AppLocalizations.of(context).selectPlaceholder

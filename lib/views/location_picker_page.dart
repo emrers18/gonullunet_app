@@ -11,6 +11,7 @@ import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import '../logic/location_cubit.dart';
 import '../logic/location_state.dart';
+import '../utils/responsive.dart';
 
 class LocationPickerPage extends StatelessWidget {
   const LocationPickerPage({super.key});
@@ -99,7 +100,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
             // 2. KATMAN: ORTADAKİ SABİT PİN (PREMIUM TASARIM)
             Center(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: 40.0),
+                padding: Responsive.padding(context, bottom: 40.0),
                 child: AnimatedScale(
                   scale: _isCameraMoving ? 1.2 : 1.0,
                   duration: const Duration(milliseconds: 150),
@@ -107,8 +108,8 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Container(
-                        width: 44,
-                        height: 44,
+                        width: Responsive.scale(context, 44),
+                        height: Responsive.scale(context, 44),
                         decoration: BoxDecoration(
                           color: AppColors.kPrimaryColor,
                           shape: BoxShape.circle,
@@ -121,17 +122,17 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             ),
                           ],
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.location_on_rounded,
                           color: Colors.white,
-                          size: 24,
+                          size: Responsive.scale(context, 24),
                         ),
                       ),
                       // Pin tail
-                      const CustomPaint(
-                        size: Size(12, 10),
+                      CustomPaint(
+                        size: Size(Responsive.scale(context, 12), Responsive.scale(context, 10)),
                         painter:
-                            _PinTailPainter(color: AppColors.kPrimaryColor),
+                            const _PinTailPainter(color: AppColors.kPrimaryColor),
                       ),
                     ],
                   ),
@@ -146,10 +147,10 @@ class _LocationPickerViewState extends State<LocationPickerView> {
               right: 0,
               child: Container(
                 padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 10,
-                    bottom: 20,
-                    left: 16,
-                    right: 16),
+                    top: MediaQuery.of(context).padding.top + Responsive.scale(context, 10),
+                    bottom: Responsive.scale(context, 20),
+                    left: Responsive.scale(context, 16),
+                    right: Responsive.scale(context, 16)),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
@@ -166,13 +167,13 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                       icon: Icons.arrow_back,
                       onTap: () => Navigator.pop(context),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: Responsive.scale(context, 12)),
                     Expanded(
                       child: Container(
-                        height: 48,
+                        height: Responsive.scale(context, 48),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 30)),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.08),
@@ -189,19 +190,19 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             FocusScope.of(context).unfocus();
                           },
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                             color: AppColors.primaryText,
                           ),
                           decoration: InputDecoration(
                             hintText:
                                 AppLocalizations.of(context).searchLocationHint,
-                            hintStyle: const TextStyle(
-                                color: AppColors.textSub, fontSize: 14),
-                            prefixIcon: const Icon(Icons.search,
-                                color: AppColors.textSub, size: 20),
+                            hintStyle: TextStyle(
+                                color: AppColors.textSub, fontSize: Responsive.sp(context, 14)),
+                            prefixIcon: Icon(Icons.search,
+                                color: AppColors.textSub, size: Responsive.scale(context, 20)),
                             border: InputBorder.none,
                             contentPadding:
-                                const EdgeInsets.symmetric(vertical: 14),
+                                Responsive.padding(context, vertical: 14),
                           ),
                         ),
                       ),
@@ -213,25 +214,25 @@ class _LocationPickerViewState extends State<LocationPickerView> {
 
             // 4. KATMAN: KONUMUMA GİT BUTONU
             Positioned(
-              bottom: 200,
-              right: 16,
+              bottom: Responsive.scale(context, 200),
+              right: Responsive.scale(context, 16),
               child: _buildCircleButton(
                 icon: Icons.my_location,
                 onTap: () => context.read<LocationCubit>().getCurrentLocation(),
-                size: 50,
+                size: Responsive.scale(context, 50),
               ),
             ),
 
             // 5. KATMAN: ALT ONAY PANELİ
             Positioned(
-              bottom: 20,
-              left: 16,
-              right: 16,
+              bottom: Responsive.scale(context, 20),
+              left: Responsive.scale(context, 16),
+              right: Responsive.scale(context, 16),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: Responsive.padding(context, all: 20),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 24)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.1),
@@ -263,18 +264,18 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                         Row(
                           children: [
                             Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: Responsive.padding(context, all: 8),
                               decoration: BoxDecoration(
                                 color: AppColors.kPrimaryColor.withOpacity(0.1),
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.place_rounded,
                                 color: AppColors.kPrimaryColor,
-                                size: 20,
+                                size: Responsive.scale(context, 20),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: Responsive.scale(context, 12)),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,17 +284,17 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                                     l10n.selectedAddress,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.grey[500],
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  const SizedBox(height: 2),
+                                  SizedBox(height: Responsive.scale(context, 2)),
                                   Text(
                                     displayAddress,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
+                                      fontSize: Responsive.sp(context, 14),
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.primaryText,
                                     ),
@@ -303,7 +304,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: Responsive.scale(context, 20)),
                         ElevatedButton(
                           onPressed: (confirmCoordinates == null || isLoading)
                               ? null
@@ -318,21 +319,21 @@ class _LocationPickerViewState extends State<LocationPickerView> {
                             foregroundColor: Colors.white,
                             disabledBackgroundColor: Colors.grey[200],
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            padding: Responsive.padding(context, vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
+                              borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                             ),
                           ),
                           child: isLoading
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: AppLoadingIndicator(size: 20),
+                              ? SizedBox(
+                                  height: Responsive.scale(context, 20),
+                                  width: Responsive.scale(context, 20),
+                                  child: AppLoadingIndicator(size: Responsive.scale(context, 20)),
                                 )
                               : Text(
                                   l10n.confirmLocation,
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 16,
+                                    fontSize: Responsive.sp(context, 16),
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -367,7 +368,7 @@ class _LocationPickerViewState extends State<LocationPickerView> {
             ),
           ],
         ),
-        child: Icon(icon, color: AppColors.primaryText, size: 22),
+        child: Icon(icon, color: AppColors.primaryText, size: Responsive.scale(context, 22)),
       ),
     );
   }

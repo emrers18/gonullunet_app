@@ -7,6 +7,7 @@ import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/models/chat_session_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'chat_page.dart';
@@ -67,7 +68,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 20))),
         title: Text(AppLocalizations.of(context).deleteChat,
             style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold)),
         content: Text(
@@ -89,7 +91,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
               backgroundColor: Colors.red.shade600,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12)),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
             ),
             child: Text(AppLocalizations.of(context).delete,
                 style:
@@ -108,7 +110,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
         slivers: [
           // --- Gradient Hero Banner AppBar ---
           SliverAppBar(
-            expandedHeight: 200,
+            expandedHeight: Responsive.scale(context, 200),
             pinned: true,
             backgroundColor: AppColors.darkPrimaryColor,
             elevation: 0,
@@ -128,11 +130,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   children: [
                     // Decorative background circles
                     Positioned(
-                      right: -30,
-                      top: -20,
+                      right: Responsive.scale(context, -30),
+                      top: Responsive.scale(context, -20),
                       child: Container(
-                        width: 160,
-                        height: 160,
+                        width: Responsive.scale(context, 160),
+                        height: Responsive.scale(context, 160),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.05),
@@ -140,11 +142,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       ),
                     ),
                     Positioned(
-                      right: 40,
-                      top: 50,
+                      right: Responsive.scale(context, 40),
+                      top: Responsive.scale(context, 50),
                       child: Container(
-                        width: 80,
-                        height: 80,
+                        width: Responsive.scale(context, 80),
+                        height: Responsive.scale(context, 80),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.07),
@@ -152,11 +154,11 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                       ),
                     ),
                     Positioned(
-                      left: -20,
-                      bottom: -10,
+                      left: Responsive.scale(context, -20),
+                      bottom: Responsive.scale(context, -10),
                       child: Container(
-                        width: 120,
-                        height: 120,
+                        width: Responsive.scale(context, 120),
+                        height: Responsive.scale(context, 120),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.white.withOpacity(0.04),
@@ -165,7 +167,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                     ),
                     // Content
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      padding: Responsive.padding(context,
+                          left: 20, top: 0, right: 20, bottom: 20),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,15 +176,15 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                           Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.all(10),
+                                padding: Responsive.padding(context, all: 10),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withOpacity(0.15),
-                                  borderRadius: BorderRadius.circular(14),
+                                  borderRadius: BorderRadius.circular(Responsive.scale(context, 14)),
                                 ),
-                                child: const Icon(Icons.auto_awesome,
-                                    color: Colors.white, size: 26),
+                                child: Icon(Icons.auto_awesome,
+                                    color: Colors.white, size: Responsive.scale(context, 26)),
                               ),
-                              const SizedBox(width: 12),
+                              SizedBox(width: Responsive.scale(context, 12)),
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -190,7 +193,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 24,
+                                      fontSize: Responsive.sp(context, 24),
                                     ),
                                   ),
                                   Text(
@@ -198,7 +201,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                                         .smartVolunteerAssistant,
                                     style: GoogleFonts.plusJakartaSans(
                                       color: Colors.white.withOpacity(0.75),
-                                      fontSize: 13,
+                                      fontSize: Responsive.sp(context, 13),
                                     ),
                                   ),
                                 ],
@@ -217,7 +220,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           // --- New Chat Button ---
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              padding: Responsive.padding(context,
+                  left: 16, top: 16, right: 16, bottom: 8),
               child: _NewChatBanner(onTap: _startNewChat),
             ),
           ),
@@ -225,11 +229,12 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
           // --- Session List Header ---
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+              padding: Responsive.padding(context,
+                  left: 20, top: 8, right: 20, bottom: 8),
               child: Text(
                 AppLocalizations.of(context).pastChats,
                 style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
+                  fontSize: Responsive.sp(context, 11),
                   fontWeight: FontWeight.bold,
                   color: Colors.grey.shade500,
                   letterSpacing: 1.2,
@@ -254,7 +259,8 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   );
                 }
                 return SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
+                  padding: Responsive.padding(context,
+                      left: 16, top: 0, right: 16, bottom: 32),
                   sliver: SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
@@ -275,18 +281,18 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                 return SliverFillRemaining(
                   child: Center(
                     child: Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: Responsive.padding(context, all: 24),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.cloud_off_rounded,
-                              size: 52, color: Colors.grey.shade300),
-                          const SizedBox(height: 16),
+                              size: Responsive.scale(context, 52), color: Colors.grey.shade300),
+                          SizedBox(height: Responsive.scale(context, 16)),
                           Text(AppMessages.resolve(context, state.message),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.plusJakartaSans(
                                   color: Colors.grey.shade500)),
-                          const SizedBox(height: 16),
+                          SizedBox(height: Responsive.scale(context, 16)),
                           ElevatedButton(
                             onPressed: () =>
                                 context.read<ChatCubit>().loadSessions(),
@@ -294,7 +300,7 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                               backgroundColor: AppColors.darkPrimaryColor,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12)),
+                                  borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
                             ),
                             child: Text('Tekrar Dene',
                                 style: GoogleFonts.plusJakartaSans()),
@@ -319,12 +325,12 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
   Widget _buildEmptyHistory() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: Responsive.padding(context, all: 32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: Responsive.padding(context, all: 24),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [Color(0xFF004E89), Color(0xFF03A9F4)],
@@ -340,24 +346,24 @@ class _ChatHistoryPageState extends State<ChatHistoryPage> {
                   ),
                 ],
               ),
-              child:
-                  const Icon(Icons.auto_awesome, size: 48, color: Colors.white),
+              child: Icon(Icons.auto_awesome,
+                  size: Responsive.scale(context, 48), color: Colors.white),
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: Responsive.scale(context, 24)),
             Text(
               AppLocalizations.of(context).aiAssistantTitle,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 20,
+                fontSize: Responsive.sp(context, 20),
                 fontWeight: FontWeight.bold,
                 color: AppColors.kTextColor,
               ),
             ),
-            const SizedBox(height: 10),
+            SizedBox(height: Responsive.scale(context, 10)),
             Text(
               AppLocalizations.of(context).aiHistoryIntro,
               textAlign: TextAlign.center,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13.5,
+                fontSize: Responsive.sp(context, 13.5),
                 color: Colors.grey.shade500,
                 height: 1.6,
               ),
@@ -379,14 +385,14 @@ class _NewChatBanner extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: Responsive.padding(context, all: 16),
         decoration: BoxDecoration(
           gradient: const LinearGradient(
             colors: [Color(0xFFFF5722), Color(0xFFFF8C42)],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 18)),
           boxShadow: const [
             BoxShadow(
               color: Color(0xFFFF5722),
@@ -398,15 +404,15 @@ class _NewChatBanner extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              padding: const EdgeInsets.all(10),
+              padding: Responsive.padding(context, all: 10),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.15),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
               ),
-              child: const Icon(Icons.add_comment_rounded,
-                  color: Colors.white, size: 22),
+              child: Icon(Icons.add_comment_rounded,
+                  color: Colors.white, size: Responsive.scale(context, 22)),
             ),
-            const SizedBox(width: 14),
+            SizedBox(width: Responsive.scale(context, 14)),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,21 +422,21 @@ class _NewChatBanner extends StatelessWidget {
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 15,
+                      fontSize: Responsive.sp(context, 15),
                     ),
                   ),
                   Text(
                     AppLocalizations.of(context).askNewQuestion,
                     style: GoogleFonts.plusJakartaSans(
                       color: Colors.white.withOpacity(0.75),
-                      fontSize: 12,
+                      fontSize: Responsive.sp(context, 12),
                     ),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios_rounded,
-                color: Colors.white70, size: 16),
+            Icon(Icons.arrow_forward_ios_rounded,
+                color: Colors.white70, size: Responsive.scale(context, 16)),
           ],
         ),
       ),
@@ -457,16 +463,16 @@ class _SessionCard extends StatelessWidget {
         locale: Localizations.localeOf(context).languageCode);
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: Responsive.padding(context, bottom: 10),
       child: Dismissible(
         key: Key(session.id),
         direction: DismissDirection.endToStart,
         background: Container(
           alignment: Alignment.centerRight,
-          padding: const EdgeInsets.only(right: 20),
+          padding: Responsive.padding(context, right: 20),
           decoration: BoxDecoration(
             color: Colors.red.shade400,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
           ),
           child: const Icon(Icons.delete_outline, color: Colors.white),
         ),
@@ -479,12 +485,12 @@ class _SessionCard extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             onLongPress: onDelete,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
             child: Container(
-              padding: const EdgeInsets.all(14),
+              padding: Responsive.padding(context, all: 14),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.04),
@@ -496,18 +502,18 @@ class _SessionCard extends StatelessWidget {
               child: Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(10),
+                    padding: Responsive.padding(context, all: 10),
                     decoration: BoxDecoration(
                       color: AppColors.darkPrimaryColor.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.chat_bubble_outline_rounded,
                       color: AppColors.darkPrimaryColor,
-                      size: 20,
+                      size: Responsive.scale(context, 20),
                     ),
                   ),
-                  const SizedBox(width: 14),
+                  SizedBox(width: Responsive.scale(context, 14)),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -517,16 +523,16 @@ class _SessionCard extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
+                            fontSize: Responsive.sp(context, 14),
                             fontWeight: FontWeight.w600,
                             color: AppColors.kTextColor,
                           ),
                         ),
-                        const SizedBox(height: 3),
+                        SizedBox(height: Responsive.scale(context, 3)),
                         Text(
                           time,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: Colors.grey.shade500,
                           ),
                         ),

@@ -11,7 +11,7 @@ import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/services/firebase_error_translator.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
-
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import '../constants/app_constants.dart';
 import '../logic/profile_cubit.dart';
@@ -138,7 +138,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
           style: GoogleFonts.plusJakartaSans(
             color: AppColors.kTextColor,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
           ),
         ),
         centerTitle: true,
@@ -195,7 +195,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const AppLoadingIndicator(),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     Text(AppLocalizations.of(context).profileUpdating),
                   ],
                 ),
@@ -204,17 +204,17 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
 
             return SingleChildScrollView(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
+                padding: Responsive.padding(context,
                     horizontal: 16.0, vertical: 24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // --- Uyarı Metni ---
                     Container(
-                      padding: const EdgeInsets.all(14),
+                      padding: Responsive.padding(context, all: 14),
                       decoration: BoxDecoration(
                         color: Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                         border:
                             Border.all(color: Colors.orange.withOpacity(0.2), width: 1),
                       ),
@@ -222,13 +222,13 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(Icons.info_outline,
-                              color: Colors.orange.shade700, size: 20),
-                          const SizedBox(width: 10),
+                              color: Colors.orange.shade700, size: Responsive.scale(context, 20)),
+                          SizedBox(width: Responsive.scale(context, 10)),
                           Expanded(
                             child: Text(
                               AppLocalizations.of(context).profileVisibilityNote,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13,
+                                fontSize: Responsive.sp(context, 13),
                                 color: Colors.orange.shade900,
                                 fontWeight: FontWeight.w500,
                                 height: 1.4,
@@ -238,7 +238,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: Responsive.scale(context, 24)),
 
                     // --- Profil Resmi ---
                     Center(
@@ -247,8 +247,8 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         child: Stack(
                           children: [
                             Container(
-                              width: 112,
-                              height: 112,
+                              width: Responsive.scale(context, 112),
+                              height: Responsive.scale(context, 112),
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 border:
@@ -277,27 +277,27 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                               bottom: 0,
                               right: 0,
                               child: Container(
-                                padding: const EdgeInsets.all(6),
+                                padding: Responsive.padding(context, all: 6),
                                 decoration: BoxDecoration(
                                   color: AppColors.kPrimaryColor,
                                   shape: BoxShape.circle,
                                   border: Border.all(
                                       color: AppColors.kBackgroundColor, width: 2),
                                 ),
-                                child: const Icon(Icons.camera_alt,
-                                    color: Colors.white, size: 16),
+                                child: Icon(Icons.camera_alt,
+                                    color: Colors.white, size: Responsive.scale(context, 16)),
                               ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    SizedBox(height: Responsive.scale(context, 8)),
                     Center(
                       child: Text(
                         '$_name $_surname',
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 18,
+                          fontSize: Responsive.sp(context, 18),
                           fontWeight: FontWeight.bold,
                           color: AppColors.kTextColor,
                         ),
@@ -307,59 +307,62 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                       child: Text(
                         _email,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                           color: Colors.grey,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 28),
+                    SizedBox(height: Responsive.scale(context, 28)),
 
                     // --- Hakkımda ---
-                    _buildLabel(AppLocalizations.of(context).aboutMe),
+                    _buildLabel(context, AppLocalizations.of(context).aboutMe),
                     _buildTextArea(
+                      context: context,
                       controller: _bioController,
                       hint: AppLocalizations.of(context).aboutMeHint,
                       maxLines: 4,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- İlgi Alanları ---
-                    _buildLabel(AppLocalizations.of(context).interests),
+                    _buildLabel(context, AppLocalizations.of(context).interests),
                     _buildChipSelector(
+                      context: context,
                       available: AppConstants.volunteerInterests,
                       selected: _selectedInterests,
                       onChanged: (list) =>
                           setState(() => _selectedInterests = list),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- Yetenekler ---
-                    _buildLabel(AppLocalizations.of(context).skills),
+                    _buildLabel(context, AppLocalizations.of(context).skills),
                     _buildChipSelector(
+                      context: context,
                       available: AppConstants.volunteerSkills,
                       selected: _selectedSkills,
                       onChanged: (list) =>
                           setState(() => _selectedSkills = list),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- Doğum Tarihi ---
-                    _buildLabel(AppLocalizations.of(context).birthDate),
+                    _buildLabel(context, AppLocalizations.of(context).birthDate),
                     GestureDetector(
                       onTap: _selectBirthDate,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: Responsive.padding(context,
                             horizontal: 16, vertical: 14),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
                         child: Row(
                           children: [
-                             const Icon(Icons.calendar_today,
-                                color: Colors.grey, size: 20),
-                            const SizedBox(width: 12),
+                             Icon(Icons.calendar_today,
+                                color: Colors.grey, size: Responsive.scale(context, 20)),
+                            SizedBox(width: Responsive.scale(context, 12)),
                             Text(
                               _birthDate != null
                                   ? DateFormat('d MMMM yyyy',
@@ -369,7 +372,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                                   : AppLocalizations.of(context)
                                       .selectBirthDate,
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 16,
+                                  fontSize: Responsive.sp(context, 16),
                                   color: _birthDate != null
                                       ? AppColors.kTextColor
                                       : Colors.grey,
@@ -379,37 +382,40 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- Eğitim Durumu ---
-                    _buildLabel(AppLocalizations.of(context).educationProfession),
+                    _buildLabel(context, AppLocalizations.of(context).educationProfession),
                     _buildInput(
+                      context: context,
                       controller: _educationController,
                       hint: AppLocalizations.of(context).educationHint,
                       icon: Icons.school_outlined,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- Konum ---
-                    _buildLabel(
+                    _buildLabel(context,
                         AppLocalizations.of(context).locationCityDistrict),
                     _buildInput(
+                      context: context,
                       controller: _cityController,
                       hint: AppLocalizations.of(context).locationExampleHint,
                       icon: Icons.location_on_outlined,
                     ),
-                    const SizedBox(height: 20),
+                    SizedBox(height: Responsive.scale(context, 20)),
 
                     // --- Telefon ---
-                    _buildLabel(AppLocalizations.of(context).phoneNumber),
+                    _buildLabel(context, AppLocalizations.of(context).phoneNumber),
                     _buildInput(
+                      context: context,
                       controller: _phoneController,
                       hint: "05XX XXX XX XX",
                       icon: Icons.phone_outlined,
                       inputType: TextInputType.phone,
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: Responsive.scale(context, 32)),
 
                     // --- Kaydet Butonu ---
                     ElevatedButton(
@@ -417,41 +423,41 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.kPrimaryColor,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          padding: Responsive.padding(context, vertical: 16),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                              borderRadius: BorderRadius.circular(Responsive.scale(context, 30))),
                           elevation: 4,
                           shadowColor: AppColors.kPrimaryColor.withOpacity(0.3),
                         ),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.save_outlined, size: 22),
-                          const SizedBox(width: 8),
+                          Icon(Icons.save_outlined, size: Responsive.scale(context, 22)),
+                          SizedBox(width: Responsive.scale(context, 8)),
                           Text(
                             AppLocalizations.of(context).save,
                             style: GoogleFonts.plusJakartaSans(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    SizedBox(height: Responsive.scale(context, 12)),
                     TextButton(
                         onPressed: () => Navigator.pop(context),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.grey,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: Responsive.padding(context, vertical: 16),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 30))),
                       ),
                       child: Text(
                         AppLocalizations.of(context).cancel,
                         style: GoogleFonts.plusJakartaSans(
-                            fontSize: 16, fontWeight: FontWeight.w600),
+                            fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                       ),
                     ),
-                    const SizedBox(height: 40),
+                    SizedBox(height: Responsive.scale(context, 40)),
                   ],
                 ),
               ),
@@ -464,14 +470,14 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
 
   // --- WIDGET HELPERS ---
 
-  Widget _buildLabel(String text) {
+  Widget _buildLabel(BuildContext context, String text) {
     return Padding(
-      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      padding: Responsive.padding(context, left: 4, bottom: 8),
       child: Text(
         text,
         style: GoogleFonts.plusJakartaSans(
           color: AppColors.kTextColor,
-          fontSize: 14,
+          fontSize: Responsive.sp(context, 14),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -479,6 +485,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
   }
 
   Widget _buildInput({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     IconData? icon,
@@ -488,7 +495,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
@@ -496,7 +503,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
         readOnly: readOnly,
         keyboardType: inputType,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
+          fontSize: Responsive.sp(context, 16),
           color: AppColors.kTextColor,
         ),
         decoration: InputDecoration(
@@ -506,9 +513,9 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
           ),
           border: InputBorder.none,
           contentPadding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              Responsive.padding(context, horizontal: 16, vertical: 14),
           prefixIcon: icon != null
-              ? Icon(icon, color: Colors.grey, size: 20)
+              ? Icon(icon, color: Colors.grey, size: Responsive.scale(context, 20))
               : null,
         ),
       ),
@@ -516,6 +523,7 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
   }
 
   Widget _buildTextArea({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
     required int maxLines,
@@ -523,14 +531,14 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.grey.shade200),
       ),
       child: TextField(
         controller: controller,
         maxLines: maxLines,
         style: GoogleFonts.plusJakartaSans(
-          fontSize: 16,
+          fontSize: Responsive.sp(context, 16),
           color: AppColors.kTextColor,
         ),
         decoration: InputDecoration(
@@ -539,27 +547,28 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
             color: Colors.grey,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.all(16),
+          contentPadding: Responsive.padding(context, all: 16),
         ),
       ),
     );
   }
 
   Widget _buildChipSelector({
+    required BuildContext context,
     required List<String> available,
     required List<String> selected,
     required ValueChanged<List<String>> onChanged,
   }) {
     return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+      spacing: Responsive.scale(context, 8),
+      runSpacing: Responsive.scale(context, 8),
       children: available.map((item) {
         final isSelected = selected.contains(item);
         return FilterChip(
           label: Text(
             item,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 13,
+              fontSize: Responsive.sp(context, 13),
               fontWeight: FontWeight.w500,
               color: isSelected ? Colors.white : AppColors.kTextColor,
             ),
@@ -578,14 +587,14 @@ class _EditVolunteerProfileViewState extends State<_EditVolunteerProfileView> {
           backgroundColor: Colors.white,
           checkmarkColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
             side: BorderSide(
               color: isSelected
                   ? AppColors.kPrimaryColor
                   : Colors.grey.shade200,
             ),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+          padding: Responsive.padding(context, horizontal: 4, vertical: 2),
         );
       }).toList(),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/models/chat_message_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class ChatBubble extends StatelessWidget {
   final ChatMessage message;
@@ -17,7 +18,8 @@ class ChatBubble extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.78,
         ),
-        margin: EdgeInsets.only(
+        margin: Responsive.padding(
+          context,
           top: 4,
           bottom: 4,
           left: isUser ? 48 : 8,
@@ -28,20 +30,21 @@ class ChatBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isUser) ...[
-              const CircleAvatar(
-                radius: 16,
+              CircleAvatar(
+                radius: Responsive.scale(context, 16),
                 backgroundColor: AppColors.darkPrimaryColor,
                 child: Icon(
                   Icons.auto_awesome,
-                  size: 18,
+                  size: Responsive.scale(context, 18),
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: Responsive.scale(context, 8)),
             ],
             Flexible(
               child: Container(
-                padding: const EdgeInsets.symmetric(
+                padding: Responsive.padding(
+                  context,
                   horizontal: 14,
                   vertical: 10,
                 ),
@@ -50,14 +53,12 @@ class ChatBubble extends StatelessWidget {
                       ? AppColors.darkPrimaryColor
                       : AppColors.kCardBackgroundColor,
                   borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(16),
-                    topRight: const Radius.circular(16),
-                    bottomLeft: isUser
-                        ? const Radius.circular(16)
-                        : const Radius.circular(4),
-                    bottomRight: isUser
-                        ? const Radius.circular(4)
-                        : const Radius.circular(16),
+                    topLeft: Radius.circular(Responsive.scale(context, 16)),
+                    topRight: Radius.circular(Responsive.scale(context, 16)),
+                    bottomLeft: Radius.circular(
+                        Responsive.scale(context, isUser ? 16 : 4)),
+                    bottomRight: Radius.circular(
+                        Responsive.scale(context, isUser ? 4 : 16)),
                   ),
                   boxShadow: [
                     BoxShadow(
@@ -71,7 +72,7 @@ class ChatBubble extends StatelessWidget {
                   message.content,
                   style: TextStyle(
                     color: isUser ? Colors.white : AppColors.primaryText,
-                    fontSize: 14.5,
+                    fontSize: Responsive.sp(context, 14.5),
                     height: 1.4,
                   ),
                 ),

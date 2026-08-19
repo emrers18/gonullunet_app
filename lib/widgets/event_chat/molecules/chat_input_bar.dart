@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../atoms/chat_text_field.dart';
 import '../atoms/send_button.dart';
 
@@ -50,10 +51,11 @@ class _ChatInputBarState extends State<ChatInputBar> {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(
-        left: 12.0,
-        right: 12.0,
-        top: 10.0,
-        bottom: 10.0 + MediaQuery.of(context).padding.bottom,
+        left: Responsive.scale(context, 12.0),
+        right: Responsive.scale(context, 12.0),
+        top: Responsive.scale(context, 10.0),
+        bottom: Responsive.scale(context, 10.0) +
+            MediaQuery.of(context).padding.bottom,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -66,10 +68,10 @@ class _ChatInputBarState extends State<ChatInputBar> {
         children: [
           Expanded(
             child: Container(
-              constraints: const BoxConstraints(maxHeight: 120),
+              constraints: BoxConstraints(maxHeight: Responsive.scale(context, 120)),
               decoration: BoxDecoration(
                 color: AppColors.kBackgroundColor,
-                borderRadius: BorderRadius.circular(22.0),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 22.0)),
                 border: Border.all(
                   color: _hasText
                       ? AppColors.primaryColor.withOpacity(0.4)
@@ -83,7 +85,7 @@ class _ChatInputBarState extends State<ChatInputBar> {
               ),
             ),
           ),
-          const SizedBox(width: 10.0),
+          SizedBox(width: Responsive.scale(context, 10.0)),
           AnimatedOpacity(
             opacity: _hasText ? 1.0 : 0.5,
             duration: const Duration(milliseconds: 200),

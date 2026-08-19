@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import 'auth_gate.dart';
 
@@ -310,8 +311,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
         content: Text(message, style: GoogleFonts.inter()),
         backgroundColor: isError ? Colors.redAccent : Colors.green.shade600,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
+        margin: Responsive.padding(context, all: 16),
       ),
     );
   }
@@ -341,7 +342,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: Responsive.padding(context, horizontal: 24, vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -351,18 +352,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 child: _buildBackButton(),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.scale(context, 24)),
 
               // ── Animasyonlu Zarf İkonu ───────────────────────────────────
               _buildEnvelopeIcon(),
 
-              const SizedBox(height: 28),
+              SizedBox(height: Responsive.scale(context, 28)),
 
               // ── Başlık ───────────────────────────────────────────────────
               Text(
                 AppLocalizations.of(context).verifyYourEmail,
                 style: GoogleFonts.inter(
-                  fontSize: 24,
+                  fontSize: Responsive.sp(context, 24),
                   fontWeight: FontWeight.w700,
                   color: _kText,
                   letterSpacing: -0.5,
@@ -370,17 +371,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 textAlign: TextAlign.center,
               ),
 
-              const SizedBox(height: 12),
+              SizedBox(height: Responsive.scale(context, 12)),
 
               // ── Açıklama ──────────────────────────────────────────────────
               _buildDescriptionCard(),
 
-              const SizedBox(height: 32),
+              SizedBox(height: Responsive.scale(context, 32)),
 
               // ── Geri Sayım Göstergesi ─────────────────────────────────────
               _buildCountdownWidget(),
 
-              const SizedBox(height: 32),
+              SizedBox(height: Responsive.scale(context, 32)),
 
               // ── Durum Kartı (Timeout / Normal) ────────────────────────────
               AnimatedSwitcher(
@@ -400,17 +401,17 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                     : _buildWaitingCard(key: const ValueKey('waiting')),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.scale(context, 24)),
 
               // ── Gönder / Yeniden Gönder Butonu ───────────────────────────
               _buildResendButton(),
 
-              const SizedBox(height: 16),
+              SizedBox(height: Responsive.scale(context, 16)),
 
               // ── Vazgeç ───────────────────────────────────────────────────
               _buildCancelButton(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: Responsive.scale(context, 24)),
             ],
           ),
         ),
@@ -452,8 +453,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
         children: [
           // Arka plan halkası
           Container(
-            width: 120,
-            height: 120,
+            width: Responsive.scale(context, 120),
+            height: Responsive.scale(context, 120),
             decoration: BoxDecoration(
               color: _kPrimary.withOpacity(0.08),
               shape: BoxShape.circle,
@@ -461,8 +462,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           ),
           // Orta daire
           Container(
-            width: 88,
-            height: 88,
+            width: Responsive.scale(context, 88),
+            height: Responsive.scale(context, 88),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
@@ -481,8 +482,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 ),
               ],
             ),
-            child: const Icon(Icons.mark_email_unread_rounded,
-                color: Colors.white, size: 40),
+            child: Icon(Icons.mark_email_unread_rounded,
+                color: Colors.white, size: Responsive.scale(context, 40)),
           ),
         ],
       ),
@@ -491,10 +492,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
   Widget _buildDescriptionCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.grey.shade100),
         boxShadow: [
           BoxShadow(
@@ -509,20 +510,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: Responsive.padding(context, all: 8),
                 decoration: BoxDecoration(
                   color: _kSecondary.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
                 ),
-                child: const Icon(Icons.email_outlined,
-                    size: 18, color: _kSecondary),
+                child: Icon(Icons.email_outlined,
+                    size: Responsive.scale(context, 18), color: _kSecondary),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: Responsive.scale(context, 12)),
               Expanded(
                 child: Text(
                   widget.email,
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w600,
                     color: _kSecondary,
                   ),
@@ -531,11 +532,11 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: Responsive.scale(context, 12)),
           Text(
             AppLocalizations.of(context).verificationLinkSent,
             style: GoogleFonts.inter(
-              fontSize: 13,
+              fontSize: Responsive.sp(context, 13),
               color: _kSubtext,
               height: 1.5,
             ),
@@ -559,8 +560,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
     return Column(
       children: [
         SizedBox(
-          width: 140,
-          height: 140,
+          width: Responsive.scale(context, 140),
+          height: Responsive.scale(context, 140),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -581,7 +582,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                   Text(
                     _isTimedOut ? '00:00' : _formattedTime,
                     style: GoogleFonts.inter(
-                      fontSize: 28,
+                      fontSize: Responsive.sp(context, 28),
                       fontWeight: FontWeight.w700,
                       color: _isTimedOut ? Colors.red.shade400 : _kText,
                       letterSpacing: 1.0,
@@ -592,7 +593,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                         ? AppLocalizations.of(context).countdownExpired
                         : AppLocalizations.of(context).countdownRemaining,
                     style: GoogleFonts.inter(
-                      fontSize: 11,
+                      fontSize: Responsive.sp(context, 11),
                       color: _kSubtext,
                       fontWeight: FontWeight.w500,
                     ),
@@ -609,25 +610,25 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   Widget _buildWaitingCard({Key? key}) {
     return Container(
       key: key,
-      padding: const EdgeInsets.all(16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.blue.shade100),
       ),
       child: Row(
         children: [
-          const SizedBox(
-            width: 20,
-            height: 20,
-            child: AppLoadingIndicator(size: 20),
+          SizedBox(
+            width: Responsive.scale(context, 20),
+            height: Responsive.scale(context, 20),
+            child: AppLoadingIndicator(size: Responsive.scale(context, 20)),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: Responsive.scale(context, 12)),
           Expanded(
             child: Text(
               AppLocalizations.of(context).checkInbox,
               style: GoogleFonts.inter(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 color: Colors.blue.shade700,
                 height: 1.4,
               ),
@@ -641,18 +642,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   Widget _buildTimeoutCard({Key? key}) {
     return Container(
       key: key,
-      padding: const EdgeInsets.all(16),
+      padding: Responsive.padding(context, all: 16),
       decoration: BoxDecoration(
         color: Colors.red.shade50,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         border: Border.all(color: Colors.red.shade100),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.warning_amber_rounded,
-              color: Colors.red.shade500, size: 22),
-          const SizedBox(width: 12),
+              color: Colors.red.shade500, size: Responsive.scale(context, 22)),
+          SizedBox(width: Responsive.scale(context, 12)),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -660,16 +661,16 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                 Text(
                   AppLocalizations.of(context).timeUp,
                   style: GoogleFonts.inter(
-                    fontSize: 14,
+                    fontSize: Responsive.sp(context, 14),
                     fontWeight: FontWeight.w700,
                     color: Colors.red.shade700,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: Responsive.scale(context, 4)),
                 Text(
                   AppLocalizations.of(context).linkExpiredDesc,
                   style: GoogleFonts.inter(
-                    fontSize: 13,
+                    fontSize: Responsive.sp(context, 13),
                     color: Colors.red.shade600,
                     height: 1.4,
                   ),
@@ -695,7 +696,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
 
     return SizedBox(
       width: double.infinity,
-      height: 54,
+      height: Responsive.scale(context, 54),
       child: ElevatedButton(
         onPressed: isActive ? _resendVerificationEmail : null,
         style: ElevatedButton.styleFrom(
@@ -704,18 +705,18 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
           disabledBackgroundColor: Colors.grey.shade200,
           disabledForegroundColor: Colors.grey.shade500,
           shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.scale(context, 16))),
           elevation: isActive ? 6 : 0,
           shadowColor: _kPrimary.withOpacity(0.4),
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 250),
           child: _isLoading
-              ? const SizedBox(
-                  key: ValueKey('loading'),
-                  width: 22,
-                  height: 22,
-                  child: AppLoadingIndicator(size: 22),
+              ? SizedBox(
+                  key: const ValueKey('loading'),
+                  width: Responsive.scale(context, 22),
+                  height: Responsive.scale(context, 22),
+                  child: AppLoadingIndicator(size: Responsive.scale(context, 22)),
                 )
               : Row(
                   key: ValueKey(label),
@@ -723,13 +724,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
                   children: [
                     Icon(
                       _isTimedOut ? Icons.refresh_rounded : Icons.send_rounded,
-                      size: 18,
+                      size: Responsive.scale(context, 18),
                     ),
-                    const SizedBox(width: 8),
+                    SizedBox(width: Responsive.scale(context, 8)),
                     Text(
                       label,
                       style: GoogleFonts.inter(
-                        fontSize: 15,
+                        fontSize: Responsive.sp(context, 15),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -743,12 +744,12 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen>
   Widget _buildCancelButton() {
     return TextButton.icon(
       onPressed: _cancelAndGoBack,
-      icon: Icon(Icons.close_rounded, size: 16, color: Colors.grey.shade500),
+      icon: Icon(Icons.close_rounded, size: Responsive.scale(context, 16), color: Colors.grey.shade500),
       label: Text(
         AppLocalizations.of(context).cancelReturnLogin,
         style: GoogleFonts.inter(
           color: Colors.grey.shade500,
-          fontSize: 13,
+          fontSize: Responsive.sp(context, 13),
           fontWeight: FontWeight.w500,
         ),
       ),

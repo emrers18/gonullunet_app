@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class ChatTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -27,7 +28,8 @@ class ChatTextField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: hintText ?? AppLocalizations.of(context).messageHint,
         border: InputBorder.none,
-        contentPadding: const EdgeInsets.symmetric(
+        contentPadding: Responsive.padding(
+          context,
           horizontal: 16.0,
           vertical: 10.0,
         ),

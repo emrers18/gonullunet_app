@@ -22,6 +22,7 @@ import '../logic/manage_applications_state.dart';
 import '../models/application_model.dart';
 import '../repo/event_repository.dart';
 import '../utils/gamification_utils.dart';
+import '../utils/responsive.dart';
 
 import 'applicant_profile_page.dart';
 import '../widgets/app_loading_indicator.dart';
@@ -378,7 +379,7 @@ class ManageApplicationsView extends StatelessWidget {
           style: GoogleFonts.plusJakartaSans(
             color: const Color(0xFF181210),
             fontWeight: FontWeight.bold,
-            fontSize: 18,
+            fontSize: Responsive.sp(context, 18),
           ),
         ),
         centerTitle: true,
@@ -408,11 +409,11 @@ class ManageApplicationsView extends StatelessWidget {
                         backgroundColor:
                             const Color(0xFF1E7E34).withOpacity(0.1),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 10))),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: Responsive.scale(context, 6)),
                   // PDF ikonu
                   Tooltip(
                     message: AppLocalizations.of(context).participationListPdf,
@@ -424,11 +425,11 @@ class ManageApplicationsView extends StatelessWidget {
                         backgroundColor:
                             const Color(0xFFDC2626).withOpacity(0.1),
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 10))),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: Responsive.scale(context, 8)),
                 ],
               );
             },
@@ -443,13 +444,13 @@ class ManageApplicationsView extends StatelessWidget {
           if (state is ManageApplicationsError) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(32),
+                padding: Responsive.padding(context, all: 32),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.error_outline,
-                        size: 48, color: Colors.red.shade300),
-                    const SizedBox(height: 12),
+                        size: Responsive.scale(context, 48), color: Colors.red.shade300),
+                    SizedBox(height: Responsive.scale(context, 12)),
                     Text(
                       AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
@@ -467,13 +468,13 @@ class ManageApplicationsView extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.inbox_outlined,
-                        size: 64, color: Colors.grey.shade300),
-                    const SizedBox(height: 12),
+                        size: Responsive.scale(context, 64), color: Colors.grey.shade300),
+                    SizedBox(height: Responsive.scale(context, 12)),
                     Text(
                       AppLocalizations.of(context).noApplications,
                       style: GoogleFonts.plusJakartaSans(
                         color: Colors.grey.shade500,
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                       ),
                     ),
                   ],
@@ -482,7 +483,7 @@ class ManageApplicationsView extends StatelessWidget {
             }
 
             return ListView.builder(
-              padding: const EdgeInsets.all(16),
+              padding: Responsive.padding(context, all: 16),
               itemCount: state.applications.length,
               itemBuilder: (context, index) {
                 final app = state.applications[index];
@@ -544,11 +545,11 @@ class _ApplicationCard extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: Responsive.padding(context, bottom: 12),
+        padding: Responsive.padding(context, all: 16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -564,8 +565,8 @@ class _ApplicationCard extends StatelessWidget {
               children: [
                 // Avatar
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: Responsive.scale(context, 50),
+                  height: Responsive.scale(context, 50),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     color: Colors.grey.shade100,
@@ -588,7 +589,7 @@ class _ApplicationCard extends StatelessWidget {
                           child: Text(
                             _getInitials(app.userName, app.userSurname),
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
+                              fontSize: Responsive.sp(context, 18),
                               fontWeight: FontWeight.bold,
                               color: AppColors.kPrimaryColor,
                             ),
@@ -596,7 +597,7 @@ class _ApplicationCard extends StatelessWidget {
                         )
                       : null,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: Responsive.scale(context, 12)),
 
                 // Name & time
                 Expanded(
@@ -606,20 +607,20 @@ class _ApplicationCard extends StatelessWidget {
                       Text(
                         "${app.userName ?? l10n.unnamed} ${app.userSurname ?? ''}",
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 16,
+                          fontSize: Responsive.sp(context, 16),
                           fontWeight: FontWeight.bold,
                           color: const Color(0xFF181210),
                         ),
                       ),
                       if (app.xp != null) ...[
-                        const SizedBox(height: 4),
+                        SizedBox(height: Responsive.scale(context, 4)),
                         _buildLevelBadge(context, app.xp!),
                       ],
-                      const SizedBox(height: 3),
+                      SizedBox(height: Responsive.scale(context, 3)),
                       Text(
                         app.timeAgo,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           color: const Color(0xFF8D6A5E),
                         ),
                       ),
@@ -629,21 +630,21 @@ class _ApplicationCard extends StatelessWidget {
 
                 // Status badge
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: Responsive.padding(context,
+                      horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: statusBg,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(statusIcon, size: 14, color: statusColor),
-                      const SizedBox(width: 4),
+                      Icon(statusIcon, size: Responsive.scale(context, 14), color: statusColor),
+                      SizedBox(width: Responsive.scale(context, 4)),
                       Text(
                         statusText,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 12,
+                          fontSize: Responsive.sp(context, 12),
                           fontWeight: FontWeight.w600,
                           color: statusColor,
                         ),
@@ -656,9 +657,9 @@ class _ApplicationCard extends StatelessWidget {
 
             // Bottom Row: Action buttons or profile link
             if (app.status == 'pending') ...[
-              const SizedBox(height: 14),
+              SizedBox(height: Responsive.scale(context, 14)),
               const Divider(height: 1, color: Color(0xFFF0EDED)),
-              const SizedBox(height: 12),
+              SizedBox(height: Responsive.scale(context, 12)),
               Row(
                 children: [
                   // Profili Gör
@@ -675,25 +676,25 @@ class _ApplicationCard extends StatelessWidget {
                           ),
                         );
                       },
-                      icon: const Icon(Icons.person_outline, size: 18),
+                      icon: Icon(Icons.person_outline, size: Responsive.scale(context, 18)),
                       label: Text(
                         l10n.viewProfile,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF6B7280),
                         side: const BorderSide(color: Color(0xFFE5E7EB)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: Responsive.padding(context, vertical: 10),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: Responsive.scale(context, 8)),
                   // Reddet
                   Expanded(
                     child: OutlinedButton.icon(
@@ -702,25 +703,25 @@ class _ApplicationCard extends StatelessWidget {
                             .read<ManageApplicationsCubit>()
                             .updateStatus(app, 'rejected');
                       },
-                      icon: const Icon(Icons.close_rounded, size: 18),
+                      icon: Icon(Icons.close_rounded, size: Responsive.scale(context, 18)),
                       label: Text(
                         l10n.reject,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFFDC2626),
                         side: BorderSide(color: Colors.red.shade200),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: Responsive.padding(context, vertical: 10),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: Responsive.scale(context, 8)),
                   // Onayla
                   Expanded(
                     child: ElevatedButton.icon(
@@ -729,12 +730,12 @@ class _ApplicationCard extends StatelessWidget {
                             .read<ManageApplicationsCubit>()
                             .updateStatus(app, 'approved');
                       },
-                      icon: const Icon(Icons.check_rounded, size: 18),
+                      icon: Icon(Icons.check_rounded, size: Responsive.scale(context, 18)),
                       label: Text(
                         l10n.approve,
                         style: GoogleFonts.plusJakartaSans(
                           fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          fontSize: Responsive.sp(context, 13),
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
@@ -742,9 +743,9 @@ class _ApplicationCard extends StatelessWidget {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        padding: Responsive.padding(context, vertical: 10),
                       ),
                     ),
                   ),
@@ -768,21 +769,21 @@ class _ApplicationCard extends StatelessWidget {
   Widget _buildLevelBadge(BuildContext context, int xp) {
     final level = GamificationUtils.getLevelInfo(xp);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: Responsive.padding(context, horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: level.color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 6)),
         border: Border.all(color: level.color.withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.stars, size: 12, color: level.color),
-          const SizedBox(width: 4),
+          Icon(Icons.stars, size: Responsive.scale(context, 12), color: level.color),
+          SizedBox(width: Responsive.scale(context, 4)),
           Text(
             CategoryLocalizer.level(AppLocalizations.of(context), level.title),
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 10,
+              fontSize: Responsive.sp(context, 10),
               fontWeight: FontWeight.bold,
               color: level.color,
             ),

@@ -6,6 +6,7 @@ import 'package:gonullunet_app/utils/app_messages.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_cubit.dart';
 import 'package:gonullunet_app/logic/chat_cubit/chat_state.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:gonullunet_app/widgets/ai/chat_bubble.dart';
 import 'package:gonullunet_app/widgets/ai/chat_input.dart';
 import 'package:gonullunet_app/widgets/ai/typing_indicator.dart';
@@ -56,15 +57,15 @@ class _ChatPageState extends State<ChatPage> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded,
-              color: AppColors.kTextColor, size: 20),
+          icon: Icon(Icons.arrow_back_ios_new_rounded,
+              color: AppColors.kTextColor, size: Responsive.scale(context, 20)),
           onPressed: () => Navigator.of(context).pop(),
         ),
         title: Row(
           children: [
             Container(
-              width: 34,
-              height: 34,
+              width: Responsive.scale(context, 34),
+              height: Responsive.scale(context, 34),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   colors: [Color(0xFF004E89), Color(0xFF03A9F4)],
@@ -73,17 +74,17 @@ class _ChatPageState extends State<ChatPage> {
                 ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome,
-                  size: 18, color: Colors.white),
+              child: Icon(Icons.auto_awesome,
+                  size: Responsive.scale(context, 18), color: Colors.white),
             ),
-            const SizedBox(width: 10),
+            SizedBox(width: Responsive.scale(context, 10)),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   AppLocalizations.of(context).volunteerAi,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
+                    fontSize: Responsive.sp(context, 15),
                     fontWeight: FontWeight.bold,
                     color: AppColors.kTextColor,
                   ),
@@ -91,7 +92,7 @@ class _ChatPageState extends State<ChatPage> {
                 Text(
                   AppLocalizations.of(context).smartAssistant,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
+                    fontSize: Responsive.sp(context, 11),
                     color: AppColors.primaryColor,
                     fontWeight: FontWeight.w500,
                   ),
@@ -130,7 +131,7 @@ class _ChatPageState extends State<ChatPage> {
                       ? _buildEmptyState()
                       : ListView.builder(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: Responsive.padding(context, vertical: 12),
                           itemCount: state.messages.length +
                               (state.isAiTyping ? 1 : 0),
                           itemBuilder: (context, index) {
@@ -155,20 +156,20 @@ class _ChatPageState extends State<ChatPage> {
           if (state is ChatError) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: Responsive.padding(context, all: 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(Icons.cloud_off_rounded,
-                        size: 52, color: Colors.grey.shade300),
-                    const SizedBox(height: 16),
+                        size: Responsive.scale(context, 52), color: Colors.grey.shade300),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     Text(
                       AppMessages.resolve(context, state.message),
                       textAlign: TextAlign.center,
                       style: GoogleFonts.plusJakartaSans(
                           color: Colors.grey.shade500),
                     ),
-                    const SizedBox(height: 16),
+                    SizedBox(height: Responsive.scale(context, 16)),
                     ElevatedButton(
                       onPressed: () => context
                           .read<ChatCubit>()
@@ -177,7 +178,7 @@ class _ChatPageState extends State<ChatPage> {
                         backgroundColor: AppColors.darkPrimaryColor,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                            borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
                       ),
                       child: Text('Tekrar Dene',
                           style: GoogleFonts.plusJakartaSans()),
@@ -198,13 +199,14 @@ class _ChatPageState extends State<ChatPage> {
 
   Widget _buildEmptyState() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+      padding: Responsive.padding(context,
+          left: 24, top: 32, right: 24, bottom: 24),
       child: Column(
         children: [
           // AI Avatar with gradient + glow
           Container(
-            width: 80,
-            height: 80,
+            width: Responsive.scale(context, 80),
+            height: Responsive.scale(context, 80),
             decoration: BoxDecoration(
               gradient: const LinearGradient(
                 colors: [Color(0xFF004E89), Color(0xFF03A9F4)],
@@ -220,43 +222,43 @@ class _ChatPageState extends State<ChatPage> {
                 ),
               ],
             ),
-            child: const Icon(Icons.auto_awesome,
-                size: 38, color: Colors.white),
+            child: Icon(Icons.auto_awesome,
+                size: Responsive.scale(context, 38), color: Colors.white),
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: Responsive.scale(context, 20)),
           Text(
             AppLocalizations.of(context).aiGreeting,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 22,
+              fontSize: Responsive.sp(context, 22),
               fontWeight: FontWeight.bold,
               color: AppColors.kTextColor,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: Responsive.scale(context, 8)),
           Text(
             AppLocalizations.of(context).aiIntro,
             textAlign: TextAlign.center,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 14,
+              fontSize: Responsive.sp(context, 14),
               color: Colors.grey.shade500,
               height: 1.6,
             ),
           ),
-          const SizedBox(height: 28),
+          SizedBox(height: Responsive.scale(context, 28)),
           // Suggestion chips
           Text(
             AppLocalizations.of(context).quickStart,
             style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
+              fontSize: Responsive.sp(context, 11),
               fontWeight: FontWeight.bold,
               color: Colors.grey.shade400,
               letterSpacing: 1.2,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: Responsive.scale(context, 12)),
           Wrap(
-            spacing: 10,
-            runSpacing: 10,
+            spacing: Responsive.scale(context, 10),
+            runSpacing: Responsive.scale(context, 10),
             alignment: WrapAlignment.center,
             children: [
               _SuggestionCard(
@@ -311,10 +313,10 @@ class _SuggestionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: Responsive.padding(context, horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 14)),
           border: Border.all(
             color: AppColors.darkPrimaryColor.withOpacity(0.15),
           ),
@@ -329,12 +331,12 @@ class _SuggestionCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: AppColors.darkPrimaryColor),
-            const SizedBox(width: 8),
+            Icon(icon, size: Responsive.scale(context, 16), color: AppColors.darkPrimaryColor),
+            SizedBox(width: Responsive.scale(context, 8)),
             Text(
               text,
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 13,
+                fontSize: Responsive.sp(context, 13),
                 fontWeight: FontWeight.w600,
                 color: AppColors.darkPrimaryColor,
               ),

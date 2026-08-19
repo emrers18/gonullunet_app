@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/utils/category_localizer.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import 'package:intl/intl.dart';
 
 import '../../constants/app_constants.dart';
@@ -72,20 +73,21 @@ class _EventFilterModalState extends State<EventFilterModal> {
     return InputDecoration(
       labelText: hint,
       labelStyle: TextStyle(color: Colors.grey[600]),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: Responsive.padding(context, horizontal: 16, vertical: 16),
       filled: true,
       fillColor: Colors.white,
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12), // rounded-xl
+        borderRadius: BorderRadius.circular(
+            Responsive.scale(context, 12)), // rounded-xl
         borderSide: BorderSide(color: Colors.grey.shade300), // border-gray-300
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
         borderSide: const BorderSide(
             color: AppColors.primaryColor, width: 2), // focus:ring-primary
       ),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
       ),
       suffixIcon: Icon(icon, color: Colors.grey[400]), // text-gray-400
     );
@@ -95,11 +97,12 @@ class _EventFilterModalState extends State<EventFilterModal> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-      decoration: const BoxDecoration(
+      padding: Responsive.padding(context,
+          left: 24, top: 16, right: 24, bottom: 24),
+      decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(24)), // rounded-t-3xl
+        borderRadius: BorderRadius.vertical(
+            top: Radius.circular(Responsive.scale(context, 24))), // rounded-t-3xl
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -108,15 +111,16 @@ class _EventFilterModalState extends State<EventFilterModal> {
           // --- DRAG HANDLE (SÜRÜKLEME ÇUBUĞU) ---
           Center(
             child: Container(
-              width: 48, // w-12
-              height: 6, // h-1.5
+              width: Responsive.scale(context, 48), // w-12
+              height: Responsive.scale(context, 6), // h-1.5
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(3), // rounded-full
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 3)), // rounded-full
               ),
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.scale(context, 24)),
 
           // --- BAŞLIK VE TEMİZLE BUTONU ---
           Row(
@@ -124,10 +128,10 @@ class _EventFilterModalState extends State<EventFilterModal> {
             children: [
               Text(
                 l10n.filterTitle,
-                style: const TextStyle(
-                  fontSize: 24, // text-2xl
+                style: TextStyle(
+                  fontSize: Responsive.sp(context, 24), // text-2xl
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF1F2937), // text-gray-900
+                  color: const Color(0xFF1F2937), // text-gray-900
                 ),
               ),
               TextButton(
@@ -140,7 +144,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: Responsive.scale(context, 20)),
 
           // --- ŞEHİR SEÇİMİ ---
           DropdownButtonFormField<String>(
@@ -155,7 +159,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
             onChanged: (val) => setState(() => _selectedCity = val),
             dropdownColor: Colors.white,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Responsive.scale(context, 16)),
 
           // --- ETKİNLİK TÜRÜ ---
           DropdownButtonFormField<String>(
@@ -171,17 +175,18 @@ class _EventFilterModalState extends State<EventFilterModal> {
             onChanged: (val) => setState(() => _selectedCategory = val),
             dropdownColor: Colors.white,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: Responsive.scale(context, 16)),
 
           // --- TARİH ARALIĞI ---
           InkWell(
             onTap: _pickDateRange,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              padding:
+                  Responsive.padding(context, horizontal: 16, vertical: 16),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 12)),
                 border: Border.all(color: Colors.grey.shade300),
               ),
               child: Row(
@@ -192,7 +197,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
                         ? l10n.selectDateRange
                         : '${DateFormat('dd/MM').format(_selectedDateRange!.start)} - ${DateFormat('dd/MM').format(_selectedDateRange!.end)}',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: Responsive.sp(context, 16),
                       color: _selectedDateRange == null
                           ? Colors.grey[600]
                           : const Color(0xFF374151), // text-gray-700
@@ -204,7 +209,7 @@ class _EventFilterModalState extends State<EventFilterModal> {
             ),
           ),
 
-          const SizedBox(height: 32), // mt-8
+          SizedBox(height: Responsive.scale(context, 32)), // mt-8
 
           // --- UYGULA BUTONU ---
           ElevatedButton(
@@ -212,32 +217,33 @@ class _EventFilterModalState extends State<EventFilterModal> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryColor,
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16), // py-4
+              padding: Responsive.padding(context, vertical: 16), // py-4
               elevation: 4,
               shadowColor: AppColors.primaryColor.withOpacity(0.4),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12), // rounded-xl
+                borderRadius:
+                    BorderRadius.circular(Responsive.scale(context, 12)), // rounded-xl
               ),
             ),
             child: Text(
               l10n.apply,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 16),
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: Responsive.scale(context, 24)),
 
           // --- ALT ÇİZGİ (iOS Home Indicator Mimic) ---
           Center(
             child: Container(
-              width: 128, // w-32
-              height: 4, // h-1
+              width: Responsive.scale(context, 128), // w-32
+              height: Responsive.scale(context, 4), // h-1
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(Responsive.scale(context, 2)),
               ),
             ),
           ),

@@ -4,6 +4,7 @@ import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/models/event_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:gonullunet_app/utils/category_localizer.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 import '../../views/event_detail_page.dart';
 import '../app_loading_indicator.dart';
 
@@ -55,10 +56,10 @@ class EventCard extends StatelessWidget {
         );
       },
       child: Container(
-        height: 140,
+        height: Responsive.scale(context, 140),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
           border: Border.all(
             color: isProje ? projeColor.withOpacity(0.4) : Colors.grey.shade200,
             width: isProje ? 1.2 : 0.5,
@@ -74,7 +75,7 @@ class EventCard extends StatelessWidget {
           ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 20)),
           child: Stack(
             children: [
               // Proje için sol renkli şerit
@@ -83,7 +84,7 @@ class EventCard extends StatelessWidget {
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  width: 5,
+                  width: Responsive.scale(context, 5),
                   child: Container(color: projeColor),
                 ),
               Row(
@@ -94,7 +95,7 @@ class EventCard extends StatelessWidget {
                   // --- SAĞ: BİLGİLER ---
                   Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
+                      padding: Responsive.padding(context,
                           horizontal: 14, vertical: 12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -103,19 +104,19 @@ class EventCard extends StatelessWidget {
                           // Üst kısım: Tarih + Tip etiketi
                           Row(
                             children: [
-                              const Icon(
+                              Icon(
                                 Icons.calendar_today_rounded,
-                                size: 13,
+                                size: Responsive.scale(context, 13),
                                 color: AppColors.kPrimaryColor,
                               ),
-                              const SizedBox(width: 4),
+                              SizedBox(width: Responsive.scale(context, 4)),
                               Expanded(
                                 child: Text(
                                   dateString.length > 15
                                       ? dateString
                                       : '$dateString • $timeString',
-                                  style: const TextStyle(
-                                    fontSize: 12,
+                                  style: TextStyle(
+                                    fontSize: Responsive.sp(context, 12),
                                     fontWeight: FontWeight.w600,
                                     color: AppColors.kPrimaryColor,
                                   ),
@@ -125,22 +126,25 @@ class EventCard extends StatelessWidget {
                               ),
                               if (isProje)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: Responsive.padding(context,
                                       horizontal: 9, vertical: 4),
                                   decoration: BoxDecoration(
                                     color: const Color(0xFF0D7377),
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(
+                                        Responsive.scale(context, 8)),
                                   ),
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      const Icon(Icons.work_rounded,
-                                          size: 10, color: Colors.white),
-                                      const SizedBox(width: 4),
+                                      Icon(Icons.work_rounded,
+                                          size: Responsive.scale(context, 10),
+                                          color: Colors.white),
+                                      SizedBox(
+                                          width: Responsive.scale(context, 4)),
                                       Text(
                                         l10n.typeProject.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontSize: 9,
+                                        style: TextStyle(
+                                          fontSize: Responsive.sp(context, 9),
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                           letterSpacing: 0.8,
@@ -155,8 +159,8 @@ class EventCard extends StatelessWidget {
                           // Başlık
                           Text(
                             event.title,
-                            style: const TextStyle(
-                              fontSize: 15,
+                            style: TextStyle(
+                              fontSize: Responsive.sp(context, 15),
                               fontWeight: FontWeight.bold,
                               color: AppColors.kTextColor,
                               height: 1.2,
@@ -169,13 +173,14 @@ class EventCard extends StatelessWidget {
                           Row(
                             children: [
                               Icon(Icons.location_on_outlined,
-                                  size: 14, color: Colors.grey.shade400),
-                              const SizedBox(width: 3),
+                                  size: Responsive.scale(context, 14),
+                                  color: Colors.grey.shade400),
+                              SizedBox(width: Responsive.scale(context, 3)),
                               Expanded(
                                 child: Text(
                                   event.location,
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     color: Colors.grey.shade600,
                                   ),
                                   maxLines: 1,
@@ -193,18 +198,19 @@ class EventCard extends StatelessWidget {
                               const Spacer(),
                               if (quotaText.isNotEmpty)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
+                                  padding: Responsive.padding(context,
                                       horizontal: 8, vertical: 3),
                                   decoration: BoxDecoration(
                                     color: isFull
                                         ? Colors.red.withOpacity(0.08)
                                         : Colors.grey.shade100,
-                                    borderRadius: BorderRadius.circular(8),
+                                    borderRadius: BorderRadius.circular(
+                                        Responsive.scale(context, 8)),
                                   ),
                                   child: Text(
                                     isFull ? l10n.eventFull : quotaText,
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: Responsive.sp(context, 11),
                                       fontWeight: FontWeight.w600,
                                       color: isFull
                                           ? Colors.red
@@ -212,10 +218,10 @@ class EventCard extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                              const SizedBox(width: 6),
+                              SizedBox(width: Responsive.scale(context, 6)),
                               Icon(
                                 Icons.chevron_right_rounded,
-                                size: 20,
+                                size: Responsive.scale(context, 20),
                                 color: Colors.grey.shade400.withOpacity(0.3),
                               ),
                             ],
@@ -252,15 +258,17 @@ class EventCard extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(placeholderIcon, color: Colors.white.withOpacity(0.9), size: 36),
-          const SizedBox(height: 6),
+          Icon(placeholderIcon,
+              color: Colors.white.withOpacity(0.9),
+              size: Responsive.scale(context, 36)),
+          SizedBox(height: Responsive.scale(context, 6)),
           Text(
             CategoryLocalizer.category(AppLocalizations.of(context),
                 event.category),
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withOpacity(0.85),
-              fontSize: 10,
+              fontSize: Responsive.sp(context, 10),
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -288,7 +296,9 @@ class EventCard extends StatelessWidget {
                 ],
               ),
             ),
-            child: const Center(child: AppLoadingIndicator(size: 28)),
+            child: Center(
+                child: AppLoadingIndicator(
+                    size: Responsive.scale(context, 28))),
           );
         },
         errorBuilder: (c, e, s) {
@@ -301,10 +311,11 @@ class EventCard extends StatelessWidget {
     }
 
     return ClipRRect(
-      borderRadius: const BorderRadius.horizontal(left: Radius.circular(20)),
+      borderRadius: BorderRadius.horizontal(
+          left: Radius.circular(Responsive.scale(context, 20))),
       child: SizedBox(
-        width: 120,
-        height: 140,
+        width: Responsive.scale(context, 120),
+        height: Responsive.scale(context, 140),
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -387,7 +398,7 @@ class EventCard extends StatelessWidget {
         AppLocalizations.of(context).beFirstToJoin,
         style: TextStyle(
           color: Colors.grey.shade400,
-          fontSize: 11,
+          fontSize: Responsive.sp(context, 11),
           fontStyle: FontStyle.italic,
         ),
       );
@@ -398,42 +409,48 @@ class EventCard extends StatelessWidget {
         participants.length > maxAvatars ? maxAvatars : participants.length;
     final int remainingCount = participants.length - maxAvatars;
 
+    final double avatarStep = Responsive.scale(context, 12);
+    final double avatarSlot = Responsive.scale(context, 24);
+    final double overflowSlot =
+        remainingCount > 0 ? Responsive.scale(context, 22) : 0;
+
     return SizedBox(
-      height: 24,
-      width: 24.0 + (displayCount - 1) * 12 + (remainingCount > 0 ? 22 : 0),
+      height: avatarSlot,
+      width: avatarSlot + (displayCount - 1) * avatarStep + overflowSlot,
       child: Stack(
         children: [
           for (int i = 0; i < displayCount; i++)
             Positioned(
-              left: i * 12.0,
+              left: i * avatarStep,
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 1.5),
                 ),
                 child: CircleAvatar(
-                  radius: 11,
+                  radius: Responsive.scale(context, 11),
                   backgroundColor: Colors.grey.shade100,
-                  child:
-                      Icon(Icons.person, size: 12, color: Colors.grey.shade400),
+                  child: Icon(Icons.person,
+                      size: Responsive.scale(context, 12),
+                      color: Colors.grey.shade400),
                 ),
               ),
             ),
           if (remainingCount > 0)
             Positioned(
-              left: displayCount * 12.0,
+              left: displayCount * avatarStep,
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 1.5),
                 ),
                 child: CircleAvatar(
-                  radius: 11,
+                  radius: Responsive.scale(context, 11),
                   backgroundColor: Colors.grey.shade200,
                   child: Text(
                     '+$remainingCount',
                     style: TextStyle(
-                      fontSize: 8,
+                      fontSize: Responsive.sp(context, 8),
                       fontWeight: FontWeight.bold,
                       color: Colors.grey.shade600,
                     ),

@@ -11,6 +11,7 @@ import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
 import 'about_page.dart';
 import 'notification_settings_page.dart';
 import 'privacy_policy_page.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -39,9 +40,9 @@ class _SettingsPageState extends State<SettingsPage> {
       body: Stack(
         children: [
           ListView(
-            padding: const EdgeInsets.symmetric(vertical: 20),
+            padding: Responsive.padding(context, vertical: 20),
             children: [
-              _buildSectionHeader(l10n.generalSettings),
+              _buildSectionHeader(context, l10n.generalSettings),
               _buildSettingItem(
                 context,
                 l10n.changePassword,
@@ -59,8 +60,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 ),
               ),
 
-              const SizedBox(height: 24),
-              _buildSectionHeader(l10n.accountSettingsSection),
+              SizedBox(height: Responsive.scale(context, 24)),
+              _buildSectionHeader(context, l10n.accountSettingsSection),
               _buildSettingItem(
                 context,
                 l10n.deleteAccount,
@@ -69,8 +70,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 onTap: () => _showDeleteConfirmation(context),
               ),
 
-              const SizedBox(height: 24),
-              _buildSectionHeader(l10n.application),
+              SizedBox(height: Responsive.scale(context, 24)),
+              _buildSectionHeader(context, l10n.application),
               _buildSettingItem(
                 context,
                 l10n.privacyPolicy,
@@ -101,8 +102,8 @@ class _SettingsPageState extends State<SettingsPage> {
           if (_isDeleting)
             Container(
               color: Colors.black26,
-              child: const Center(
-                child: AppLoadingIndicator(size: 48),
+              child: Center(
+                child: AppLoadingIndicator(size: Responsive.scale(context, 48)),
               ),
             ),
         ],
@@ -110,13 +111,13 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
-      padding: const EdgeInsets.only(left: 20, bottom: 8, top: 8),
+      padding: Responsive.padding(context, left: 20, bottom: 8, top: 8),
       child: Text(
         title.toUpperCase(),
         style: GoogleFonts.inter(
-          fontSize: 12,
+          fontSize: Responsive.sp(context, 12),
           fontWeight: FontWeight.w700,
           color: Colors.grey.shade500,
           letterSpacing: 1.1,
@@ -133,10 +134,10 @@ class _SettingsPageState extends State<SettingsPage> {
     VoidCallback? onTap,
   }) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      margin: Responsive.padding(context, horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 16)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
@@ -146,19 +147,19 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+        contentPadding: Responsive.padding(context, horizontal: 20, vertical: 4),
         leading: Container(
-          padding: const EdgeInsets.all(8),
+          padding: Responsive.padding(context, all: 8),
           decoration: BoxDecoration(
             color: isDestructive
                 ? Colors.red.shade50
                 : AppColors.kPrimaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(Responsive.scale(context, 10)),
           ),
           child: Icon(
             icon,
             color: isDestructive ? Colors.red : AppColors.kPrimaryColor,
-            size: 20,
+            size: Responsive.scale(context, 20),
           ),
         ),
         title: Text(
@@ -169,7 +170,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         trailing:
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios, size: Responsive.scale(context, 14), color: Colors.grey),
         onTap: onTap ??
             () {
               ScaffoldMessenger.of(context).showSnackBar(
@@ -203,7 +204,7 @@ class _SettingsPageState extends State<SettingsPage> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.scale(context, 16))),
         title: Text(l10n.changePassword,
             style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
         content: Text(l10n.changePasswordConfirm(email),
@@ -284,7 +285,7 @@ class _SettingsPageState extends State<SettingsPage> {
               l10n.deleteAccountConfirm,
               style: GoogleFonts.inter(),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: Responsive.scale(context, 8)),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -300,7 +301,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: Responsive.scale(context, 8)),
                 TextButton(
                   onPressed: () async {
                     ScaffoldMessenger.of(context).hideCurrentSnackBar();
@@ -338,8 +339,8 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: Colors.grey.shade900,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(days: 1), // İptale basılmadıkça gitmesin
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Responsive.scale(context, 12))),
+        margin: Responsive.padding(context, all: 16),
       ),
     );
   }

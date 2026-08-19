@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:gonullunet_app/utils/responsive.dart';
+
 class TimestampText extends StatelessWidget {
   final Timestamp timestamp;
   final TextStyle? style;
@@ -21,8 +23,8 @@ class TimestampText extends StatelessWidget {
     return Text(
       formattedTime,
       style: style ??
-          const TextStyle(
-            fontSize: 10,
+          TextStyle(
+            fontSize: Responsive.sp(context, 10),
             color: Colors.black54,
           ),
     );

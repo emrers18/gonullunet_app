@@ -6,6 +6,7 @@ import 'package:gonullunet_app/models/ngo_model.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gonullunet_app/widgets/app_loading_indicator.dart';
+import 'package:gonullunet_app/utils/responsive.dart';
 
 import 'package:gonullunet_app/repo/ngo_repository.dart';
 import '../../views/ngo_detail_page.dart';
@@ -23,7 +24,7 @@ class NgoCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(Responsive.scale(context, 28)),
         border: Border.all(color: Colors.grey.shade200, width: 0.5),
         boxShadow: [
           BoxShadow(
@@ -41,7 +42,7 @@ class NgoCard extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(Responsive.scale(context, 28)),
           onTap: () {
             Navigator.push(
               context,
@@ -60,8 +61,8 @@ class NgoCard extends StatelessWidget {
                   children: [
                     Positioned.fill(
                       child: ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(28)),
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(Responsive.scale(context, 28))),
                         child: Hero(
                           tag: 'ngo_image_${ngo.id}',
                           child: CachedNetworkImage(
@@ -69,12 +70,15 @@ class NgoCard extends StatelessWidget {
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
                               color: Colors.grey.shade50,
-                              child: const Center(child: AppLoadingIndicator(size: 28)),
+                              child: Center(
+                                  child: AppLoadingIndicator(
+                                      size: Responsive.scale(context, 28))),
                             ),
                             errorWidget: (context, url, error) => Container(
                               color: Colors.grey.shade100,
                               child: Icon(Icons.business,
-                                  size: 40, color: Colors.grey.shade400),
+                                  size: Responsive.scale(context, 40),
+                                  color: Colors.grey.shade400),
                             ),
                           ),
                         ),
@@ -83,10 +87,10 @@ class NgoCard extends StatelessWidget {
                     // Gradient Overlay for Depth
                     Positioned.fill(
                       child: Container(
-                        decoration: const BoxDecoration(
+                        decoration: BoxDecoration(
                           borderRadius: BorderRadius.vertical(
-                              top: Radius.circular(28)),
-                          gradient: LinearGradient(
+                              top: Radius.circular(Responsive.scale(context, 28))),
+                          gradient: const LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
                             colors: [
@@ -99,8 +103,8 @@ class NgoCard extends StatelessWidget {
                     ),
                     // Etkinlik Sayısı Floating Badge
                     Positioned(
-                      top: 12,
-                      right: 12,
+                      top: Responsive.scale(context, 12),
+                      right: Responsive.scale(context, 12),
                       child: FutureBuilder<int>(
                         future: context
                             .read<NgoRepository>()
@@ -108,11 +112,12 @@ class NgoCard extends StatelessWidget {
                         builder: (context, snapshot) {
                           final count = snapshot.data ?? 0;
                           return Container(
-                            padding: const EdgeInsets.symmetric(
+                            padding: Responsive.padding(context,
                                 horizontal: 10, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius:
+                                  BorderRadius.circular(Responsive.scale(context, 12)),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.1),
@@ -123,13 +128,14 @@ class NgoCard extends StatelessWidget {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(Icons.auto_awesome,
-                                    size: 12, color: AppColors.kPrimaryColor),
-                                const SizedBox(width: 4),
+                                Icon(Icons.auto_awesome,
+                                    size: Responsive.scale(context, 12),
+                                    color: AppColors.kPrimaryColor),
+                                SizedBox(width: Responsive.scale(context, 4)),
                                 Text(
                                   '$count',
                                   style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
+                                    fontSize: Responsive.sp(context, 12),
                                     color: AppColors.kTextColor,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -148,7 +154,7 @@ class NgoCard extends StatelessWidget {
               Expanded(
                 flex: 11,
                 child: Padding(
-                  padding: const EdgeInsets.all(14),
+                  padding: Responsive.padding(context, all: 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -158,21 +164,21 @@ class NgoCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.plusJakartaSans(
-                          fontSize: 15,
+                          fontSize: Responsive.sp(context, 15),
                           fontWeight: FontWeight.w800,
                           color: AppColors.kTextColor,
                           letterSpacing: -0.2,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      
+                      SizedBox(height: Responsive.scale(context, 6)),
+
                       // Şehir / Konum
                       Row(
                         children: [
                           Icon(Icons.location_on_rounded,
-                              size: 14,
+                              size: Responsive.scale(context, 14),
                               color: AppColors.kPrimaryColor.withOpacity(0.8)),
-                          const SizedBox(width: 4),
+                          SizedBox(width: Responsive.scale(context, 4)),
                           Expanded(
                             child: Text(
                               ngo.location.isNotEmpty
@@ -182,7 +188,7 @@ class NgoCard extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 color: Colors.grey.shade500,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -190,7 +196,7 @@ class NgoCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: Responsive.scale(context, 10)),
 
                       // Kısa Açıklama
                       Expanded(
@@ -199,13 +205,13 @@ class NgoCard extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 12,
+                            fontSize: Responsive.sp(context, 12),
                             color: Colors.grey.shade600,
                             height: 1.5,
                           ),
                         ),
                       ),
-                      
+
                       // View Profile Indicator
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -213,14 +219,15 @@ class NgoCard extends StatelessWidget {
                           Text(
                             AppLocalizations.of(context).examine,
                             style: GoogleFonts.plusJakartaSans(
-                              fontSize: 11,
+                              fontSize: Responsive.sp(context, 11),
                               color: AppColors.kPrimaryColor,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(width: 2),
-                          const Icon(Icons.arrow_forward_ios_rounded,
-                              size: 10, color: AppColors.kPrimaryColor),
+                          SizedBox(width: Responsive.scale(context, 2)),
+                          Icon(Icons.arrow_forward_ios_rounded,
+                              size: Responsive.scale(context, 10),
+                              color: AppColors.kPrimaryColor),
                         ],
                       ),
                     ],

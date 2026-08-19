@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:gonullunet_app/l10n/app_localizations.dart';
 import 'package:gonullunet_app/utils/app_colors.dart';
 import '../logic/user_cubit.dart';
@@ -68,6 +69,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
           String? mission;
           String? phone;
           String? email;
+          String? facebookUrl;
+          String? instagramUrl;
+          String? twitterUrl;
+          String? linkedinUrl;
 
           // Eğer detaylı veri geldiyse güncelle
           int followersCount = 0;
@@ -82,6 +87,10 @@ class _NgoDetailPageState extends State<NgoDetailPage>
             phone = data['phone'];
             email = data['email'];
             followersCount = data['followersCount'] ?? 0;
+            facebookUrl = data['facebookUrl'];
+            instagramUrl = data['instagramUrl'];
+            twitterUrl = data['twitterUrl'];
+            linkedinUrl = data['linkedinUrl'];
           }
 
           return NestedScrollView(
@@ -410,17 +419,12 @@ class _NgoDetailPageState extends State<NgoDetailPage>
                         ),
                       ),
                       const SizedBox(height: 24),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          buildSocialButton(
-                              context, "f", const Color(0xFF1877F2)),
-                          const SizedBox(width: 12),
-                          buildSocialButton(
-                              context, "in", const Color(0xFF0077b5)),
-                          const SizedBox(width: 12),
-                          buildSocialButton(context, "X", Colors.black),
-                        ],
+                      _buildSocialButtonsRow(
+                        context,
+                        facebookUrl: facebookUrl,
+                        instagramUrl: instagramUrl,
+                        twitterUrl: twitterUrl,
+                        linkedinUrl: linkedinUrl,
                       ),
                       const SizedBox(height: 80),
                     ],
@@ -434,6 +438,87 @@ class _NgoDetailPageState extends State<NgoDetailPage>
         },
       ),
     );
+  }
+
+  Widget _buildSocialButtonsRow(
+    BuildContext context, {
+    String? facebookUrl,
+    String? instagramUrl,
+    String? twitterUrl,
+    String? linkedinUrl,
+  }) {
+    final buttons = <Widget>[];
+
+    void addButton(Widget button) {
+      if (buttons.isNotEmpty) buttons.add(const SizedBox(width: 12));
+      buttons.add(button);
+    }
+
+    if (facebookUrl != null && facebookUrl.trim().isNotEmpty) {
+      addButton(buildSocialButton(
+        context,
+        "f",
+        const Color(0xFF1877F2),
+        onTap: () => _openSocialLink(context, facebookUrl),
+      ));
+    }
+    if (instagramUrl != null && instagramUrl.trim().isNotEmpty) {
+      addButton(buildSocialButton(
+        context,
+        "IG",
+        const Color(0xFFC13584),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFFFEDA75), Color(0xFFD62976), Color(0xFF4F5BD5)],
+        ),
+        onTap: () => _openSocialLink(context, instagramUrl),
+      ));
+    }
+    if (twitterUrl != null && twitterUrl.trim().isNotEmpty) {
+      addButton(buildSocialButton(
+        context,
+        "X",
+        Colors.black,
+        onTap: () => _openSocialLink(context, twitterUrl),
+      ));
+    }
+    if (linkedinUrl != null && linkedinUrl.trim().isNotEmpty) {
+      addButton(buildSocialButton(
+        context,
+        "in",
+        const Color(0xFF0077b5),
+        onTap: () => _openSocialLink(context, linkedinUrl),
+      ));
+    }
+
+    if (buttons.isEmpty) return const SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: buttons,
+    );
+  }
+
+  Future<void> _openSocialLink(BuildContext context, String rawUrl) async {
+    final trimmed = rawUrl.trim();
+    if (trimmed.isEmpty) return;
+
+    final normalized =
+        trimmed.startsWith('http://') || trimmed.startsWith('https://')
+            ? trimmed
+            : 'https://$trimmed';
+    final uri = Uri.tryParse(normalized);
+
+    final launched = uri != null &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(AppLocalizations.of(context).couldNotOpenLink)),
+      );
+    }
   }
 
   Widget _buildEventsList() {

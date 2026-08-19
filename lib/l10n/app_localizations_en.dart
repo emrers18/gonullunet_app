@@ -993,6 +993,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get missionEmptyError => 'Mission cannot be empty.';
 
   @override
+  String get socialMediaLinks => 'Social Media Links';
+
+  @override
+  String get facebookLabel => 'Facebook (Optional)';
+
+  @override
+  String get facebookHint => 'https://facebook.com/yourpage';
+
+  @override
+  String get instagramLabel => 'Instagram (Optional)';
+
+  @override
+  String get instagramHint => 'https://instagram.com/yourpage';
+
+  @override
+  String get twitterLabel => 'Twitter / X (Optional)';
+
+  @override
+  String get twitterHint => 'https://x.com/yourpage';
+
+  @override
+  String get linkedinLabel => 'LinkedIn (Optional)';
+
+  @override
+  String get linkedinHint => 'https://linkedin.com/company/yourpage';
+
+  @override
+  String get couldNotOpenLink => 'The link could not be opened.';
+
+  @override
   String get completeNgoProfileTitle => 'Complete Your Profile';
 
   @override

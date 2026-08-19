@@ -20,6 +20,10 @@ class EditProfileLoaded extends EditProfileState {
   final String mission;
   final String phone;
   final String email;
+  final String facebookUrl;
+  final String instagramUrl;
+  final String twitterUrl;
+  final String linkedinUrl;
 
   const EditProfileLoaded({
     required this.stkName,
@@ -30,6 +34,10 @@ class EditProfileLoaded extends EditProfileState {
     required this.mission,
     required this.phone,
     required this.email,
+    this.facebookUrl = '',
+    this.instagramUrl = '',
+    this.twitterUrl = '',
+    this.linkedinUrl = '',
   });
 
   @override

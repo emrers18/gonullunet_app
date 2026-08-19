@@ -25,6 +25,10 @@ class EditProfileCubit extends Cubit<EditProfileState> {
           mission: data['mission'] ?? '',
           imageUrl: data['imageUrl'],
           email: data['email'],
+          facebookUrl: data['facebookUrl'] ?? '',
+          instagramUrl: data['instagramUrl'] ?? '',
+          twitterUrl: data['twitterUrl'] ?? '',
+          linkedinUrl: data['linkedinUrl'] ?? '',
         ));
       } else {
         emit(const EditProfileError(AppErrorCodes.userDataNotFound));
@@ -42,6 +46,10 @@ class EditProfileCubit extends Cubit<EditProfileState> {
     required String vision,
     required String mission,
     File? imageFile,
+    String? facebookUrl,
+    String? instagramUrl,
+    String? twitterUrl,
+    String? linkedinUrl,
   }) async {
     try {
       emit(EditProfileUpdating());
@@ -59,6 +67,10 @@ class EditProfileCubit extends Cubit<EditProfileState> {
         phone: phone,
         vision: vision,
         mission: mission,
+        facebookUrl: facebookUrl,
+        instagramUrl: instagramUrl,
+        twitterUrl: twitterUrl,
+        linkedinUrl: linkedinUrl,
       );
 
       emit(EditProfileSuccess());

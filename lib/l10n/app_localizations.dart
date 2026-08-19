@@ -1946,6 +1946,66 @@ abstract class AppLocalizations {
   /// **'Misyon boş olamaz.'**
   String get missionEmptyError;
 
+  /// No description provided for @socialMediaLinks.
+  ///
+  /// In tr, this message translates to:
+  /// **'Sosyal Medya Bağlantıları'**
+  String get socialMediaLinks;
+
+  /// No description provided for @facebookLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Facebook (Opsiyonel)'**
+  String get facebookLabel;
+
+  /// No description provided for @facebookHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://facebook.com/sayfaniz'**
+  String get facebookHint;
+
+  /// No description provided for @instagramLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Instagram (Opsiyonel)'**
+  String get instagramLabel;
+
+  /// No description provided for @instagramHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://instagram.com/hesabiniz'**
+  String get instagramHint;
+
+  /// No description provided for @twitterLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'Twitter / X (Opsiyonel)'**
+  String get twitterLabel;
+
+  /// No description provided for @twitterHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://x.com/hesabiniz'**
+  String get twitterHint;
+
+  /// No description provided for @linkedinLabel.
+  ///
+  /// In tr, this message translates to:
+  /// **'LinkedIn (Opsiyonel)'**
+  String get linkedinLabel;
+
+  /// No description provided for @linkedinHint.
+  ///
+  /// In tr, this message translates to:
+  /// **'https://linkedin.com/company/kuruluşunuz'**
+  String get linkedinHint;
+
+  /// No description provided for @couldNotOpenLink.
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı açılamadı.'**
+  String get couldNotOpenLink;
+
   /// No description provided for @completeNgoProfileTitle.
   ///
   /// In tr, this message translates to:

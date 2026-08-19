@@ -997,6 +997,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get missionEmptyError => 'Misyon boş olamaz.';
 
   @override
+  String get socialMediaLinks => 'Sosyal Medya Bağlantıları';
+
+  @override
+  String get facebookLabel => 'Facebook (Opsiyonel)';
+
+  @override
+  String get facebookHint => 'https://facebook.com/sayfaniz';
+
+  @override
+  String get instagramLabel => 'Instagram (Opsiyonel)';
+
+  @override
+  String get instagramHint => 'https://instagram.com/hesabiniz';
+
+  @override
+  String get twitterLabel => 'Twitter / X (Opsiyonel)';
+
+  @override
+  String get twitterHint => 'https://x.com/hesabiniz';
+
+  @override
+  String get linkedinLabel => 'LinkedIn (Opsiyonel)';
+
+  @override
+  String get linkedinHint => 'https://linkedin.com/company/kuruluşunuz';
+
+  @override
+  String get couldNotOpenLink => 'Bağlantı açılamadı.';
+
+  @override
   String get completeNgoProfileTitle => 'Profilinizi Tamamlayın';
 
   @override

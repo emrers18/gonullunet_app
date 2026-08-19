@@ -48,6 +48,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _visionController = TextEditingController();
   final TextEditingController _missionController = TextEditingController();
+  final TextEditingController _facebookController = TextEditingController();
+  final TextEditingController _instagramController = TextEditingController();
+  final TextEditingController _twitterController = TextEditingController();
+  final TextEditingController _linkedinController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
@@ -62,6 +66,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
     _descriptionController.dispose();
     _visionController.dispose();
     _missionController.dispose();
+    _facebookController.dispose();
+    _instagramController.dispose();
+    _twitterController.dispose();
+    _linkedinController.dispose();
     super.dispose();
   }
 
@@ -133,6 +141,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
           vision: _visionController.text.trim(),
           mission: _missionController.text.trim(),
           imageFile: _selectedImage,
+          facebookUrl: _facebookController.text.trim(),
+          instagramUrl: _instagramController.text.trim(),
+          twitterUrl: _twitterController.text.trim(),
+          linkedinUrl: _linkedinController.text.trim(),
         );
   }
 
@@ -205,6 +217,10 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                   _descriptionController.text = state.description;
                   _visionController.text = state.vision;
                   _missionController.text = state.mission;
+                  _facebookController.text = state.facebookUrl;
+                  _instagramController.text = state.instagramUrl;
+                  _twitterController.text = state.twitterUrl;
+                  _linkedinController.text = state.linkedinUrl;
                   _currentImageUrl = state.imageUrl;
                 }
               }
@@ -366,6 +382,46 @@ class _EditNgoProfileViewState extends State<EditNgoProfileView> {
                           controller: _missionController,
                           hint: AppLocalizations.of(context).missionHint,
                           maxLines: 3),
+
+                      const SizedBox(height: 24),
+                      const Divider(),
+                      const SizedBox(height: 24),
+
+                      _buildLabel(
+                          AppLocalizations.of(context).socialMediaLinks),
+                      const SizedBox(height: 12),
+                      _buildLabel(AppLocalizations.of(context).facebookLabel),
+                      _buildInput(
+                        controller: _facebookController,
+                        hint: AppLocalizations.of(context).facebookHint,
+                        icon: Icons.facebook_outlined,
+                        inputType: TextInputType.url,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLabel(
+                          AppLocalizations.of(context).instagramLabel),
+                      _buildInput(
+                        controller: _instagramController,
+                        hint: AppLocalizations.of(context).instagramHint,
+                        icon: Icons.camera_alt_outlined,
+                        inputType: TextInputType.url,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLabel(AppLocalizations.of(context).twitterLabel),
+                      _buildInput(
+                        controller: _twitterController,
+                        hint: AppLocalizations.of(context).twitterHint,
+                        icon: Icons.alternate_email,
+                        inputType: TextInputType.url,
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLabel(AppLocalizations.of(context).linkedinLabel),
+                      _buildInput(
+                        controller: _linkedinController,
+                        hint: AppLocalizations.of(context).linkedinHint,
+                        icon: Icons.business_center_outlined,
+                        inputType: TextInputType.url,
+                      ),
 
                       const SizedBox(height: 32),
 

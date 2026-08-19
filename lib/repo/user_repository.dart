@@ -73,6 +73,10 @@ class UserRepository {
     required String vision,
     required String mission,
     String? imageUrl,
+    String? facebookUrl,
+    String? instagramUrl,
+    String? twitterUrl,
+    String? linkedinUrl,
   }) async {
     final user = _auth.currentUser;
     if (user == null) throw Exception(AppErrorCodes.sessionNotFound);
@@ -84,6 +88,10 @@ class UserRepository {
       'phone': phone,
       'vision': vision,
       'mission': mission,
+      'facebookUrl': facebookUrl ?? '',
+      'instagramUrl': instagramUrl ?? '',
+      'twitterUrl': twitterUrl ?? '',
+      'linkedinUrl': linkedinUrl ?? '',
     };
 
     if (imageUrl != null) {

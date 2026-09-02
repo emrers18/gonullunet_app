@@ -57,7 +57,6 @@ dependencies:
   flutter_image_compress: ^2.4.0
   cached_network_image: ^3.4.1
   http: ^1.6.0
-  googleapis_auth: ^2.3.0
   firebase_ai: ^3.11.0
   firebase_remote_config: ^6.4.0
   cloud_functions: ^6.2.0

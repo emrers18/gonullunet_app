@@ -9,7 +9,7 @@ import '../utils/app_colors.dart';
 import '../widgets/app_loading_indicator.dart';
 import '../utils/validators/validators.dart';
 import '../utils/responsive.dart';
-import 'signUp_page.dart';
+import 'signup_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
